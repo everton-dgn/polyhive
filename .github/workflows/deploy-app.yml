@@ -1,0 +1,105 @@
+name: Deploy App
+
+on:
+  workflow_run:
+    workflows: [CI]
+    types: [completed]
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      github.event.workflow_run.conclusion == 'success'
+    runs-on: macos-15
+    permissions:
+      contents: read
+      deployments: write
+    concurrency:
+      group: deploy-app-${{ github.ref }}
+      cancel-in-progress: false
+    env:
+      PRODUCTION_URL: https://polyhive-app.vercel.app
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
+
+      - name: Create GitHub deployment
+        id: gh_deployment
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          DEPLOY_REF: ${{ github.event.workflow_run.head_sha || github.sha }}
+        run: |
+          deployment_id=$(gh api -X POST "repos/$GITHUB_REPOSITORY/deployments" \
+            -f ref="$DEPLOY_REF" \
+            -f environment="Production" \
+            -F auto_merge=false \
+            -f description="Deploy polyhive app client to Vercel" \
+            -f 'required_contexts[]' \
+            --jq '.id')
+          echo "id=$deployment_id" >> "$GITHUB_OUTPUT"
+          gh api -X POST "repos/$GITHUB_REPOSITORY/deployments/$deployment_id/statuses" \
+            -f state="in_progress" \
+            -f description="Building and deploying on Vercel" \
+            -f environment_url="$PRODUCTION_URL" \
+            -H "Accept: application/vnd.github.flash-preview+json"
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '24'
+          cache: 'npm'
+
+      - name: Install Vercel CLI
+        run: npm install -g vercel@52.0.0
+
+      - name: Install workspace dependencies
+        run: npm install --workspace=@getpaseo/app --include-workspace-root
+
+      - name: Build workspace dependencies
+        run: npm run build --workspace=@getpaseo/highlight
+
+      - name: Pull Vercel environment
+        run: vercel pull --yes --environment=production --cwd packages/app --token=$VERCEL_TOKEN
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_APP_PROJECT_ID }}
+
+      - name: Deploy to Vercel (build on Vercel backend)
+        id: vercel_deploy
+        run: |
+          deploy_url=$(vercel deploy --prod --archive=tgz --cwd packages/app --token=$VERCEL_TOKEN)
+          echo "url=$deploy_url" >> "$GITHUB_OUTPUT"
+          echo "Deployed to: $deploy_url"
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_APP_PROJECT_ID }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Mark deployment successful
+        if: success()
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          DEPLOYMENT_ID: ${{ steps.gh_deployment.outputs.id }}
+          DEPLOY_URL: ${{ steps.vercel_deploy.outputs.url }}
+        run: |
+          gh api -X POST "repos/$GITHUB_REPOSITORY/deployments/$DEPLOYMENT_ID/statuses" \
+            -f state="success" \
+            -f description="Deployed to Vercel" \
+            -f environment_url="$PRODUCTION_URL" \
+            -f log_url="$DEPLOY_URL"
+
+      - name: Mark deployment failed
+        if: failure() && steps.gh_deployment.outputs.id != ''
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          DEPLOYMENT_ID: ${{ steps.gh_deployment.outputs.id }}
+        run: |
+          run_url="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
+          gh api -X POST "repos/$GITHUB_REPOSITORY/deployments/$DEPLOYMENT_ID/statuses" \
+            -f state="failure" \
+            -f description="Deploy failed, see workflow logs" \
+            -f log_url="$run_url"

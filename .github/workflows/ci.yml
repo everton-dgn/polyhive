@@ -1,0 +1,114 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  format:
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '24'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Check formatting
+        run: npx biome format .
+
+  typecheck:
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '24'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Build highlight dependency
+        run: npm run build --workspace=@getpaseo/highlight
+
+      - name: Build relay dependency
+        run: npm run build --workspace=@getpaseo/relay
+
+      - name: Build server dependency
+        run: npm run build --workspace=@getpaseo/server
+
+      - name: Typecheck all packages
+        run: npm run typecheck
+
+  app-tests:
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '24'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Build highlight dependency
+        run: npm run build --workspace=@getpaseo/highlight
+
+      - name: Run app unit tests
+        run: npm run test --workspace=@getpaseo/app
+
+  relay-tests:
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '24'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Build relay
+        run: npm run build --workspace=@getpaseo/relay
+
+      - name: Run relay tests
+        run: npm run test --workspace=@getpaseo/relay
+
+  cli-tests:
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '24'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Install agent CLIs for provider tests
+        run: npm install -g @openai/codex@0.105.0 opencode-ai
+
+      - name: Build highlight dependency
+        run: npm run build --workspace=@getpaseo/highlight
+
+      - name: Run CLI tests
+        run: npm run test --workspace=@getpaseo/cli
+        env:
+          PASEO_LOCAL_SPEECH_AUTO_DOWNLOAD: '0'
+          PASEO_DICTATION_ENABLED: '0'
+          PASEO_VOICE_MODE_ENABLED: '0'

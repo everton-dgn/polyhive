@@ -1,0 +1,124 @@
+name: Desktop Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+      - 'desktop-v*'
+      - 'desktop-macos-v*'
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Existing tag to build (e.g. v0.1.0)'
+        required: true
+        type: string
+
+concurrency:
+  group: desktop-release-${{ github.ref }}
+  cancel-in-progress: false
+
+env:
+  SOURCE_TAG: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.tag || github.ref_name }}
+  DESKTOP_WORKSPACE: '@getpaseo/desktop'
+  DESKTOP_PACKAGE_PATH: 'packages/desktop'
+
+jobs:
+  create-release:
+    if: ${{ (github.event_name == 'push' && !startsWith(github.ref_name, 'desktop-macos-v')) || github.event_name == 'workflow_dispatch' }}
+    permissions:
+      contents: write
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: scripts
+          ref: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.tag || github.ref }}
+
+      - name: Resolve release metadata
+        shell: bash
+        run: node scripts/emit-release-env.mjs --source-tag "$SOURCE_TAG" >> "$GITHUB_ENV"
+
+      - name: Create GitHub release
+        if: env.IS_SMOKE_TAG != 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          if gh release view "$RELEASE_TAG" --repo "${{ github.repository }}" > /dev/null 2>&1; then
+            echo "Release $RELEASE_TAG already exists, skipping creation"
+          else
+            prerelease_flag=""
+            if [[ "$IS_PRERELEASE" == "true" ]]; then
+              prerelease_flag="--prerelease"
+            fi
+            gh release create "$RELEASE_TAG" \
+              --repo "${{ github.repository }}" \
+              --title "Paseo $RELEASE_TAG" \
+              --generate-notes \
+              $prerelease_flag || {
+                echo "Release creation raced with another workflow; continuing."
+              }
+          fi
+
+  publish-macos:
+    needs: [create-release]
+    if: ${{ always() && (needs.create-release.result == 'success' || needs.create-release.result == 'skipped') && (github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && (startsWith(github.ref_name, 'v') || startsWith(github.ref_name, 'desktop-v') || startsWith(github.ref_name, 'desktop-macos-v')))) }}
+    permissions:
+      contents: write
+      packages: read
+    runs-on: macos-15
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.tag || github.ref }}
+
+      - name: Resolve release metadata
+        shell: bash
+        run: node scripts/emit-release-env.mjs --source-tag "$SOURCE_TAG" >> "$GITHUB_ENV"
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+          cache-dependency-path: package-lock.json
+
+      - name: Install JS dependencies
+        run: npm ci
+
+      - name: Set desktop package version from tag
+        shell: bash
+        run: |
+          node <<'NODE'
+          const fs = require('node:fs');
+          const path = require('node:path');
+
+          const version = process.env.DESKTOP_VERSION;
+          if (!version) throw new Error('DESKTOP_VERSION env var is missing');
+
+          const packageJsonPath = path.join(process.env.DESKTOP_PACKAGE_PATH, 'package.json');
+          const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, 'utf8'));
+          packageJson.version = version;
+          fs.writeFileSync(packageJsonPath, `${JSON.stringify(packageJson, null, 2)}\n`);
+          NODE
+
+      - name: Build web app for desktop
+        run: npm run build:web --workspace=@getpaseo/app
+
+      - name: Build desktop release
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          EP_GH_IGNORE_TIME: true
+        run: |
+          set -euo pipefail
+          publish_mode="never"
+          publish_args=()
+          if [[ "$IS_SMOKE_TAG" != "true" ]]; then
+            publish_mode="always"
+            publish_args+=("-c.publish.releaseType=$RELEASE_TYPE")
+            publish_args+=("-c.publish.channel=$RELEASE_CHANNEL")
+          fi
+
+          npm run build --workspace="$DESKTOP_WORKSPACE" -- --publish "$publish_mode" --mac --arm64 "${publish_args[@]}"

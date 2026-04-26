@@ -1,0 +1,101 @@
+{
+  "name": "polyhive",
+  "version": "0.1.60-beta.1",
+  "private": true,
+  "workspaces": [
+    "packages/highlight",
+    "packages/server",
+    "packages/app",
+    "packages/relay",
+    "packages/website",
+    "packages/desktop",
+    "packages/cli"
+  ],
+  "scripts": {
+    "dev": "./scripts/dev.sh",
+    "dev:server": "npm run dev --workspace=@getpaseo/server",
+    "dev:app": "npm run start --workspace=@getpaseo/app",
+    "dev:website": "npm run dev --workspace=@getpaseo/website",
+    "postinstall": "node scripts/postinstall-patches.mjs",
+    "build": "npm run build --workspaces --if-present",
+    "build:highlight": "npm run build --workspace=@getpaseo/highlight",
+    "build:daemon": "npm run build --workspace=@getpaseo/highlight && npm run build --workspace=@getpaseo/relay && npm run build --workspace=@getpaseo/server && npm run build --workspace=@getpaseo/cli",
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "typecheck:daemon": "npm run typecheck --workspace=@getpaseo/relay && npm run typecheck --workspace=@getpaseo/server && npm run typecheck --workspace=@getpaseo/cli",
+    "test": "npm run test --workspaces --if-present",
+    "format": "biome format --write .",
+    "format:check": "biome format .",
+    "start": "npm run start --workspace=@getpaseo/server",
+    "web": "npm run web --workspace=@getpaseo/app",
+    "dev:desktop": "npm run dev --workspace=@getpaseo/desktop",
+    "build:desktop": "npm run version:sync-internal && npm run build:web --workspace=@getpaseo/app && npm run build --workspace=@getpaseo/desktop",
+    "db:query": "npm run db:query --workspace=@getpaseo/server --",
+    "cli": "npx tsx packages/cli/src/index.js",
+    "version": "npm run version:sync-internal && npm run release:prepare && git add -A",
+    "version:sync-internal": "node scripts/sync-workspace-versions.mjs",
+    "release:prepare": "npm install --workspaces --include-workspace-root",
+    "version:all:patch": "node scripts/set-release-version.mjs --mode patch",
+    "version:all:minor": "node scripts/set-release-version.mjs --mode minor",
+    "version:all:major": "node scripts/set-release-version.mjs --mode major",
+    "version:all:beta:patch": "node scripts/set-release-version.mjs --mode beta-patch",
+    "version:all:beta:minor": "node scripts/set-release-version.mjs --mode beta-minor",
+    "version:all:beta:major": "node scripts/set-release-version.mjs --mode beta-major",
+    "version:all:beta:next": "node scripts/set-release-version.mjs --mode beta-next",
+    "version:all:promote": "node scripts/set-release-version.mjs --mode promote",
+    "version:pin-deps-exact": "node scripts/pin-exact-dependency-versions.mjs",
+    "release:check": "npm run release:prepare && npm run typecheck --workspace=@getpaseo/highlight && npm run build --workspace=@getpaseo/highlight && npm run typecheck --workspace=@getpaseo/relay && npm run build --workspace=@getpaseo/relay && npm run typecheck --workspace=@getpaseo/server && npm run build --workspace=@getpaseo/server && npm run typecheck --workspace=@getpaseo/cli && npm run build --workspace=@getpaseo/cli && npm pack --dry-run --workspace=@getpaseo/highlight && npm pack --dry-run --workspace=@getpaseo/relay && npm pack --dry-run --workspace=@getpaseo/server && npm pack --dry-run --workspace=@getpaseo/cli",
+    "release:publish:dry-run": "npm publish --dry-run --workspace=@getpaseo/highlight --access public && npm publish --dry-run --workspace=@getpaseo/relay --access public && npm publish --dry-run --workspace=@getpaseo/server --access public && npm publish --dry-run --workspace=@getpaseo/cli --access public",
+    "release:publish": "npm publish --workspace=@getpaseo/highlight --access public && npm publish --workspace=@getpaseo/relay --access public && npm publish --workspace=@getpaseo/server --access public && npm publish --workspace=@getpaseo/cli --access public",
+    "release:push": "node scripts/push-current-release-tag.mjs",
+    "release:beta:patch": "npm run release:check && npm run version:all:beta:patch && npm run release:push",
+    "release:beta:minor": "npm run release:check && npm run version:all:beta:minor && npm run release:push",
+    "release:beta:major": "npm run release:check && npm run version:all:beta:major && npm run release:push",
+    "release:beta:next": "npm run release:check && npm run version:all:beta:next && npm run release:push",
+    "release:promote": "npm run release:check && npm run version:all:promote && npm run release:publish && npm run release:push",
+    "release:patch": "npm run release:check && npm run version:all:patch && npm run release:publish && npm run release:push",
+    "release:minor": "npm run release:check && npm run version:all:minor && npm run release:publish && npm run release:push",
+    "release:major": "npm run release:check && npm run version:all:major && npm run release:publish && npm run release:push"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "2.4.8",
+    "concurrently": "9.2.1",
+    "get-port-cli": "3.0.0",
+    "knip": "5.86.0",
+    "patch-package": "8.0.1",
+    "portless": "0.10.3",
+    "react": "19.1.0",
+    "react-dom": "19.1.0",
+    "typescript": "5.9.3"
+  },
+  "description": "Paseo: monitor and control your local AI coding agents from any browser (macOS daemon + web app)",
+  "homepage": "https://github.com/everton-dgn/polyhive",
+  "keywords": [
+    "claude-code",
+    "codex",
+    "opencode",
+    "agent",
+    "development",
+    "mcp"
+  ],
+  "author": {
+    "name": "Mohamed Boudra",
+    "email": "hello@moboudra.com"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/everton-dgn/polyhive.git"
+  },
+  "license": "AGPL-3.0-or-later",
+  "overrides": {
+    "lightningcss": "1.30.1",
+    "react": "19.1.0",
+    "react-dom": "19.1.0"
+  },
+  "dependencies": {
+    "@anthropic-ai/claude-agent-sdk": "0.2.71",
+    "@modelcontextprotocol/sdk": "1.27.1",
+    "expo": "54.0.33",
+    "react": "19.1.0",
+    "react-native": "0.81.5"
+  }
+}

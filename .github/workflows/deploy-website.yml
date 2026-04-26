@@ -58,7 +58,7 @@ jobs:
         run: npm install --workspace=@getpaseo/website --include-workspace-root
 
       - name: Pull Vercel environment
-        run: vercel pull --yes --environment=production --cwd packages/website --token=$VERCEL_TOKEN
+        run: vercel pull --yes --environment=production --token=$VERCEL_TOKEN
         env:
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
           VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
@@ -67,7 +67,7 @@ jobs:
       - name: Deploy to Vercel (build on Vercel backend)
         id: vercel_deploy
         run: |
-          deploy_url=$(vercel deploy --prod --archive=tgz --cwd packages/website --token=$VERCEL_TOKEN)
+          deploy_url=$(vercel deploy --prod --archive=tgz --token=$VERCEL_TOKEN)
           echo "url=$deploy_url" >> "$GITHUB_OUTPUT"
           echo "Deployed to: $deploy_url"
         env:

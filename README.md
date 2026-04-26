@@ -47,11 +47,15 @@ To connect from another device (e.g. a mobile browser on your phone), scan the Q
 
 ### CLI / headless
 
-Install the CLI and start Paseo:
+This fork does not currently advertise a fork-specific npm CLI package. Do not use
+`@getpaseo/cli` if you need this fork; that package installs upstream Paseo.
+
+For local development from this checkout:
 
 ```bash
-npm install -g @getpaseo/cli
-paseo
+npm install
+npm run build:daemon
+npm run cli -- daemon start
 ```
 
 This shows a QR code in the terminal. Connect from any client. This path is useful for servers and remote machines.

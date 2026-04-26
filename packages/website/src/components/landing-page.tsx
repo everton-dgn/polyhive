@@ -8,7 +8,7 @@ import {
   useMotionValueEvent,
 } from "framer-motion";
 import { CommandDialog } from "~/components/command-dialog";
-import { GITHUB_WEB_BASE } from "~/fork-identity";
+import { CLI_HEADLESS_COMMAND, CLI_START_COMMAND, GITHUB_WEB_BASE } from "~/fork-identity";
 import {
   webAppUrl,
   getDownloadOptions,
@@ -916,7 +916,7 @@ function GetStarted() {
           <GlobeIcon className="h-4 w-4" />
           Web App
         </a>
-        <ServerInstallButton />
+        {CLI_HEADLESS_COMMAND && <ServerInstallButton />}
       </div>
       <div className="pt-3">
         <a href="/download" className="text-xs text-white/40 hover:text-white/70 transition-colors">
@@ -982,11 +982,11 @@ function ServerInstallButton() {
       }
       title="Run agents on a headless Mac"
       description="For headless Macs you want to connect to from Paseo clients. The macOS app already includes a built-in daemon."
-      command="npm install -g @getpaseo/cli && paseo"
+      command={CLI_HEADLESS_COMMAND}
       footnote={
         <>
-          Requires Node.js 18+. Run <span className="font-mono text-white/40">paseo</span> to start
-          the daemon.
+          Requires Node.js 18+. Run{" "}
+          <span className="font-mono text-white/40">{CLI_START_COMMAND}</span> to start the daemon.
         </>
       }
     />
@@ -1571,14 +1571,19 @@ function FAQ() {
           Claude Code, Codex, and OpenCode. Each agent runs as its own process using its own CLI.
           Paseo doesn't modify or wrap their behavior.
         </FAQItem>
-        <FAQItem question="Do I need the macOS app?">
-          No. You can run the daemon headless with{" "}
-          <code className="font-mono text-muted-foreground">
-            npm install -g @getpaseo/cli && paseo
-          </code>{" "}
-          and use the CLI or web app (on any browser, including mobile) to connect. The macOS app
-          just bundles the daemon with a UI.
-        </FAQItem>
+        {CLI_HEADLESS_COMMAND ? (
+          <FAQItem question="Do I need the macOS app?">
+            No. You can run the daemon headless with{" "}
+            <code className="font-mono text-muted-foreground">{CLI_HEADLESS_COMMAND}</code> and use
+            the CLI or web app (on any browser, including mobile) to connect. The macOS app just
+            bundles the daemon with a UI.
+          </FAQItem>
+        ) : (
+          <FAQItem question="Do I need the macOS app?">
+            For packaged installs in this fork, use the macOS app. The web app can still connect to
+            daemons you run from source or from a fork-specific CLI package.
+          </FAQItem>
+        )}
         <FAQItem question="How does voice work?">
           Voice runs locally on your device by default. You talk, the app transcribes and sends it
           to your agent as text. Optionally, you can configure OpenAI speech providers for

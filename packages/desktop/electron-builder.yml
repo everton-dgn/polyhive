@@ -17,7 +17,7 @@ extraResources:
 publish:
   provider: github
   owner: everton-dgn
-  repo: paseo-contrib
+  repo: polyhive
 mac:
   artifactName: "Paseo-${version}-${arch}.${ext}"
   category: public.app-category.developer-tools

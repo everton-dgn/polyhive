@@ -1,6 +1,6 @@
 import { Link, createFileRoute } from "@tanstack/react-router";
 import { CommandDialog } from "~/components/command-dialog";
-import { GITHUB_WEB_BASE } from "~/fork-identity";
+import { CLI_INSTALL_COMMAND, GITHUB_WEB_BASE, HOMEBREW_CASK_COMMAND } from "~/fork-identity";
 import { pageMeta } from "~/meta";
 import {
   AppleIcon,
@@ -110,15 +110,17 @@ function Download() {
               </div>
               <div className="flex flex-wrap items-center gap-2">
                 <DownloadPill href={urls.macAppleSilicon} label="Apple Silicon" />
-                <CommandDialog
-                  trigger={
-                    <span className="inline-flex items-center justify-center rounded-full bg-foreground px-4 py-1.5 text-sm font-medium text-background hover:bg-foreground/85 transition-colors">
-                      Homebrew
-                    </span>
-                  }
-                  title="Install via Homebrew"
-                  command="brew install --cask paseo"
-                />
+                {HOMEBREW_CASK_COMMAND && (
+                  <CommandDialog
+                    trigger={
+                      <span className="inline-flex items-center justify-center rounded-full bg-foreground px-4 py-1.5 text-sm font-medium text-background hover:bg-foreground/85 transition-colors">
+                        Homebrew
+                      </span>
+                    }
+                    title="Install via Homebrew"
+                    command={HOMEBREW_CASK_COMMAND}
+                  />
+                )}
               </div>
             </div>
           </div>
@@ -126,7 +128,9 @@ function Download() {
 
         <section className="rounded-xl border border-border bg-card/40 p-6 md:p-8">
           <div className="flex items-center justify-between mb-8">
-            <h2 className="text-2xl font-semibold">Web App & macOS CLI</h2>
+            <h2 className="text-2xl font-semibold">
+              {CLI_INSTALL_COMMAND ? "Web App & macOS CLI" : "Web App"}
+            </h2>
             <TerminalIcon className="h-5 w-5 text-muted-foreground" />
           </div>
 
@@ -141,17 +145,19 @@ function Download() {
               </div>
             </div>
 
-            <div className="flex items-center justify-between py-5 first:pt-0 last:pb-0">
-              <div className="flex items-center gap-3">
-                <TerminalIcon className="h-5 w-5 text-foreground" />
-                <span className="font-medium">CLI</span>
+            {CLI_INSTALL_COMMAND && (
+              <div className="flex items-center justify-between py-5 first:pt-0 last:pb-0">
+                <div className="flex items-center gap-3">
+                  <TerminalIcon className="h-5 w-5 text-foreground" />
+                  <span className="font-medium">CLI</span>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  <code className="text-sm text-muted-foreground font-mono bg-muted px-3 py-1.5 rounded-lg">
+                    {CLI_INSTALL_COMMAND}
+                  </code>
+                </div>
               </div>
-              <div className="flex flex-wrap gap-2">
-                <code className="text-sm text-muted-foreground font-mono bg-muted px-3 py-1.5 rounded-lg">
-                  npm install -g @getpaseo/cli
-                </code>
-              </div>
-            </div>
+            )}
           </div>
         </section>
 

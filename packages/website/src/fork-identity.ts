@@ -5,7 +5,9 @@ const DEFAULT_CLI_START_COMMAND = "paseo";
 
 function readEnv(key: string): string | undefined {
   const value = import.meta.env[key];
-  return typeof value === "string" && value.length > 0 ? value : undefined;
+  if (typeof value !== "string") return undefined;
+  const normalized = value.trim();
+  return normalized.length > 0 ? normalized : undefined;
 }
 
 function requireForkEnv(key: string, fallback: string): string {

@@ -1,5 +1,5 @@
 npmRebuild: false
-appId: sh.paseo-contrib.desktop
+appId: sh.polyhive.desktop
 productName: Paseo
 executableName: Paseo
 afterPack: ./scripts/after-pack.js

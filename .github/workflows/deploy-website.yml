@@ -34,7 +34,7 @@ jobs:
         run: |
           deployment_id=$(gh api -X POST "repos/$GITHUB_REPOSITORY/deployments" \
             -f ref="$DEPLOY_REF" \
-            -f environment="Production" \
+            -f environment="Production – polyhive" \
             -F auto_merge=false \
             -f description="Deploy polyhive website to Vercel" \
             -f 'required_contexts[]' \

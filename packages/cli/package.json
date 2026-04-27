@@ -1,6 +1,6 @@
 {
   "name": "polyhive",
-  "version": "0.1.60-beta.1",
+  "version": "0.1.60",
   "description": "PolyHive CLI - control your AI coding agents from the command line",
   "type": "module",
   "files": [
@@ -24,8 +24,8 @@
   },
   "dependencies": {
     "@clack/prompts": "1.1.0",
-    "polyhive-relay": "0.1.60-beta.1",
-    "polyhive-server": "0.1.60-beta.1",
+    "polyhive-relay": "0.1.60",
+    "polyhive-server": "0.1.60",
     "chalk": "5.6.2",
     "commander": "12.1.0",
     "mime-types": "2.1.35",

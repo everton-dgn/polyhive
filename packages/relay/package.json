@@ -1,6 +1,6 @@
 {
   "name": "polyhive-relay",
-  "version": "0.1.60-beta.1",
+  "version": "0.1.60",
   "description": "PolyHive relay for bridging daemon and client connections",
   "type": "module",
   "publishConfig": {

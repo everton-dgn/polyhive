@@ -4,7 +4,7 @@ import {
   findExecutable,
   applyProviderEnv,
   execCommand,
-} from "polyhive-server";
+} from "@everton-dgn/polyhive-server";
 import { tryConnectToDaemon } from "../../utils/client.js";
 import { resolveCliVersionOrUnknown } from "../../utils/version.js";
 import type { CommandOptions, ListResult, OutputSchema } from "../../output/index.js";

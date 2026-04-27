@@ -81,10 +81,10 @@ buildNpmPackage rec {
     # Copy PolyHive workspace packages built by build:daemon. Workspace links in
     # node_modules are dangling until these target directories exist.
     for spec in \
-      polyhive:cli \
-      polyhive-highlight:highlight \
-      polyhive-relay:relay \
-      polyhive-server:server; do
+      @everton-dgn/polyhive-cli:cli \
+      @everton-dgn/polyhive-highlight:highlight \
+      @everton-dgn/polyhive-relay:relay \
+      @everton-dgn/polyhive-server:server; do
       workspace_name=''${spec#*:}
       if [ -d "packages/$workspace_name/dist" ]; then
         mkdir -p "$out/lib/polyhive/packages/$workspace_name"

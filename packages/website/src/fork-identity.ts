@@ -1,7 +1,7 @@
 const DEFAULT_SITE_HOST = "https://polyhive.vercel.app";
 const DEFAULT_GITHUB_REPO = "everton-dgn/polyhive";
 const DEFAULT_WEB_APP_URL = "https://polyhive-app.vercel.app";
-const DEFAULT_CLI_INSTALL_COMMAND = "npm install -g polyhive";
+const DEFAULT_CLI_INSTALL_COMMAND = "npm install -g @everton-dgn/polyhive-cli";
 const DEFAULT_CLI_START_COMMAND = "polyhive";
 
 function readEnv(key: string): string | undefined {

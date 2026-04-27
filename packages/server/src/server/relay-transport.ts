@@ -7,7 +7,7 @@ import {
   type EncryptedChannel,
   type Transport as RelayTransport,
   type KeyPair,
-} from "polyhive-relay/e2ee";
+} from "@everton-dgn/polyhive-relay/e2ee";
 import { buildRelayWebSocketUrl } from "../shared/daemon-endpoints.js";
 import type { ExternalSocketMetadata } from "./websocket-server.js";
 

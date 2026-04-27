@@ -3,7 +3,7 @@ import { readFileSync } from "node:fs";
 import path from "node:path";
 import { app, ipcMain, powerMonitor } from "electron";
 import log from "electron-log/main";
-import { resolvePolyHiveHome, spawnProcess } from "polyhive-server";
+import { resolvePolyHiveHome, spawnProcess } from "@everton-dgn/polyhive-server";
 import {
   copyAttachmentFileToManagedStorage,
   deleteManagedAttachmentFile,

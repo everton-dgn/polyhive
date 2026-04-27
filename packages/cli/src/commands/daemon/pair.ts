@@ -1,6 +1,10 @@
 import { Command } from "commander";
 import chalk from "chalk";
-import { generateLocalPairingOffer, loadConfig, resolvePolyHiveHome } from "polyhive-server";
+import {
+  generateLocalPairingOffer,
+  loadConfig,
+  resolvePolyHiveHome,
+} from "@everton-dgn/polyhive-server";
 import { addJsonOption } from "../../utils/command-options.js";
 
 interface PairOptions {

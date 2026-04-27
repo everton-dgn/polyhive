@@ -47,10 +47,16 @@ To connect from another device (e.g. a mobile browser on your phone), scan the Q
 
 ### CLI / headless
 
-This fork does not currently advertise a fork-specific npm CLI package. Do not use
-`polyhive` if you need this fork; that package installs upstream PolyHive.
+Install the CLI from npm. This is the headless path: no GUI, just the daemon
+and the `polyhive` binary on your `$PATH`. Useful for Linux, servers, CI, and
+remote machines.
 
-For local development from this checkout:
+```bash
+npm install -g @everton-dgn/polyhive-cli
+polyhive daemon start
+```
+
+Or, for local development from this checkout:
 
 ```bash
 npm install

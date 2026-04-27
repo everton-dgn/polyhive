@@ -9,7 +9,7 @@ import { Buffer } from "node:buffer";
 
 import { generateLocalPairingOffer } from "../pairing-offer.js";
 import { createTestPolyHiveDaemon } from "../test-utils/polyhive-daemon.js";
-import { createClientChannel, type Transport } from "polyhive-relay/e2ee";
+import { createClientChannel, type Transport } from "@everton-dgn/polyhive-relay/e2ee";
 import { buildRelayWebSocketUrl } from "../../shared/daemon-endpoints.js";
 
 const nodeMajor = Number((process.versions.node ?? "0").split(".")[0] ?? "0");

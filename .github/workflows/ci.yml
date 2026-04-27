@@ -38,13 +38,13 @@ jobs:
         run: npm install
 
       - name: Build highlight dependency
-        run: npm run build --workspace=polyhive-highlight
+        run: npm run build --workspace=@everton-dgn/polyhive-highlight
 
       - name: Build relay dependency
-        run: npm run build --workspace=polyhive-relay
+        run: npm run build --workspace=@everton-dgn/polyhive-relay
 
       - name: Build server dependency
-        run: npm run build --workspace=polyhive-server
+        run: npm run build --workspace=@everton-dgn/polyhive-server
 
       - name: Typecheck all packages
         run: npm run typecheck
@@ -63,7 +63,7 @@ jobs:
         run: npm install
 
       - name: Build highlight dependency
-        run: npm run build --workspace=polyhive-highlight
+        run: npm run build --workspace=@everton-dgn/polyhive-highlight
 
       - name: Run app unit tests
         run: npm run test --workspace=polyhive-app
@@ -82,10 +82,10 @@ jobs:
         run: npm install
 
       - name: Build relay
-        run: npm run build --workspace=polyhive-relay
+        run: npm run build --workspace=@everton-dgn/polyhive-relay
 
       - name: Run relay tests
-        run: npm run test --workspace=polyhive-relay
+        run: npm run test --workspace=@everton-dgn/polyhive-relay
 
   cli-tests:
     runs-on: macos-15
@@ -104,7 +104,7 @@ jobs:
         run: npm install -g @openai/codex@0.105.0 opencode-ai
 
       - name: Build highlight dependency
-        run: npm run build --workspace=polyhive-highlight
+        run: npm run build --workspace=@everton-dgn/polyhive-highlight
 
       - name: Run CLI tests
         run: npm run test --workspace=polyhive

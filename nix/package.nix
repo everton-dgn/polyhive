@@ -96,6 +96,13 @@ buildNpmPackage rec {
       fi
     done
 
+    # Keep private workspace symlink targets present. They are not part of the
+    # daemon artifact, but npm still creates root node_modules workspace links.
+    for workspace_name in app website desktop; do
+      mkdir -p "$out/lib/polyhive/packages/$workspace_name"
+      cp "packages/$workspace_name/package.json" "$out/lib/polyhive/packages/$workspace_name/"
+    done
+
     # Copy CLI bin entry
     mkdir -p $out/lib/polyhive/packages/cli/bin
     cp packages/cli/bin/polyhive $out/lib/polyhive/packages/cli/bin/

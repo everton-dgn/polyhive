@@ -75,7 +75,7 @@ function deriveRemoteProjectKey(remoteUrl: string | null): string | null {
 export function deriveProjectGroupingKey(options: {
   cwd: string;
   remoteUrl: string | null;
-  isPaseoOwnedWorktree: boolean;
+  isPolyHiveOwnedWorktree: boolean;
   mainRepoRoot: string | null;
 }): string {
   const remoteKey = deriveRemoteProjectKey(options.remoteUrl);
@@ -84,7 +84,7 @@ export function deriveProjectGroupingKey(options: {
   }
 
   const mainRepoRoot = options.mainRepoRoot?.trim();
-  if (options.isPaseoOwnedWorktree && mainRepoRoot) {
+  if (options.isPolyHiveOwnedWorktree && mainRepoRoot) {
     return mainRepoRoot;
   }
 
@@ -122,7 +122,7 @@ export function deriveProjectRootPath(input: {
   cwd: string;
   checkout: ProjectCheckoutLitePayload;
 }): string {
-  if (input.checkout.isGit && input.checkout.isPaseoOwnedWorktree) {
+  if (input.checkout.isGit && input.checkout.isPolyHiveOwnedWorktree) {
     return input.checkout.mainRepoRoot;
   }
   return input.cwd;
@@ -136,7 +136,7 @@ export function deriveWorkspaceKind(checkout: ProjectCheckoutLitePayload): Persi
   if (!checkout.isGit) {
     return "directory";
   }
-  return checkout.isPaseoOwnedWorktree ? "worktree" : "local_checkout";
+  return checkout.isPolyHiveOwnedWorktree ? "worktree" : "local_checkout";
 }
 
 export function checkoutLiteFromGitSnapshot(
@@ -146,7 +146,7 @@ export function checkoutLiteFromGitSnapshot(
     currentBranch: string | null;
     remoteUrl: string | null;
     repoRoot: string | null;
-    isPaseoOwnedWorktree: boolean;
+    isPolyHiveOwnedWorktree: boolean;
     mainRepoRoot: string | null;
   },
 ): ProjectCheckoutLitePayload {
@@ -157,18 +157,18 @@ export function checkoutLiteFromGitSnapshot(
       currentBranch: null,
       remoteUrl: null,
       worktreeRoot: null,
-      isPaseoOwnedWorktree: false,
+      isPolyHiveOwnedWorktree: false,
       mainRepoRoot: null,
     };
   }
-  if (git.isPaseoOwnedWorktree && git.mainRepoRoot) {
+  if (git.isPolyHiveOwnedWorktree && git.mainRepoRoot) {
     return {
       cwd,
       isGit: true,
       currentBranch: git.currentBranch,
       remoteUrl: git.remoteUrl,
       worktreeRoot: git.repoRoot ?? cwd,
-      isPaseoOwnedWorktree: true,
+      isPolyHiveOwnedWorktree: true,
       mainRepoRoot: git.mainRepoRoot,
     };
   }
@@ -178,7 +178,7 @@ export function checkoutLiteFromGitSnapshot(
     currentBranch: git.currentBranch,
     remoteUrl: git.remoteUrl,
     worktreeRoot: git.repoRoot ?? cwd,
-    isPaseoOwnedWorktree: false,
+    isPolyHiveOwnedWorktree: false,
     mainRepoRoot: null,
   };
 }
@@ -216,7 +216,7 @@ export async function buildProjectPlacementForCwd(input: {
         currentBranch: null,
         remoteUrl: null,
         worktreeRoot: null,
-        isPaseoOwnedWorktree: false,
+        isPolyHiveOwnedWorktree: false,
         mainRepoRoot: null,
       }),
     );
@@ -224,7 +224,7 @@ export async function buildProjectPlacementForCwd(input: {
   const projectKey = deriveProjectGroupingKey({
     cwd: checkout.worktreeRoot ?? normalizedCwd,
     remoteUrl: checkout.remoteUrl,
-    isPaseoOwnedWorktree: checkout.isPaseoOwnedWorktree,
+    isPolyHiveOwnedWorktree: checkout.isPolyHiveOwnedWorktree,
     mainRepoRoot: checkout.mainRepoRoot,
   });
 

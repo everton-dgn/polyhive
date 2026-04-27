@@ -17,7 +17,7 @@ import type {
   ProjectPlacementPayload,
   AgentPermissionResolvedMessage,
   CreateAgentRequestMessage,
-  CreatePaseoWorktreeRequest,
+  CreatePolyHiveWorktreeRequest,
   FileDownloadTokenResponse,
   FileExplorerResponse,
   FetchAgentTimelineResponseMessage,
@@ -40,8 +40,8 @@ import type {
   GitHubSearchResponse,
   GitHubSearchRequest,
   DirectorySuggestionsResponse,
-  PaseoWorktreeListResponse,
-  PaseoWorktreeArchiveResponse,
+  PolyHiveWorktreeListResponse,
+  PolyHiveWorktreeArchiveResponse,
   ProjectIconResponse,
   ListAvailableEditorsResponseMessage,
   OpenInEditorResponseMessage,
@@ -232,9 +232,9 @@ export interface CreateAgentRequestOptions extends AgentConfigOverrides {
   labels?: Record<string, string>;
 }
 
-export interface CreatePaseoWorktreeInput
+export interface CreatePolyHiveWorktreeInput
   extends Pick<
-    CreatePaseoWorktreeRequest,
+    CreatePolyHiveWorktreeRequest,
     "cwd" | "worktreeSlug" | "attachments" | "refName" | "action" | "githubPrNumber"
   > {}
 
@@ -260,11 +260,11 @@ type ValidateBranchPayload = ValidateBranchResponse["payload"];
 type BranchSuggestionsPayload = BranchSuggestionsResponse["payload"];
 type GitHubSearchPayload = GitHubSearchResponse["payload"];
 type DirectorySuggestionsPayload = DirectorySuggestionsResponse["payload"];
-type PaseoWorktreeListPayload = PaseoWorktreeListResponse["payload"];
-type PaseoWorktreeArchivePayload = PaseoWorktreeArchiveResponse["payload"];
-type CreatePaseoWorktreePayload = Extract<
+type PolyHiveWorktreeListPayload = PolyHiveWorktreeListResponse["payload"];
+type PolyHiveWorktreeArchivePayload = PolyHiveWorktreeArchiveResponse["payload"];
+type CreatePolyHiveWorktreePayload = Extract<
   SessionOutboundMessage,
-  { type: "create_paseo_worktree_response" }
+  { type: "create_polyhive_worktree_response" }
 >["payload"];
 type FileExplorerPayload = FileExplorerResponse["payload"];
 type FileDownloadTokenPayload = FileDownloadTokenResponse["payload"];
@@ -2585,7 +2585,7 @@ export class DaemonClient {
 
   async stashList(
     cwd: string,
-    options?: { paseoOnly?: boolean },
+    options?: { polyhiveOnly?: boolean },
     requestId?: string,
   ): Promise<StashListPayload> {
     return this.sendCorrelatedSessionRequest({
@@ -2593,54 +2593,54 @@ export class DaemonClient {
       message: {
         type: "stash_list_request",
         cwd,
-        paseoOnly: options?.paseoOnly,
+        polyhiveOnly: options?.polyhiveOnly,
       },
       responseType: "stash_list_response",
       timeout: 10000,
     });
   }
 
-  async getPaseoWorktreeList(
+  async getPolyHiveWorktreeList(
     input: { cwd?: string; repoRoot?: string },
     requestId?: string,
-  ): Promise<PaseoWorktreeListPayload> {
+  ): Promise<PolyHiveWorktreeListPayload> {
     return this.sendCorrelatedSessionRequest({
       requestId,
       message: {
-        type: "paseo_worktree_list_request",
+        type: "polyhive_worktree_list_request",
         cwd: input.cwd,
         repoRoot: input.repoRoot,
       },
-      responseType: "paseo_worktree_list_response",
+      responseType: "polyhive_worktree_list_response",
       timeout: 60000,
     });
   }
 
-  async archivePaseoWorktree(
+  async archivePolyHiveWorktree(
     input: { worktreePath?: string; repoRoot?: string; branchName?: string },
     requestId?: string,
-  ): Promise<PaseoWorktreeArchivePayload> {
+  ): Promise<PolyHiveWorktreeArchivePayload> {
     return this.sendCorrelatedSessionRequest({
       requestId,
       message: {
-        type: "paseo_worktree_archive_request",
+        type: "polyhive_worktree_archive_request",
         worktreePath: input.worktreePath,
         repoRoot: input.repoRoot,
         branchName: input.branchName,
       },
-      responseType: "paseo_worktree_archive_response",
+      responseType: "polyhive_worktree_archive_response",
       timeout: 20000,
     });
   }
 
-  async createPaseoWorktree(
-    input: CreatePaseoWorktreeInput,
+  async createPolyHiveWorktree(
+    input: CreatePolyHiveWorktreeInput,
     requestId?: string,
-  ): Promise<CreatePaseoWorktreePayload> {
+  ): Promise<CreatePolyHiveWorktreePayload> {
     return this.sendCorrelatedSessionRequest({
       requestId,
       message: {
-        type: "create_paseo_worktree_request",
+        type: "create_polyhive_worktree_request",
         cwd: input.cwd,
         worktreeSlug: input.worktreeSlug,
         ...(input.attachments && input.attachments.length > 0
@@ -2650,7 +2650,7 @@ export class DaemonClient {
         ...(input.action !== undefined ? { action: input.action } : {}),
         ...(input.githubPrNumber !== undefined ? { githubPrNumber: input.githubPrNumber } : {}),
       },
-      responseType: "create_paseo_worktree_response",
+      responseType: "create_polyhive_worktree_response",
       timeout: 60000,
     });
   }

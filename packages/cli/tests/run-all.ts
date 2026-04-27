@@ -1,7 +1,7 @@
 #!/usr/bin/env npx zx
 
 /**
- * Test runner for Paseo CLI E2E tests
+ * Test runner for PolyHive CLI E2E tests
  *
  * Runs all test phases in sequence and reports results.
  * Each test is a separate .ts file that can also be run independently.
@@ -15,9 +15,9 @@ import { fileURLToPath } from "url";
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const args = process.argv.slice(2);
 const testEnvDefaults = {
-  PASEO_LOCAL_SPEECH_AUTO_DOWNLOAD: process.env.PASEO_LOCAL_SPEECH_AUTO_DOWNLOAD ?? "0",
-  PASEO_DICTATION_ENABLED: process.env.PASEO_DICTATION_ENABLED ?? "0",
-  PASEO_VOICE_MODE_ENABLED: process.env.PASEO_VOICE_MODE_ENABLED ?? "0",
+  POLYHIVE_LOCAL_SPEECH_AUTO_DOWNLOAD: process.env.POLYHIVE_LOCAL_SPEECH_AUTO_DOWNLOAD ?? "0",
+  POLYHIVE_DICTATION_ENABLED: process.env.POLYHIVE_DICTATION_ENABLED ?? "0",
+  POLYHIVE_VOICE_MODE_ENABLED: process.env.POLYHIVE_VOICE_MODE_ENABLED ?? "0",
 };
 
 let jsonOutputPath: string | null = null;
@@ -70,7 +70,7 @@ async function writeJsonSummary({
     JSON.stringify(
       {
         suite: "cli-local",
-        command: "npm run test:local --workspace=@getpaseo/cli",
+        command: "npm run test:local --workspace=polyhive",
         counts: {
           passed,
           failed,
@@ -88,7 +88,7 @@ async function writeJsonSummary({
   );
 }
 
-console.log("🧪 Paseo CLI E2E Test Runner\n");
+console.log("🧪 PolyHive CLI E2E Test Runner\n");
 console.log("=".repeat(50));
 
 // Discover all test files
@@ -111,9 +111,9 @@ let passed = 0;
 let failed = 0;
 const failures: Failure[] = [];
 
-await runCommand("Building relay", "npm run build --workspace=@getpaseo/relay");
-await runCommand("Building server", "npm run build --workspace=@getpaseo/server");
-await runCommand("Building CLI", "npm run build --workspace=@getpaseo/cli");
+await runCommand("Building relay", "npm run build --workspace=polyhive-relay");
+await runCommand("Building server", "npm run build --workspace=polyhive-server");
+await runCommand("Building CLI", "npm run build --workspace=polyhive");
 
 for (const testFile of testFiles) {
   const testPath = join(__dirname, testFile);
@@ -125,7 +125,7 @@ for (const testFile of testFiles) {
 
   try {
     const result =
-      await $`PASEO_LOCAL_SPEECH_AUTO_DOWNLOAD=${testEnvDefaults.PASEO_LOCAL_SPEECH_AUTO_DOWNLOAD} PASEO_DICTATION_ENABLED=${testEnvDefaults.PASEO_DICTATION_ENABLED} PASEO_VOICE_MODE_ENABLED=${testEnvDefaults.PASEO_VOICE_MODE_ENABLED} npx tsx ${testPath}`.nothrow();
+      await $`POLYHIVE_LOCAL_SPEECH_AUTO_DOWNLOAD=${testEnvDefaults.POLYHIVE_LOCAL_SPEECH_AUTO_DOWNLOAD} POLYHIVE_DICTATION_ENABLED=${testEnvDefaults.POLYHIVE_DICTATION_ENABLED} POLYHIVE_VOICE_MODE_ENABLED=${testEnvDefaults.POLYHIVE_VOICE_MODE_ENABLED} npx tsx ${testPath}`.nothrow();
     if (result.exitCode === 0) {
       console.log(`\n✅ ${testName} PASSED`);
       passed++;

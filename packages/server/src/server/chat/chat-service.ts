@@ -112,8 +112,8 @@ export class FileBackedChatService {
   private persistQueue: Promise<void> = Promise.resolve();
   private readonly waitersByRoomId = new Map<string, Set<Waiter>>();
 
-  constructor(options: { paseoHome: string; logger: pino.Logger }) {
-    this.filePath = path.join(options.paseoHome, "chat", "rooms.json");
+  constructor(options: { polyhiveHome: string; logger: pino.Logger }) {
+    this.filePath = path.join(options.polyhiveHome, "chat", "rooms.json");
     this.logger = options.logger.child({ component: "chat-service" });
   }
 

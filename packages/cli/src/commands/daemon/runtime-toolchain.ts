@@ -1,4 +1,4 @@
-import { execCommand } from "@getpaseo/server";
+import { execCommand } from "polyhive-server";
 
 export interface NodePathFromPidResult {
   nodePath: string | null;

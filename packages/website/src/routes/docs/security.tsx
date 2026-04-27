@@ -4,8 +4,8 @@ import { pageMeta } from "~/meta";
 export const Route = createFileRoute("/docs/security")({
   head: () => ({
     meta: pageMeta(
-      "Security - Paseo Docs",
-      "Security model for Paseo: architecture overview, connection methods, relay encryption, and best practices.",
+      "Security - PolyHive Docs",
+      "Security model for PolyHive: architecture overview, connection methods, relay encryption, and best practices.",
     ),
   }),
   component: Security,
@@ -25,13 +25,13 @@ function Security() {
       <div>
         <h1 className="text-3xl font-medium font-title mb-4">Security</h1>
         <p className="text-white/60 leading-relaxed">
-          Paseo follows a client-server architecture. The daemon runs on your Mac and manages your
-          coding agents. Clients (the CLI or web interface, including mobile browsers) connect to
-          the daemon to monitor and control those agents.
+          PolyHive follows a client-server architecture. The daemon runs on your Mac and manages
+          your coding agents. Clients (the CLI or web interface, including mobile browsers) connect
+          to the daemon to monitor and control those agents.
         </p>
         <p className="text-white/60 leading-relaxed mt-3">
-          Your code never leaves your machine. Paseo is a local-first tool that connects directly to
-          your development environment.
+          Your code never leaves your machine. PolyHive is a local-first tool that connects directly
+          to your development environment.
         </p>
       </div>
 
@@ -39,9 +39,9 @@ function Security() {
       <section className="space-y-4">
         <h2 className="text-xl font-medium">Architecture</h2>
         <p className="text-white/60 leading-relaxed">
-          The Paseo daemon runs on the macOS machine where you want to execute agents: your laptop,
-          a Mac mini, or another Mac you control. The daemon listens for connections and manages
-          agent lifecycles.
+          The PolyHive daemon runs on the macOS machine where you want to execute agents: your
+          laptop, a Mac mini, or another Mac you control. The daemon listens for connections and
+          manages agent lifecycles.
         </p>
         <p className="text-white/60 leading-relaxed">
           Clients connect to the daemon over WebSocket. There are two ways to establish this
@@ -80,7 +80,7 @@ function Security() {
         <ol className="text-white/60 space-y-2 list-decimal list-inside">
           <li>
             The daemon generates a persistent ECDH keypair and stores it in{" "}
-            <code className="font-mono">$PASEO_HOME/daemon-keypair.json</code>
+            <code className="font-mono">$POLYHIVE_HOME/daemon-keypair.json</code>
           </li>
           <li>
             When you scan the QR code or click the pairing link, your phone receives the daemon's
@@ -189,7 +189,7 @@ function Security() {
             <code className="font-mono">cors.allowedOrigins</code>
           </li>
           <li>
-            Add the daemon as a direct connection in the Paseo web client using the Tailscale
+            Add the daemon as a direct connection in the PolyHive web client using the Tailscale
             address
           </li>
         </ol>
@@ -213,8 +213,8 @@ function Security() {
           from resolving its domain to your local machine (DNS rebinding).
         </p>
         <p className="text-white/60 leading-relaxed">
-          Paseo uses a host allowlist to validate the <code className="font-mono">Host</code> header
-          on incoming requests. Requests with unrecognized hosts are rejected.
+          PolyHive uses a host allowlist to validate the <code className="font-mono">Host</code>{" "}
+          header on incoming requests. Requests with unrecognized hosts are rejected.
         </p>
         <p className="text-white/60 leading-relaxed">
           Configure via <code className="font-mono">daemon.hostnames</code> in{" "}
@@ -240,7 +240,7 @@ function Security() {
       <section className="space-y-4">
         <h2 className="text-xl font-medium">Agent authentication</h2>
         <p className="text-white/60 leading-relaxed">
-          Paseo wraps agent CLIs (Claude Code, Codex, OpenCode) but does not manage their
+          PolyHive wraps agent CLIs (Claude Code, Codex, OpenCode) but does not manage their
           authentication. Each agent provider handles its own credentials:
         </p>
         <ul className="text-white/60 space-y-2 list-disc list-inside">
@@ -258,7 +258,7 @@ function Security() {
           </li>
         </ul>
         <p className="text-white/60 leading-relaxed">
-          Paseo never stores or transmits provider API keys. Agents run in your user context with
+          PolyHive never stores or transmits provider API keys. Agents run in your user context with
           your existing credentials.
         </p>
       </section>

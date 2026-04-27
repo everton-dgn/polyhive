@@ -9,7 +9,7 @@ function createInput(overrides: Partial<BuildGitActionsInput> = {}): BuildGitAct
     hasPullRequest: false,
     pullRequestUrl: null,
     hasRemote: false,
-    isPaseoOwnedWorktree: false,
+    isPolyHiveOwnedWorktree: false,
     isOnBaseBranch: true,
     hasUncommittedChanges: false,
     baseRefAvailable: true,
@@ -158,9 +158,9 @@ describe("git-actions-policy", () => {
     ).toBe(true);
   });
 
-  it("only shows archive worktree for paseo worktrees", () => {
+  it("only shows archive worktree for polyhive worktrees", () => {
     const hidden = buildGitActions(createInput());
-    const shown = buildGitActions(createInput({ isPaseoOwnedWorktree: true }));
+    const shown = buildGitActions(createInput({ isPolyHiveOwnedWorktree: true }));
 
     expect(hidden.secondary.some((action) => action.id === "archive-worktree")).toBe(false);
     expect(shown.secondary.some((action) => action.id === "archive-worktree")).toBe(true);

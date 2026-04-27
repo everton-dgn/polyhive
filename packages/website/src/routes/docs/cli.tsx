@@ -4,8 +4,8 @@ import { pageMeta } from "~/meta";
 export const Route = createFileRoute("/docs/cli")({
   head: () => ({
     meta: pageMeta(
-      "CLI - Paseo Docs",
-      "Paseo CLI reference: manage agents, daemons, permissions, and worktrees from your terminal.",
+      "CLI - PolyHive Docs",
+      "PolyHive CLI reference: manage agents, daemons, permissions, and worktrees from your terminal.",
     ),
   }),
   component: CLI,
@@ -25,16 +25,17 @@ function CLI() {
       <div>
         <h1 className="text-3xl font-medium font-title mb-4">CLI</h1>
         <p className="text-white/60 leading-relaxed">
-          The Paseo CLI lets you manage agents from your terminal. It's the same interface exposed
-          by the daemon's API, so anything you can do in the app you can do from the command line.
+          The PolyHive CLI lets you manage agents from your terminal. It's the same interface
+          exposed by the daemon's API, so anything you can do in the app you can do from the command
+          line.
         </p>
       </div>
 
       {/* Agent orchestration callout */}
       <section className="space-y-4">
         <div className="bg-primary/10 border border-primary/30 rounded-lg p-4 text-white/80">
-          <strong>Agent orchestration:</strong> You can tell coding agents to use the Paseo CLI to
-          spawn and manage other agents. This enables multi-agent workflows where one agent
+          <strong>Agent orchestration:</strong> You can tell coding agents to use the PolyHive CLI
+          to spawn and manage other agents. This enables multi-agent workflows where one agent
           delegates subtasks to others and waits for results.
         </div>
       </section>
@@ -43,12 +44,12 @@ function CLI() {
       <section className="space-y-4">
         <h2 className="text-xl font-medium">Quick reference</h2>
         <Code>
-          <pre className="text-white/80">{`paseo run "fix the tests"           # Start an agent
-paseo ls                             # List running agents
-paseo attach <id>                    # Stream agent output
-paseo send <id> "also fix linting"  # Send follow-up task
-paseo logs <id>                      # View agent timeline
-paseo stop <id>                      # Stop an agent`}</pre>
+          <pre className="text-white/80">{`polyhive run "fix the tests"           # Start an agent
+polyhive ls                             # List running agents
+polyhive attach <id>                    # Stream agent output
+polyhive send <id> "also fix linting"  # Send follow-up task
+polyhive logs <id>                      # View agent timeline
+polyhive stop <id>                      # Stop an agent`}</pre>
         </Code>
       </section>
 
@@ -56,15 +57,15 @@ paseo stop <id>                      # Stop an agent`}</pre>
       <section className="space-y-4">
         <h2 className="text-xl font-medium">Running agents</h2>
         <p className="text-white/60 leading-relaxed">
-          Use <code className="font-mono">paseo run</code> to start a new agent with a task:
+          Use <code className="font-mono">polyhive run</code> to start a new agent with a task:
         </p>
         <Code>
-          <pre className="text-white/80">{`paseo run "implement user authentication"
-paseo run --provider codex "refactor the API layer"
-paseo run --detach "run the full test suite"  # background
-paseo run --worktree feature-x "implement feature X"
-paseo run --output-schema schema.json "extract release notes"
-paseo run --output-schema '{"type":"object","properties":{"summary":{"type":"string"}},"required":["summary"]}' "summarize release notes"`}</pre>
+          <pre className="text-white/80">{`polyhive run "implement user authentication"
+polyhive run --provider codex "refactor the API layer"
+polyhive run --detach "run the full test suite"  # background
+polyhive run --worktree feature-x "implement feature X"
+polyhive run --output-schema schema.json "extract release notes"
+polyhive run --output-schema '{"type":"object","properties":{"summary":{"type":"string"}},"required":["summary"]}' "summarize release notes"`}</pre>
         </Code>
         <p className="text-white/60 leading-relaxed">
           The <code className="font-mono">--worktree</code> flag creates the agent in an isolated
@@ -76,7 +77,7 @@ paseo run --output-schema '{"type":"object","properties":{"summary":{"type":"str
           be used with <code className="font-mono">--detach</code>.
         </p>
         <p className="text-white/60 leading-relaxed">
-          By default, <code className="font-mono">paseo run</code> waits for completion. Use{" "}
+          By default, <code className="font-mono">polyhive run</code> waits for completion. Use{" "}
           <code className="font-mono">--detach</code> to run in the background.
         </p>
       </section>
@@ -85,10 +86,10 @@ paseo run --output-schema '{"type":"object","properties":{"summary":{"type":"str
       <section className="space-y-4">
         <h2 className="text-xl font-medium">Listing agents</h2>
         <Code>
-          <pre className="text-white/80">{`paseo ls                    # Running agents in current directory
-paseo ls -a                 # Include completed/stopped agents
-paseo ls -g                 # All directories
-paseo ls -a -g --json       # Full list as JSON`}</pre>
+          <pre className="text-white/80">{`polyhive ls                    # Running agents in current directory
+polyhive ls -a                 # Include completed/stopped agents
+polyhive ls -g                 # All directories
+polyhive ls -a -g --json       # Full list as JSON`}</pre>
         </Code>
       </section>
 
@@ -96,11 +97,11 @@ paseo ls -a -g --json       # Full list as JSON`}</pre>
       <section className="space-y-4">
         <h2 className="text-xl font-medium">Streaming output</h2>
         <p className="text-white/60 leading-relaxed">
-          Use <code className="font-mono">paseo attach</code> to stream an agent's output in
+          Use <code className="font-mono">polyhive attach</code> to stream an agent's output in
           real-time:
         </p>
         <Code>
-          <pre className="text-white/80">{`paseo attach abc123   # Attach to agent (Ctrl+C to detach)`}</pre>
+          <pre className="text-white/80">{`polyhive attach abc123   # Attach to agent (Ctrl+C to detach)`}</pre>
         </Code>
         <p className="text-white/60 leading-relaxed">
           Agent IDs can be shortened — <code className="font-mono">abc</code> works if it's
@@ -115,9 +116,9 @@ paseo ls -a -g --json       # Full list as JSON`}</pre>
           Send follow-up tasks to a running or idle agent:
         </p>
         <Code>
-          <pre className="text-white/80">{`paseo send <id> "now run the tests"
-paseo send <id> --image screenshot.png "what's wrong here?"
-paseo send <id> --no-wait "queue this task"`}</pre>
+          <pre className="text-white/80">{`polyhive send <id> "now run the tests"
+polyhive send <id> --image screenshot.png "what's wrong here?"
+polyhive send <id> --no-wait "queue this task"`}</pre>
         </Code>
       </section>
 
@@ -125,10 +126,10 @@ paseo send <id> --no-wait "queue this task"`}</pre>
       <section className="space-y-4">
         <h2 className="text-xl font-medium">Viewing logs</h2>
         <Code>
-          <pre className="text-white/80">{`paseo logs <id>                  # Full timeline
-paseo logs <id> -f               # Follow (streaming)
-paseo logs <id> --tail 10        # Last 10 entries
-paseo logs <id> --filter tools   # Only tool calls`}</pre>
+          <pre className="text-white/80">{`polyhive logs <id>                  # Full timeline
+polyhive logs <id> -f               # Follow (streaming)
+polyhive logs <id> --tail 10        # Last 10 entries
+polyhive logs <id> --filter tools   # Only tool calls`}</pre>
         </Code>
       </section>
 
@@ -139,8 +140,8 @@ paseo logs <id> --filter tools   # Only tool calls`}</pre>
           Block until an agent finishes its current task:
         </p>
         <Code>
-          <pre className="text-white/80">{`paseo wait <id>
-paseo wait <id> --timeout 60   # 60 second timeout`}</pre>
+          <pre className="text-white/80">{`polyhive wait <id>
+polyhive wait <id> --timeout 60   # 60 second timeout`}</pre>
         </Code>
         <p className="text-white/60 leading-relaxed">
           Useful in scripts or when one agent needs to wait for another.
@@ -154,9 +155,9 @@ paseo wait <id> --timeout 60   # 60 second timeout`}</pre>
           Agents may request permission for certain actions. Manage these from the CLI:
         </p>
         <Code>
-          <pre className="text-white/80">{`paseo permit ls                # List pending requests
-paseo permit allow <id>        # Allow all pending for agent
-paseo permit deny <id> --all   # Deny all pending`}</pre>
+          <pre className="text-white/80">{`polyhive permit ls                # List pending requests
+polyhive permit allow <id>        # Allow all pending for agent
+polyhive permit deny <id> --all   # Deny all pending`}</pre>
         </Code>
       </section>
 
@@ -167,9 +168,9 @@ paseo permit deny <id> --all   # Deny all pending`}</pre>
           Change an agent's operational mode (provider-specific):
         </p>
         <Code>
-          <pre className="text-white/80">{`paseo agent mode <id> --list   # Show available modes
-paseo agent mode <id> bypass   # Set bypass mode
-paseo agent mode <id> plan     # Set plan mode`}</pre>
+          <pre className="text-white/80">{`polyhive agent mode <id> --list   # Show available modes
+polyhive agent mode <id> bypass   # Set bypass mode
+polyhive agent mode <id> plan     # Set plan mode`}</pre>
         </Code>
       </section>
 
@@ -177,12 +178,12 @@ paseo agent mode <id> plan     # Set plan mode`}</pre>
       <section className="space-y-4">
         <h2 className="text-xl font-medium">Daemon management</h2>
         <Code>
-          <pre className="text-white/80">{`paseo daemon start             # Start the daemon
-paseo daemon status            # Check status
-paseo daemon stop              # Stop the daemon`}</pre>
+          <pre className="text-white/80">{`polyhive daemon start             # Start the daemon
+polyhive daemon status            # Check status
+polyhive daemon stop              # Stop the daemon`}</pre>
         </Code>
         <p className="text-white/60 leading-relaxed">
-          Use <code className="font-mono">PASEO_HOME</code> to run multiple isolated daemon
+          Use <code className="font-mono">POLYHIVE_HOME</code> to run multiple isolated daemon
           instances.
         </p>
       </section>
@@ -196,17 +197,17 @@ paseo daemon stop              # Stop the daemon`}</pre>
         </p>
         <Code>
           <pre className="text-white/80">{`# Agent A spawns Agent B and waits for it
-paseo run --detach "implement the API" --name api-agent
-paseo wait api-agent
-paseo logs api-agent --tail 5`}</pre>
+polyhive run --detach "implement the API" --name api-agent
+polyhive wait api-agent
+polyhive logs api-agent --tail 5`}</pre>
         </Code>
         <p className="text-white/60 leading-relaxed">Simple implement + verify loop:</p>
         <Code>
           <pre className="text-white/80">{`# Requires jq
 while true; do
-  paseo run --provider codex "make the tests pass" >/dev/null
+  polyhive run --provider codex "make the tests pass" >/dev/null
 
-  verdict=$(paseo run --provider claude --output-schema '{"type":"object","properties":{"criteria_met":{"type":"boolean"}},"required":["criteria_met"],"additionalProperties":false}' "ensure tests all pass")
+  verdict=$(polyhive run --provider claude --output-schema '{"type":"object","properties":{"criteria_met":{"type":"boolean"}},"required":["criteria_met"],"additionalProperties":false}' "ensure tests all pass")
   if echo "$verdict" | jq -e '.criteria_met == true' >/dev/null; then
     echo "criteria met"
     break
@@ -226,9 +227,9 @@ done`}</pre>
           Most commands support multiple output formats for scripting:
         </p>
         <Code>
-          <pre className="text-white/80">{`paseo ls --json                # JSON output
-paseo ls --format yaml         # YAML output
-paseo ls -q                    # IDs only (quiet)`}</pre>
+          <pre className="text-white/80">{`polyhive ls --json                # JSON output
+polyhive ls --format yaml         # YAML output
+polyhive ls -q                    # IDs only (quiet)`}</pre>
         </Code>
       </section>
 

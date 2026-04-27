@@ -144,14 +144,14 @@ describe("workspace agent visibility", () => {
         "slash-agent",
         makeAgent({
           id: "slash-agent",
-          cwd: "/Users/dev/.paseo/worktrees/1luy0po7/normal-squid/",
+          cwd: "/Users/dev/.polyhive/worktrees/1luy0po7/normal-squid/",
         }),
       ],
     ]);
 
     const result = deriveWorkspaceAgentVisibility({
       sessionAgents,
-      workspaceDirectory: "/Users/dev/.paseo/worktrees/1luy0po7/normal-squid",
+      workspaceDirectory: "/Users/dev/.polyhive/worktrees/1luy0po7/normal-squid",
     });
 
     expect(result.activeAgentIds).toEqual(new Set(["slash-agent"]));

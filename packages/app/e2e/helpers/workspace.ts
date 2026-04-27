@@ -9,10 +9,10 @@ type TempRepo = {
 };
 
 export const createTempGitRepo = async (
-  prefix = "paseo-e2e-",
+  prefix = "polyhive-e2e-",
   options?: {
     withRemote?: boolean;
-    paseoConfig?: Record<string, unknown>;
+    polyhiveConfig?: Record<string, unknown>;
     files?: Array<{ path: string; content: string }>;
     branches?: string[];
   },
@@ -24,14 +24,14 @@ export const createTempGitRepo = async (
   const withRemote = options?.withRemote ?? false;
 
   execSync("git init -b main", { cwd: repoPath, stdio: "ignore" });
-  execSync('git config user.email "e2e@paseo.test"', { cwd: repoPath, stdio: "ignore" });
-  execSync('git config user.name "Paseo E2E"', { cwd: repoPath, stdio: "ignore" });
+  execSync('git config user.email "e2e@polyhive.test"', { cwd: repoPath, stdio: "ignore" });
+  execSync('git config user.name "PolyHive E2E"', { cwd: repoPath, stdio: "ignore" });
   execSync("git config commit.gpgsign false", { cwd: repoPath, stdio: "ignore" });
   await writeFile(path.join(repoPath, "README.md"), "# Temp Repo\n");
-  if (options?.paseoConfig) {
+  if (options?.polyhiveConfig) {
     await writeFile(
-      path.join(repoPath, "paseo.json"),
-      JSON.stringify(options.paseoConfig, null, 2),
+      path.join(repoPath, "polyhive.json"),
+      JSON.stringify(options.polyhiveConfig, null, 2),
     );
   }
   for (const file of options?.files ?? []) {
@@ -40,8 +40,8 @@ export const createTempGitRepo = async (
     await writeFile(filePath, file.content);
   }
   execSync("git add README.md", { cwd: repoPath, stdio: "ignore" });
-  if (options?.paseoConfig) {
-    execSync("git add paseo.json", { cwd: repoPath, stdio: "ignore" });
+  if (options?.polyhiveConfig) {
+    execSync("git add polyhive.json", { cwd: repoPath, stdio: "ignore" });
   }
   for (const file of options?.files ?? []) {
     execSync(`git add ${JSON.stringify(file.path)}`, { cwd: repoPath, stdio: "ignore" });
@@ -57,7 +57,7 @@ export const createTempGitRepo = async (
         stdio: "ignore",
       });
     }
-    const markerPath = `.paseo-e2e-${branch.replace(/[^a-zA-Z0-9._-]/g, "-")}.txt`;
+    const markerPath = `.polyhive-e2e-${branch.replace(/[^a-zA-Z0-9._-]/g, "-")}.txt`;
     await writeFile(path.join(repoPath, markerPath), `branch ${branch}\n`);
     execSync(`git add ${JSON.stringify(markerPath)}`, { cwd: repoPath, stdio: "ignore" });
     execSync(`git commit -m ${JSON.stringify(`Add ${branch} marker`)}`, {

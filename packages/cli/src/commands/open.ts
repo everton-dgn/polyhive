@@ -6,8 +6,8 @@ import path from "node:path";
 function findDesktopApp(): string | null {
   if (process.platform === "darwin") {
     const candidates = [
-      "/Applications/Paseo.app",
-      path.join(homedir(), "Applications", "Paseo.app"),
+      "/Applications/PolyHive.app",
+      path.join(homedir(), "Applications", "PolyHive.app"),
     ];
 
     for (const candidate of candidates) {
@@ -40,7 +40,7 @@ function spawnDetached(command: string, args: string[]): void {
 
 export async function openDesktopWithProject(projectPath: string): Promise<void> {
   try {
-    if (process.env.PASEO_DESKTOP_CLI === "1") {
+    if (process.env.POLYHIVE_DESKTOP_CLI === "1") {
       throw new Error(
         "Cannot open a desktop project while running in desktop CLI passthrough mode.",
       );
@@ -49,7 +49,7 @@ export async function openDesktopWithProject(projectPath: string): Promise<void>
     const desktopApp = findDesktopApp();
     if (!desktopApp) {
       throw new Error(
-        "Paseo desktop app not found. Install it from https://github.com/everton-dgn/polyhive/releases",
+        "PolyHive desktop app not found. Install it from https://github.com/everton-dgn/polyhive/releases",
       );
     }
 

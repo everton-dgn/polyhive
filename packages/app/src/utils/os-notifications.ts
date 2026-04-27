@@ -16,7 +16,7 @@ type WebNotificationInstance = {
   onclick?: ((event: Event) => void) | null;
 };
 
-export const WEB_NOTIFICATION_CLICK_EVENT = "paseo:web-notification-click";
+export const WEB_NOTIFICATION_CLICK_EVENT = "polyhive:web-notification-click";
 
 let permissionRequest: Promise<boolean> | null = null;
 let notificationIconUrl: string | null | undefined;

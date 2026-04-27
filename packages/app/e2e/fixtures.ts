@@ -71,7 +71,7 @@ test.beforeEach(async ({ page }) => {
       // `addInitScript` runs on every navigation (including reloads). Some tests intentionally
       // override storage and reload; they can opt out of seeding for the *next* navigation by
       // setting this flag before the reload.
-      const disableOnceKey = "@paseo:e2e-disable-default-seed-once";
+      const disableOnceKey = "@polyhive:e2e-disable-default-seed-once";
       const disableValue = localStorage.getItem(disableOnceKey);
       if (disableValue) {
         localStorage.removeItem(disableOnceKey);
@@ -80,13 +80,13 @@ test.beforeEach(async ({ page }) => {
         }
       }
 
-      localStorage.setItem("@paseo:e2e", "1");
-      localStorage.setItem("@paseo:e2e-seed-nonce", seedNonce);
+      localStorage.setItem("@polyhive:e2e", "1");
+      localStorage.setItem("@polyhive:e2e-seed-nonce", seedNonce);
 
       // Hard-reset anything that could point to a developer's real daemon.
-      localStorage.setItem("@paseo:daemon-registry", JSON.stringify([daemon]));
-      localStorage.removeItem("@paseo:settings");
-      localStorage.setItem("@paseo:create-agent-preferences", JSON.stringify(preferences));
+      localStorage.setItem("@polyhive:daemon-registry", JSON.stringify([daemon]));
+      localStorage.removeItem("@polyhive:settings");
+      localStorage.setItem("@polyhive:create-agent-preferences", JSON.stringify(preferences));
     },
     { daemon: testDaemon, preferences: createAgentPreferences, seedNonce },
   );

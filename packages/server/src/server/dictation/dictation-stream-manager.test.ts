@@ -76,17 +76,17 @@ const tick = async (): Promise<void> => {
 
 describe("DictationStreamManager (finish buffer-too-small tolerance)", () => {
   const env = {
-    dictationDebug: process.env.PASEO_DICTATION_DEBUG,
+    dictationDebug: process.env.POLYHIVE_DICTATION_DEBUG,
   };
 
   beforeEach(() => {
     vi.useFakeTimers();
-    process.env.PASEO_DICTATION_DEBUG = "false";
+    process.env.POLYHIVE_DICTATION_DEBUG = "false";
   });
 
   afterEach(() => {
     vi.useRealTimers();
-    process.env.PASEO_DICTATION_DEBUG = env.dictationDebug;
+    process.env.POLYHIVE_DICTATION_DEBUG = env.dictationDebug;
   });
 
   it("treats buffer-too-small as benign and finalizes with existing transcripts", async () => {
@@ -155,8 +155,8 @@ describe("DictationStreamManager (provider-agnostic provider)", () => {
   });
 
   it("auto-commits while streaming and assembles final transcript in segment order", async () => {
-    const originalDebug = process.env.PASEO_DICTATION_DEBUG;
-    process.env.PASEO_DICTATION_DEBUG = "false";
+    const originalDebug = process.env.POLYHIVE_DICTATION_DEBUG;
+    process.env.POLYHIVE_DICTATION_DEBUG = "false";
 
     try {
       const session = new FakeRealtimeSession();
@@ -200,9 +200,9 @@ describe("DictationStreamManager (provider-agnostic provider)", () => {
       expect(final?.payload.text).toBe("hello world");
     } finally {
       if (originalDebug === undefined) {
-        delete process.env.PASEO_DICTATION_DEBUG;
+        delete process.env.POLYHIVE_DICTATION_DEBUG;
       } else {
-        process.env.PASEO_DICTATION_DEBUG = originalDebug;
+        process.env.POLYHIVE_DICTATION_DEBUG = originalDebug;
       }
     }
   });
@@ -266,9 +266,9 @@ describe("DictationStreamManager (provider-agnostic provider)", () => {
     expect(finishAccepted?.payload.timeoutMs).toBeGreaterThan(5000);
   });
 
-  it("defaults to English when PASEO_DICTATION_LANGUAGE is unset", async () => {
-    const original = process.env.PASEO_DICTATION_LANGUAGE;
-    delete process.env.PASEO_DICTATION_LANGUAGE;
+  it("defaults to English when POLYHIVE_DICTATION_LANGUAGE is unset", async () => {
+    const original = process.env.POLYHIVE_DICTATION_LANGUAGE;
+    delete process.env.POLYHIVE_DICTATION_LANGUAGE;
 
     try {
       const session = new FakeRealtimeSession();
@@ -283,14 +283,14 @@ describe("DictationStreamManager (provider-agnostic provider)", () => {
       await manager.handleStart("d-lang-default", "audio/pcm;rate=24000;bits=16");
       expect(sttProvider.lastLanguage).toBe("en");
     } finally {
-      if (original !== undefined) process.env.PASEO_DICTATION_LANGUAGE = original;
-      else delete process.env.PASEO_DICTATION_LANGUAGE;
+      if (original !== undefined) process.env.POLYHIVE_DICTATION_LANGUAGE = original;
+      else delete process.env.POLYHIVE_DICTATION_LANGUAGE;
     }
   });
 
-  it("uses PASEO_DICTATION_LANGUAGE when set to pt for Brazilian Portuguese", async () => {
-    const original = process.env.PASEO_DICTATION_LANGUAGE;
-    process.env.PASEO_DICTATION_LANGUAGE = "pt";
+  it("uses POLYHIVE_DICTATION_LANGUAGE when set to pt for Brazilian Portuguese", async () => {
+    const original = process.env.POLYHIVE_DICTATION_LANGUAGE;
+    process.env.POLYHIVE_DICTATION_LANGUAGE = "pt";
 
     try {
       const session = new FakeRealtimeSession();
@@ -305,14 +305,14 @@ describe("DictationStreamManager (provider-agnostic provider)", () => {
       await manager.handleStart("d-lang-pt", "audio/pcm;rate=24000;bits=16");
       expect(sttProvider.lastLanguage).toBe("pt");
     } finally {
-      if (original !== undefined) process.env.PASEO_DICTATION_LANGUAGE = original;
-      else delete process.env.PASEO_DICTATION_LANGUAGE;
+      if (original !== undefined) process.env.POLYHIVE_DICTATION_LANGUAGE = original;
+      else delete process.env.POLYHIVE_DICTATION_LANGUAGE;
     }
   });
 
-  it("treats empty PASEO_DICTATION_LANGUAGE as unset and falls back to default", async () => {
-    const original = process.env.PASEO_DICTATION_LANGUAGE;
-    process.env.PASEO_DICTATION_LANGUAGE = "  ";
+  it("treats empty POLYHIVE_DICTATION_LANGUAGE as unset and falls back to default", async () => {
+    const original = process.env.POLYHIVE_DICTATION_LANGUAGE;
+    process.env.POLYHIVE_DICTATION_LANGUAGE = "  ";
 
     try {
       const session = new FakeRealtimeSession();
@@ -327,15 +327,15 @@ describe("DictationStreamManager (provider-agnostic provider)", () => {
       await manager.handleStart("d-lang-empty", "audio/pcm;rate=24000;bits=16");
       expect(sttProvider.lastLanguage).toBe("en");
     } finally {
-      if (original !== undefined) process.env.PASEO_DICTATION_LANGUAGE = original;
-      else delete process.env.PASEO_DICTATION_LANGUAGE;
+      if (original !== undefined) process.env.POLYHIVE_DICTATION_LANGUAGE = original;
+      else delete process.env.POLYHIVE_DICTATION_LANGUAGE;
     }
   });
 
   it("drops dangling uncommitted non-final transcripts when finishing after silence tail clear", async () => {
     vi.useFakeTimers();
-    const previousDebug = process.env.PASEO_DICTATION_DEBUG;
-    process.env.PASEO_DICTATION_DEBUG = "false";
+    const previousDebug = process.env.POLYHIVE_DICTATION_DEBUG;
+    process.env.POLYHIVE_DICTATION_DEBUG = "false";
     try {
       const session = new FakeRealtimeSession();
       const emitted: Array<{ type: string; payload: any }> = [];
@@ -377,7 +377,7 @@ describe("DictationStreamManager (provider-agnostic provider)", () => {
       expect(error).toBeUndefined();
       expect(final?.payload.text).toBe("hello");
     } finally {
-      process.env.PASEO_DICTATION_DEBUG = previousDebug;
+      process.env.POLYHIVE_DICTATION_DEBUG = previousDebug;
       vi.useRealTimers();
     }
   });

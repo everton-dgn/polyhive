@@ -74,7 +74,7 @@ function createFallbackWorkspaceGitService(): WorkspaceGitServiceImpl {
           mainRepoRoot: null,
           currentBranch: null,
           remoteUrl: null,
-          isPaseoOwnedWorktree: false,
+          isPolyHiveOwnedWorktree: false,
           isDirty: null,
           aheadBehind: null,
           aheadOfOrigin: null,
@@ -99,7 +99,7 @@ function createFallbackWorkspaceGitService(): WorkspaceGitServiceImpl {
         mainRepoRoot: null,
         currentBranch: null,
         remoteUrl: null,
-        isPaseoOwnedWorktree: false,
+        isPolyHiveOwnedWorktree: false,
         isDirty: null,
         aheadBehind: null,
         aheadOfOrigin: null,
@@ -297,7 +297,7 @@ export class VoiceAssistantWebSocketServer {
   private readonly github: GitHubService;
   private readonly workspaceGitService: WorkspaceGitServiceImpl;
   private readonly downloadTokenStore: DownloadTokenStore;
-  private readonly paseoHome: string;
+  private readonly polyhiveHome: string;
   private readonly daemonConfigStore: DaemonConfigStore;
   private readonly mcpBaseUrl: string | null;
   private readonly speech: SpeechService | null;
@@ -359,7 +359,7 @@ export class VoiceAssistantWebSocketServer {
     agentManager: AgentManager,
     agentStorage: AgentStorage,
     downloadTokenStore: DownloadTokenStore,
-    paseoHome: string,
+    polyhiveHome: string,
     daemonConfigStore: DaemonConfigStore,
     mcpBaseUrl: string | null,
     wsConfig: WebSocketServerConfig,
@@ -421,7 +421,7 @@ export class VoiceAssistantWebSocketServer {
     this.github = github ?? createGitHubService();
     this.workspaceGitService = workspaceGitService ?? createFallbackWorkspaceGitService();
     this.downloadTokenStore = downloadTokenStore;
-    this.paseoHome = paseoHome;
+    this.polyhiveHome = polyhiveHome;
     this.daemonConfigStore = daemonConfigStore;
     this.mcpBaseUrl = mcpBaseUrl;
     this.speech = speech ?? null;
@@ -743,7 +743,7 @@ export class VoiceAssistantWebSocketServer {
       },
       logger: connectionLogger.child({ module: "session" }),
       downloadTokenStore: this.downloadTokenStore,
-      paseoHome: this.paseoHome,
+      polyhiveHome: this.polyhiveHome,
       agentManager: this.agentManager,
       agentStorage: this.agentStorage,
       projectRegistry: this.projectRegistry,

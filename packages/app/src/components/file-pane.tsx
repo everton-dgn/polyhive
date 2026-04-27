@@ -20,7 +20,7 @@ import {
   lightHighlightColors,
   type HighlightToken,
   type HighlightStyle,
-} from "@getpaseo/highlight";
+} from "polyhive-highlight";
 import { lineNumberGutterWidth } from "@/components/code-insets";
 import { isRenderedMarkdownFile } from "@/components/file-pane-render-mode";
 import { createMarkdownStyles } from "@/styles/markdown-styles";

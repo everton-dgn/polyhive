@@ -15,13 +15,13 @@ The dev script automatically picks an available port. Both the server and Expo a
 
 ### Running alongside the main checkout
 
-Set `PASEO_HOME` to isolate state when running a second instance (e.g., in a worktree):
+Set `POLYHIVE_HOME` to isolate state when running a second instance (e.g., in a worktree):
 
 ```bash
-PASEO_HOME=~/.paseo-blue npm run dev
+POLYHIVE_HOME=~/.polyhive-blue npm run dev
 ```
 
-- `PASEO_HOME` — path for runtime state (agents, sockets, etc.). Defaults to `~/.paseo`.
+- `POLYHIVE_HOME` — path for runtime state (agents, sockets, etc.). Defaults to `~/.polyhive`.
 
 ### Default ports
 
@@ -33,7 +33,7 @@ In worktrees or with `npm run dev`, ports may differ. Never assume defaults.
 
 ### Daemon logs
 
-Check `$PASEO_HOME/daemon.log` for trace-level logs.
+Check `$POLYHIVE_HOME/daemon.log` for trace-level logs.
 
 ### Database queries
 
@@ -51,19 +51,19 @@ npm run db:query -- "SELECT agent_id, seq, item_kind FROM agent_timeline_rows OR
 npm run db:query -- --db /path/to/db "SELECT ..."
 ```
 
-Auto-detects the running dev daemon's database from `/tmp/paseo-dev.*`, `PASEO_HOME`, or `~/.paseo/db`.
-Pass either a DB directory or a `paseo.sqlite` file to `--db`. The script opens the database directly in read-only mode.
+Auto-detects the running dev daemon's database from `/tmp/polyhive-dev.*`, `POLYHIVE_HOME`, or `~/.polyhive/db`.
+Pass either a DB directory or a `polyhive.sqlite` file to `--db`. The script opens the database directly in read-only mode.
 
-## paseo.json service scripts
+## polyhive.json service scripts
 
 Every `scripts` entry with `"type": "service"` receives these environment variables:
 
 | Variable | Value |
 |---|---|
-| `PASEO_SERVICE_<NAME>_URL` | Proxied daemon URL for a declared peer service. Prefer this for peer discovery; it survives peer restarts. |
-| `PASEO_SERVICE_<NAME>_PORT` | Raw ephemeral port for a declared peer service. Use only as a bypass escape hatch; it can go stale if that peer restarts. |
-| `PASEO_URL` | Self alias for `PASEO_SERVICE_<SELF>_URL`. |
-| `PASEO_PORT` | Self alias for `PASEO_SERVICE_<SELF>_PORT`. |
+| `POLYHIVE_SERVICE_<NAME>_URL` | Proxied daemon URL for a declared peer service. Prefer this for peer discovery; it survives peer restarts. |
+| `POLYHIVE_SERVICE_<NAME>_PORT` | Raw ephemeral port for a declared peer service. Use only as a bypass escape hatch; it can go stale if that peer restarts. |
+| `POLYHIVE_URL` | Self alias for `POLYHIVE_SERVICE_<SELF>_URL`. |
+| `POLYHIVE_PORT` | Self alias for `POLYHIVE_SERVICE_<SELF>_PORT`. |
 | `HOST` | Bind host for the service process. |
 
 `<NAME>` is normalized from the script name by uppercasing it, replacing each run of non-`A-Z0-9` characters with `_`, and trimming leading or trailing `_`. For example, `app-server` and `app.server` both normalize to `APP_SERVER`; that collision fails at spawn time with an actionable error.
@@ -75,7 +75,7 @@ Every `scripts` entry with `"type": "service"` receives these environment variab
   "scripts": {
     "web": {
       "type": "service",
-      "command": "PORT=$PASEO_PORT npm run dev:web"
+      "command": "PORT=$POLYHIVE_PORT npm run dev:web"
     }
   }
 }
@@ -88,24 +88,24 @@ Every `scripts` entry with `"type": "service"` receives these environment variab
 When changing `packages/relay/src/*`, rebuild before running the daemon:
 
 ```bash
-npm run build --workspace=@getpaseo/relay
+npm run build --workspace=polyhive-relay
 ```
 
-The Node daemon imports `@getpaseo/relay` from `packages/relay/dist/*`, not `src/*`.
+The Node daemon imports `polyhive-relay` from `packages/relay/dist/*`, not `src/*`.
 
 ### Server → CLI
 
 When changing `packages/server/src/client/*` (especially `daemon-client.ts`) or shared WS protocol types, rebuild before running CLI commands:
 
 ```bash
-npm run build --workspace=@getpaseo/server
+npm run build --workspace=polyhive-server
 ```
 
-The CLI imports `@getpaseo/server` via package exports resolving to `dist/*`. Stale `dist` means the CLI speaks an old protocol and fails with handshake warnings or timeouts.
+The CLI imports `polyhive-server` via package exports resolving to `dist/*`. Stale `dist` means the CLI speaks an old protocol and fails with handshake warnings or timeouts.
 
 ## CLI reference
 
-Use `npm run cli` to run the local CLI (instead of the globally installed `paseo` which points to the main checkout).
+Use `npm run cli` to run the local CLI (instead of the globally installed `polyhive` which points to the main checkout).
 
 ```bash
 npm run cli -- ls -a -g              # List all agents globally
@@ -126,17 +126,17 @@ npm run cli -- --host localhost:7777 ls -a
 Agent data lives at:
 
 ```
-$PASEO_HOME/agents/{cwd-with-dashes}/{agent-id}.json
+$POLYHIVE_HOME/agents/{cwd-with-dashes}/{agent-id}.json
 ```
 
 Find an agent by ID:
 ```bash
-find $PASEO_HOME/agents -name "{agent-id}.json"
+find $POLYHIVE_HOME/agents -name "{agent-id}.json"
 ```
 
 Find by content:
 ```bash
-rg -l "some title text" $PASEO_HOME/agents/
+rg -l "some title text" $POLYHIVE_HOME/agents/
 ```
 
 ## Provider session files

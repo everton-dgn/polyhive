@@ -382,7 +382,7 @@ describe("daemon E2E", () => {
   });
 
   describe("worktree setup", () => {
-    test("runs paseo.json setup asynchronously and reports status via timeline tool_call", async () => {
+    test("runs polyhive.json setup asynchronously and reports status via timeline tool_call", async () => {
       const repoRoot = tmpCwd();
 
       const { execSync } = await import("child_process");
@@ -402,13 +402,13 @@ describe("daemon E2E", () => {
       execSync("git branch -M main", { cwd: repoRoot, stdio: "pipe" });
 
       const setupCommand =
-        'while [ ! -f "$PASEO_WORKTREE_PATH/allow-setup" ]; do sleep 0.05; done; echo "done" > "$PASEO_WORKTREE_PATH/setup-done.txt"';
+        'while [ ! -f "$POLYHIVE_WORKTREE_PATH/allow-setup" ]; do sleep 0.05; done; echo "done" > "$POLYHIVE_WORKTREE_PATH/setup-done.txt"';
       writeFileSync(
-        path.join(repoRoot, "paseo.json"),
+        path.join(repoRoot, "polyhive.json"),
         JSON.stringify({ worktree: { setup: [setupCommand] } }),
       );
-      execSync("git add paseo.json", { cwd: repoRoot, stdio: "pipe" });
-      execSync("git -c commit.gpgsign=false commit -m 'add paseo.json'", {
+      execSync("git add polyhive.json", { cwd: repoRoot, stdio: "pipe" });
+      execSync("git -c commit.gpgsign=false commit -m 'add polyhive.json'", {
         cwd: repoRoot,
         stdio: "pipe",
       });
@@ -432,7 +432,7 @@ describe("daemon E2E", () => {
         label: "createAgent should not block on setup",
       });
 
-      expect(agent.cwd).toContain(path.join(".paseo", "worktrees"));
+      expect(agent.cwd).toContain(path.join(".polyhive", "worktrees"));
       expect(existsSync(path.join(agent.cwd, "setup-done.txt"))).toBe(false);
 
       writeFileSync(path.join(agent.cwd, "allow-setup"), "ok\n");
@@ -440,7 +440,7 @@ describe("daemon E2E", () => {
       const completed = await waitForTimelineToolCall(
         collector.messages,
         agent.id,
-        (item) => item.name === "paseo_worktree_setup" && item.status === "completed",
+        (item) => item.name === "polyhive_worktree_setup" && item.status === "completed",
         20000,
       );
 
@@ -477,9 +477,9 @@ describe("daemon E2E", () => {
         execSync("git branch -M main", { cwd: repoRoot, stdio: "pipe" });
 
         const setupCommand =
-          'while [ ! -f "$PASEO_WORKTREE_PATH/allow-setup" ]; do sleep 0.05; done; echo "done" > "$PASEO_WORKTREE_PATH/setup-done.txt"; echo "$PASEO_WORKTREE_PORT" > "$PASEO_WORKTREE_PATH/setup-port.txt"';
+          'while [ ! -f "$POLYHIVE_WORKTREE_PATH/allow-setup" ]; do sleep 0.05; done; echo "done" > "$POLYHIVE_WORKTREE_PATH/setup-done.txt"; echo "$POLYHIVE_WORKTREE_PORT" > "$POLYHIVE_WORKTREE_PATH/setup-port.txt"';
         writeFileSync(
-          path.join(repoRoot, "paseo.json"),
+          path.join(repoRoot, "polyhive.json"),
           JSON.stringify({
             worktree: {
               setup: [setupCommand],
@@ -495,7 +495,7 @@ describe("daemon E2E", () => {
             },
           }),
         );
-        execSync("git add paseo.json", { cwd: repoRoot, stdio: "pipe" });
+        execSync("git add polyhive.json", { cwd: repoRoot, stdio: "pipe" });
         execSync("git -c commit.gpgsign=false commit -m 'add setup and terminals'", {
           cwd: repoRoot,
           stdio: "pipe",
@@ -520,7 +520,7 @@ describe("daemon E2E", () => {
           label: "createAgent should not block on setup",
         });
 
-        expect(agent.cwd).toContain(path.join(".paseo", "worktrees"));
+        expect(agent.cwd).toContain(path.join(".polyhive", "worktrees"));
         expect(existsSync(path.join(agent.cwd, "setup-done.txt"))).toBe(false);
         expect(existsSync(path.join(agent.cwd, "dev-terminal.txt"))).toBe(false);
         expect(existsSync(path.join(agent.cwd, "lint-terminal.txt"))).toBe(false);
@@ -530,13 +530,13 @@ describe("daemon E2E", () => {
         await waitForTimelineToolCall(
           collector.messages,
           agent.id,
-          (item) => item.name === "paseo_worktree_setup" && item.status === "completed",
+          (item) => item.name === "polyhive_worktree_setup" && item.status === "completed",
           20000,
         );
         const terminalsBootstrapToolCall = await waitForTimelineToolCall(
           collector.messages,
           agent.id,
-          (item) => item.name === "paseo_worktree_terminals" && item.status === "completed",
+          (item) => item.name === "polyhive_worktree_terminals" && item.status === "completed",
           30000,
         );
         const bootstrappedTerminals = getWorktreeTerminalBootstrapEntries(
@@ -571,7 +571,7 @@ describe("daemon E2E", () => {
         }
         ctx.client.sendTerminalInput(manualTerminalId, {
           type: "input",
-          data: 'echo "$PASEO_WORKTREE_PORT" > "$PASEO_WORKTREE_PATH/manual-terminal-port.txt"\r',
+          data: 'echo "$POLYHIVE_WORKTREE_PORT" > "$POLYHIVE_WORKTREE_PATH/manual-terminal-port.txt"\r',
         });
         await waitForPathExists({
           targetPath: path.join(agent.cwd, "manual-terminal-port.txt"),
@@ -609,9 +609,9 @@ describe("daemon E2E", () => {
       execSync("git branch -M main", { cwd: repoRoot, stdio: "pipe" });
 
       const setupCommand =
-        'echo "started" > "$PASEO_WORKTREE_PATH/setup-start.txt"; sleep 0.1; echo "boom" 1>&2; exit 7';
+        'echo "started" > "$POLYHIVE_WORKTREE_PATH/setup-start.txt"; sleep 0.1; echo "boom" 1>&2; exit 7';
       writeFileSync(
-        path.join(repoRoot, "paseo.json"),
+        path.join(repoRoot, "polyhive.json"),
         JSON.stringify({
           worktree: {
             setup: [setupCommand],
@@ -624,7 +624,7 @@ describe("daemon E2E", () => {
           },
         }),
       );
-      execSync("git add paseo.json", { cwd: repoRoot, stdio: "pipe" });
+      execSync("git add polyhive.json", { cwd: repoRoot, stdio: "pipe" });
       execSync("git -c commit.gpgsign=false commit -m 'add failing setup'", {
         cwd: repoRoot,
         stdio: "pipe",
@@ -649,13 +649,13 @@ describe("daemon E2E", () => {
         label: "createAgent should not block on failing setup",
       });
 
-      expect(agent.cwd).toContain(path.join(".paseo", "worktrees"));
+      expect(agent.cwd).toContain(path.join(".polyhive", "worktrees"));
       expect(existsSync(agent.cwd)).toBe(true);
 
       const started = await waitForTimelineToolCall(
         collector.messages,
         agent.id,
-        (item) => item.name === "paseo_worktree_setup" && item.status === "running",
+        (item) => item.name === "polyhive_worktree_setup" && item.status === "running",
         10000,
       );
 
@@ -663,7 +663,7 @@ describe("daemon E2E", () => {
         collector.messages,
         agent.id,
         (item) =>
-          item.name === "paseo_worktree_setup" &&
+          item.name === "polyhive_worktree_setup" &&
           item.callId === started.callId &&
           item.status === "failed",
         20000,
@@ -685,7 +685,7 @@ describe("daemon E2E", () => {
   });
 
   describe("createAgent with worktree", () => {
-    test("creates agent in ~/.paseo/worktrees/{hash} when worktree is requested", async () => {
+    test("creates agent in ~/.polyhive/worktrees/{hash} when worktree is requested", async () => {
       const cwd = tmpCwd();
       const projectHash = await deriveWorktreeProjectHash(cwd);
 
@@ -720,7 +720,7 @@ describe("daemon E2E", () => {
       expect(agent.id).toBeTruthy();
       expect(agent.status).toBe("idle");
       expect(realpathSync(agent.cwd)).toBe(
-        realpathSync(path.join(ctx.daemon.paseoHome, "worktrees", projectHash, "worktree-test")),
+        realpathSync(path.join(ctx.daemon.polyhiveHome, "worktrees", projectHash, "worktree-test")),
       );
       expect(existsSync(agent.cwd)).toBe(true);
 
@@ -729,7 +729,7 @@ describe("daemon E2E", () => {
     }, 60000);
   });
 
-  describe("archivePaseoWorktree", () => {
+  describe("archivePolyHiveWorktree", () => {
     test("archives worktree by running teardown commands and shutting down worktree terminals", async () => {
       const repoRoot = tmpCwd();
 
@@ -751,7 +751,7 @@ describe("daemon E2E", () => {
 
       const teardownMarkerPath = path.join(repoRoot, "teardown-marker.txt");
       writeFileSync(
-        path.join(repoRoot, "paseo.json"),
+        path.join(repoRoot, "polyhive.json"),
         JSON.stringify({
           worktree: {
             terminals: [
@@ -760,11 +760,11 @@ describe("daemon E2E", () => {
                 command: 'echo "dev-server" > dev-terminal.txt; tail -f /dev/null',
               },
             ],
-            teardown: [`echo "$PASEO_WORKTREE_PATH" > "${teardownMarkerPath}"`],
+            teardown: [`echo "$POLYHIVE_WORKTREE_PATH" > "${teardownMarkerPath}"`],
           },
         }),
       );
-      execSync("git add paseo.json", { cwd: repoRoot, stdio: "pipe" });
+      execSync("git add polyhive.json", { cwd: repoRoot, stdio: "pipe" });
       execSync("git -c commit.gpgsign=false commit -m 'add worktree terminal + teardown'", {
         cwd: repoRoot,
         stdio: "pipe",
@@ -805,7 +805,7 @@ describe("daemon E2E", () => {
       const beforeArchiveDirectories = ctx.daemon.daemon.terminalManager.listDirectories();
       expect(beforeArchiveDirectories).toContain(agent.cwd);
 
-      const archive = await ctx.client.archivePaseoWorktree({
+      const archive = await ctx.client.archivePolyHiveWorktree({
         worktreePath: agent.cwd,
       });
       expect(archive.error).toBeNull();

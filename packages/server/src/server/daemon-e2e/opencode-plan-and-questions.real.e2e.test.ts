@@ -5,7 +5,7 @@ import path from "node:path";
 import pino from "pino";
 
 import { OpenCodeAgentClient } from "../agent/providers/opencode-agent.js";
-import { createTestPaseoDaemon } from "../test-utils/paseo-daemon.js";
+import { createTestPolyHiveDaemon } from "../test-utils/polyhive-daemon.js";
 import { DaemonClient } from "../test-utils/daemon-client.js";
 import { isProviderAvailable } from "./agent-configs.js";
 
@@ -25,10 +25,10 @@ function pickOpenCodeModel(
 
 async function createHarness(): Promise<{
   client: DaemonClient;
-  daemon: Awaited<ReturnType<typeof createTestPaseoDaemon>>;
+  daemon: Awaited<ReturnType<typeof createTestPolyHiveDaemon>>;
 }> {
   const logger = pino({ level: "silent" });
-  const daemon = await createTestPaseoDaemon({
+  const daemon = await createTestPolyHiveDaemon({
     agentClients: { opencode: new OpenCodeAgentClient(logger) },
     logger,
   });

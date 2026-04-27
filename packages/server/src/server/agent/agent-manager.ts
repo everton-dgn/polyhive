@@ -644,7 +644,7 @@ export class AgentManager {
         : {
             ...config,
             mcpServers: {
-              paseo: {
+              polyhive: {
                 type: "http" as const,
                 url: `${this.mcpBaseUrl}?callerAgentId=${resolvedAgentId}`,
               },
@@ -2865,7 +2865,7 @@ export class AgentManager {
   private buildLaunchContext(agentId: string): AgentLaunchContext {
     return {
       env: {
-        PASEO_AGENT_ID: agentId,
+        POLYHIVE_AGENT_ID: agentId,
       },
     };
   }

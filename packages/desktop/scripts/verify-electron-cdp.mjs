@@ -281,7 +281,7 @@ async function inspectFullscreenResizer(page) {
     await page.waitForTimeout(1000);
 
     const details = await page.evaluate(async () => {
-      const bridge = window.paseoDesktop?.window;
+      const bridge = window.polyhiveDesktop?.window;
       const bridgeFullscreen =
         typeof bridge?.isFullscreen === "function" ? await bridge.isFullscreen() : null;
       const visibleNoDragResizers = Array.from(document.querySelectorAll("*"))
@@ -399,7 +399,7 @@ async function main() {
   const welcomeScreenshot = await captureScreenshot(page, "01-welcome.png");
 
   const desktopDetection = await page.evaluate(() => {
-    const bridge = window.paseoDesktop;
+    const bridge = window.polyhiveDesktop;
     const keys = bridge && typeof bridge === "object" ? Object.keys(bridge) : [];
     const keyTypes =
       bridge && typeof bridge === "object"
@@ -425,7 +425,7 @@ async function main() {
   });
 
   const desktopStatus = await page.evaluate(() =>
-    window.paseoDesktop.invoke("desktop_daemon_status"),
+    window.polyhiveDesktop.invoke("desktop_daemon_status"),
   );
   assert(
     typeof desktopStatus?.serverId === "string" && desktopStatus.serverId.trim().length > 0,

@@ -1,8 +1,8 @@
 {
-  "name": "@getpaseo/desktop",
+  "name": "polyhive-desktop",
   "version": "0.1.60-beta.1",
   "private": true,
-  "description": "Paseo desktop app (Electron wrapper)",
+  "description": "PolyHive desktop app (Electron wrapper)",
   "main": "dist/main.js",
   "scripts": {
     "build": "npm --prefix ../.. run build:daemon && npm run build:main && electron-builder --config electron-builder.yml",
@@ -12,8 +12,8 @@
     "typecheck": "tsc --noEmit -p tsconfig.json"
   },
   "dependencies": {
-    "@getpaseo/cli": "0.1.60-beta.1",
-    "@getpaseo/server": "0.1.60-beta.1",
+    "polyhive": "0.1.60-beta.1",
+    "polyhive-server": "0.1.60-beta.1",
     "electron-log": "5.4.3",
     "electron-updater": "6.8.3",
     "ws": "8.19.0"

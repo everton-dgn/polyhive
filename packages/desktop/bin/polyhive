@@ -7,7 +7,7 @@ case "$SCRIPT_PATH" in
   *) SCRIPT_PATH="$(pwd)/$SCRIPT_PATH" ;;
 esac
 
-# Follow symlinks so `/usr/local/bin/paseo` resolves back into the app bundle.
+# Follow symlinks so `/usr/local/bin/polyhive` resolves back into the app bundle.
 while [ -L "$SCRIPT_PATH" ]; do
   SCRIPT_DIR=$(CDPATH= cd -- "$(dirname -- "$SCRIPT_PATH")" && pwd)
   LINK_TARGET=$(readlink "$SCRIPT_PATH")
@@ -20,15 +20,15 @@ done
 SCRIPT_DIR=$(CDPATH= cd -- "$(dirname -- "$SCRIPT_PATH")" && pwd)
 RESOURCES_DIR=$(CDPATH= cd -- "${SCRIPT_DIR}/.." && pwd)
 
-# macOS: MacOS/Paseo is a sibling of Resources/
-if [ -x "${RESOURCES_DIR}/../MacOS/Paseo" ]; then
-  APP_EXECUTABLE="${RESOURCES_DIR}/../MacOS/Paseo"
+# macOS: MacOS/PolyHive is a sibling of Resources/
+if [ -x "${RESOURCES_DIR}/../MacOS/PolyHive" ]; then
+  APP_EXECUTABLE="${RESOURCES_DIR}/../MacOS/PolyHive"
 else
-  echo "Bundled Paseo executable not found relative to ${RESOURCES_DIR}" >&2
+  echo "Bundled PolyHive executable not found relative to ${RESOURCES_DIR}" >&2
   exit 1
 fi
 
 RUNNER_PATH="${RESOURCES_DIR}/app.asar.unpacked/dist/daemon/node-entrypoint-runner.js"
-CLI_ENTRYPOINT="${RESOURCES_DIR}/app.asar/node_modules/@getpaseo/cli/dist/index.js"
+CLI_ENTRYPOINT="${RESOURCES_DIR}/app.asar/node_modules/polyhive/dist/index.js"
 
 exec env ELECTRON_RUN_AS_NODE=1 "${APP_EXECUTABLE}" --disable-warning=DEP0040 "${RUNNER_PATH}" node-script "${CLI_ENTRYPOINT}" "$@"

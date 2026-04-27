@@ -569,7 +569,7 @@ export default function TerminalEmulator({
   const handleTravelDurationMs =
     isDraggingScrollbar || isScrollActive ? 0 : SCROLLBAR_HANDLE_TRAVEL_DURATION_MS;
   const handleContextMenu = () => {
-    const showContextMenu = window.paseoDesktop?.menu?.showContextMenu;
+    const showContextMenu = window.polyhiveDesktop?.menu?.showContextMenu;
     if (typeof showContextMenu !== "function") {
       return;
     }

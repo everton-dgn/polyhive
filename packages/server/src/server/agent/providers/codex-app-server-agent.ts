@@ -66,7 +66,7 @@ const INTERRUPT_TIMEOUT_MS = 2_000;
 const APP_SERVER_GRACEFUL_SHUTDOWN_TIMEOUT_MS = 2_000;
 const APP_SERVER_FORCE_SHUTDOWN_TIMEOUT_MS = 1_000;
 const CODEX_PROVIDER = "codex" as const;
-const CODEX_IMAGE_ATTACHMENT_DIR = "paseo-attachments";
+const CODEX_IMAGE_ATTACHMENT_DIR = "polyhive-attachments";
 const CODEX_PLAN_IMPLEMENTATION_PROMPT_PREFIX =
   "The user approved the plan. Implement it now. Do not restate or revise the plan unless blocked.";
 
@@ -2443,8 +2443,8 @@ function buildCodexAppServerInitializeParams(): {
 } {
   return {
     clientInfo: {
-      name: "paseo",
-      title: "Paseo",
+      name: "polyhive",
+      title: "PolyHive",
       version: "0.0.0",
     },
     capabilities: {

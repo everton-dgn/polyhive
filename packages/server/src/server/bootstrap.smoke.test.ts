@@ -4,18 +4,18 @@ import { mkdir, mkdtemp, rm } from "node:fs/promises";
 import pino from "pino";
 import { afterEach, describe, expect, test, vi } from "vitest";
 
-import { createPaseoDaemon, parseListenString, type PaseoDaemonConfig } from "./bootstrap.js";
+import { createPolyHiveDaemon, parseListenString, type PolyHiveDaemonConfig } from "./bootstrap.js";
 import { generateLocalPairingOffer } from "./pairing-offer.js";
-import { createTestPaseoDaemon } from "./test-utils/paseo-daemon.js";
+import { createTestPolyHiveDaemon } from "./test-utils/polyhive-daemon.js";
 import { createTestAgentClients } from "./test-utils/fake-agent-client.js";
 
-describe("paseo daemon bootstrap", () => {
+describe("polyhive daemon bootstrap", () => {
   afterEach(() => {
     vi.restoreAllMocks();
   });
 
   test("starts and serves health endpoint", async () => {
-    const daemonHandle = await createTestPaseoDaemon({
+    const daemonHandle = await createTestPolyHiveDaemon({
       openai: { apiKey: "test-openai-api-key" },
       speech: {
         providers: {
@@ -41,23 +41,23 @@ describe("paseo daemon bootstrap", () => {
   });
 
   test("fails fast when OpenAI speech provider is configured without credentials", async () => {
-    const paseoHomeRoot = await mkdtemp(path.join(os.tmpdir(), "paseo-openai-config-"));
-    const paseoHome = path.join(paseoHomeRoot, ".paseo");
-    const staticDir = await mkdtemp(path.join(os.tmpdir(), "paseo-static-"));
-    await mkdir(paseoHome, { recursive: true });
+    const polyhiveHomeRoot = await mkdtemp(path.join(os.tmpdir(), "polyhive-openai-config-"));
+    const polyhiveHome = path.join(polyhiveHomeRoot, ".polyhive");
+    const staticDir = await mkdtemp(path.join(os.tmpdir(), "polyhive-static-"));
+    await mkdir(polyhiveHome, { recursive: true });
 
-    const config: PaseoDaemonConfig = {
+    const config: PolyHiveDaemonConfig = {
       listen: "127.0.0.1:0",
-      paseoHome,
+      polyhiveHome,
       corsAllowedOrigins: [],
       hostnames: true,
       mcpEnabled: false,
       staticDir,
       mcpDebug: false,
       agentClients: createTestAgentClients(),
-      agentStoragePath: path.join(paseoHome, "agents"),
+      agentStoragePath: path.join(polyhiveHome, "agents"),
       relayEnabled: false,
-      appBaseUrl: "https://app.paseo.sh",
+      appBaseUrl: "https://app.polyhive.sh",
       openai: undefined,
       speech: {
         providers: {
@@ -69,11 +69,11 @@ describe("paseo daemon bootstrap", () => {
     };
 
     try {
-      await expect(createPaseoDaemon(config, pino({ level: "silent" }))).rejects.toThrow(
+      await expect(createPolyHiveDaemon(config, pino({ level: "silent" }))).rejects.toThrow(
         "Missing OpenAI credentials",
       );
     } finally {
-      await rm(paseoHomeRoot, { recursive: true, force: true });
+      await rm(polyhiveHomeRoot, { recursive: true, force: true });
       await rm(staticDir, { recursive: true, force: true });
     }
   });
@@ -89,7 +89,7 @@ describe("paseo daemon bootstrap", () => {
       vi.fn(() => fetchGate),
     );
 
-    const daemonHandle = await createTestPaseoDaemon({
+    const daemonHandle = await createTestPolyHiveDaemon({
       speech: {
         providers: {
           dictationStt: { provider: "local", explicit: true, enabled: true },
@@ -98,7 +98,7 @@ describe("paseo daemon bootstrap", () => {
           voiceTts: { provider: "local", explicit: true, enabled: false },
         },
         local: {
-          modelsDir: path.join(os.tmpdir(), `paseo-missing-models-${Date.now()}`),
+          modelsDir: path.join(os.tmpdir(), `polyhive-missing-models-${Date.now()}`),
           models: {
             dictationStt: "parakeet-tdt-0.6b-v3-int8",
             voiceStt: "parakeet-tdt-0.6b-v3-int8",
@@ -131,50 +131,50 @@ describe("paseo daemon bootstrap", () => {
   });
 
   test("generates a relay pairing offer for unix socket listeners", async () => {
-    const paseoHomeRoot = await mkdtemp(path.join(os.tmpdir(), "paseo-socket-relay-"));
-    const paseoHome = path.join(paseoHomeRoot, ".paseo");
-    const staticDir = await mkdtemp(path.join(os.tmpdir(), "paseo-static-"));
-    const socketPath = path.join(paseoHomeRoot, "run", "paseo.sock");
+    const polyhiveHomeRoot = await mkdtemp(path.join(os.tmpdir(), "polyhive-socket-relay-"));
+    const polyhiveHome = path.join(polyhiveHomeRoot, ".polyhive");
+    const staticDir = await mkdtemp(path.join(os.tmpdir(), "polyhive-static-"));
+    const socketPath = path.join(polyhiveHomeRoot, "run", "polyhive.sock");
     await mkdir(path.dirname(socketPath), { recursive: true });
-    await mkdir(paseoHome, { recursive: true });
+    await mkdir(polyhiveHome, { recursive: true });
     const logger = pino({ level: "silent" });
 
-    const config: PaseoDaemonConfig = {
+    const config: PolyHiveDaemonConfig = {
       listen: socketPath,
-      paseoHome,
+      polyhiveHome,
       corsAllowedOrigins: [],
       hostnames: true,
       mcpEnabled: false,
       staticDir,
       mcpDebug: false,
       agentClients: createTestAgentClients(),
-      agentStoragePath: path.join(paseoHome, "agents"),
+      agentStoragePath: path.join(polyhiveHome, "agents"),
       relayEnabled: true,
       relayEndpoint: "127.0.0.1:9",
       relayPublicEndpoint: "127.0.0.1:9",
-      appBaseUrl: "https://app.paseo.sh",
+      appBaseUrl: "https://app.polyhive.sh",
       openai: undefined,
       speech: undefined,
     };
 
-    const daemon = await createPaseoDaemon(config, logger);
+    const daemon = await createPolyHiveDaemon(config, logger);
 
     try {
       await daemon.start();
       const pairing = await generateLocalPairingOffer({
-        paseoHome,
+        polyhiveHome,
         relayEnabled: true,
         relayEndpoint: "127.0.0.1:9",
         relayPublicEndpoint: "127.0.0.1:9",
-        appBaseUrl: "https://app.paseo.sh",
+        appBaseUrl: "https://app.polyhive.sh",
         includeQr: false,
       });
       expect(pairing.relayEnabled).toBe(true);
-      expect(pairing.url?.startsWith("https://app.paseo.sh/#offer=")).toBe(true);
+      expect(pairing.url?.startsWith("https://app.polyhive.sh/#offer=")).toBe(true);
     } finally {
       await daemon.stop().catch(() => undefined);
       await daemon.agentManager.flush().catch(() => undefined);
-      await rm(paseoHomeRoot, { recursive: true, force: true });
+      await rm(polyhiveHomeRoot, { recursive: true, force: true });
       await rm(staticDir, { recursive: true, force: true });
     }
   });

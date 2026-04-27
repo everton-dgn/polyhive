@@ -6,7 +6,7 @@
  *   npx tsx packages/server/src/server/daemon-e2e/checkout-debug.ts [agentIdOrCwd1] [agentIdOrCwd2]
  *
  * To test against a different daemon:
- *   PASEO_LISTEN=127.0.0.1:7777 npx tsx packages/server/src/server/daemon-e2e/checkout-debug.ts
+ *   POLYHIVE_LISTEN=127.0.0.1:7777 npx tsx packages/server/src/server/daemon-e2e/checkout-debug.ts
  */
 
 import { WebSocket } from "ws";
@@ -29,9 +29,9 @@ class LoggingWebSocket extends OriginalWebSocket {
   }
 }
 
-const PASEO_HOME = process.env.PASEO_HOME ?? `${os.homedir()}/.paseo`;
-const PASEO_LISTEN = process.env.PASEO_LISTEN ?? "127.0.0.1:6767";
-const DAEMON_URL = `ws://${PASEO_LISTEN}/ws`;
+const POLYHIVE_HOME = process.env.POLYHIVE_HOME ?? `${os.homedir()}/.polyhive`;
+const POLYHIVE_LISTEN = process.env.POLYHIVE_LISTEN ?? "127.0.0.1:6767";
+const DAEMON_URL = `ws://${POLYHIVE_LISTEN}/ws`;
 const CLIENT_ID = "clsk_checkout_debug";
 
 function requestCheckoutStatus(client: DaemonClient, cwd: string) {
@@ -163,7 +163,7 @@ async function testMultiAgentSequence() {
 async function main() {
   console.log("Checkout Debug Script - Multi-Agent Sequence Test");
   console.log("==================================================");
-  console.log(`PASEO_HOME: ${PASEO_HOME}`);
+  console.log(`POLYHIVE_HOME: ${POLYHIVE_HOME}`);
 
   await testMultiAgentSequence();
 

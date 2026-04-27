@@ -1,6 +1,6 @@
 const IGNORED_ARG_PREFIXES = ["-psn_", "--no-sandbox"];
 
-export const DESKTOP_CLI_ENV = "PASEO_DESKTOP_CLI";
+export const DESKTOP_CLI_ENV = "POLYHIVE_DESKTOP_CLI";
 
 export type NodeEntrypointSpec = {
   entryPath: string;

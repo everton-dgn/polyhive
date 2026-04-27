@@ -10,7 +10,7 @@ describe("SessionAgentMap", () => {
   let tmpHome: string;
 
   beforeEach(() => {
-    tmpHome = mkdtempSync(join(tmpdir(), "paseo-session-map-"));
+    tmpHome = mkdtempSync(join(tmpdir(), "polyhive-session-map-"));
   });
 
   afterEach(() => {
@@ -18,7 +18,7 @@ describe("SessionAgentMap", () => {
   });
 
   test("persists entries atomically to opencode-session-map.json", () => {
-    const map = new SessionAgentMap({ paseoHome: tmpHome });
+    const map = new SessionAgentMap({ polyhiveHome: tmpHome });
     map.set("session-a", "agent-a");
     map.set("session-b", "agent-b");
 
@@ -35,13 +35,13 @@ describe("SessionAgentMap", () => {
       "utf8",
     );
 
-    const map = new SessionAgentMap({ paseoHome: tmpHome });
+    const map = new SessionAgentMap({ polyhiveHome: tmpHome });
     expect(map.get("session-x")).toBe("agent-x");
     expect(map.size()).toBe(1);
   });
 
   test("removes file after clear()", () => {
-    const map = new SessionAgentMap({ paseoHome: tmpHome });
+    const map = new SessionAgentMap({ polyhiveHome: tmpHome });
     map.set("session-a", "agent-a");
     map.clear();
 
@@ -50,7 +50,7 @@ describe("SessionAgentMap", () => {
   });
 
   test("delete() removes entry and persists", () => {
-    const map = new SessionAgentMap({ paseoHome: tmpHome });
+    const map = new SessionAgentMap({ polyhiveHome: tmpHome });
     map.set("session-a", "agent-a");
     map.set("session-b", "agent-b");
     map.delete("session-a");
@@ -64,7 +64,7 @@ describe("SessionAgentMap", () => {
 
   test("ignores corrupted JSON and starts empty", () => {
     writeFileSync(join(tmpHome, SESSION_MAP_FILE_NAME), "{not-json]", "utf8");
-    const map = new SessionAgentMap({ paseoHome: tmpHome });
+    const map = new SessionAgentMap({ polyhiveHome: tmpHome });
     expect(map.size()).toBe(0);
   });
 
@@ -75,7 +75,7 @@ describe("SessionAgentMap", () => {
       "utf8",
     );
 
-    const map = new SessionAgentMap({ paseoHome: tmpHome });
+    const map = new SessionAgentMap({ polyhiveHome: tmpHome });
     expect(map.snapshot()).toEqual({ valid: "agent-a" });
   });
 });

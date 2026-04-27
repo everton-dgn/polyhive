@@ -4,8 +4,8 @@ import { pageMeta } from "~/meta";
 export const Route = createFileRoute("/docs/providers")({
   head: () => ({
     meta: pageMeta(
-      "Providers - Paseo Docs",
-      "First-class agent providers in Paseo, and how to configure custom providers, ACP agents, and profiles.",
+      "Providers - PolyHive Docs",
+      "First-class agent providers in PolyHive, and how to configure custom providers, ACP agents, and profiles.",
     ),
   }),
   component: Providers,
@@ -20,10 +20,10 @@ function Providers() {
       <div>
         <h1 className="text-3xl font-medium font-title mb-4">Providers</h1>
         <p className="text-white/60 leading-relaxed">
-          A provider is an agent CLI that Paseo knows how to launch, stream, and control. Paseo
-          ships with first-class providers for the major coding agents, and lets you add your own
-          through <code className="font-mono">config.json</code> — either by pointing an existing
-          provider at a different API, adding extra profiles, or plugging in any{" "}
+          A provider is an agent CLI that PolyHive knows how to launch, stream, and control.
+          PolyHive ships with first-class providers for the major coding agents, and lets you add
+          your own through <code className="font-mono">config.json</code> — either by pointing an
+          existing provider at a different API, adding extra profiles, or plugging in any{" "}
           <a
             href="https://agentclientprotocol.com"
             target="_blank"
@@ -39,7 +39,7 @@ function Providers() {
       <section className="space-y-4">
         <h2 className="text-xl font-medium">First-class providers</h2>
         <p className="text-white/60 leading-relaxed">
-          These work out of the box once the underlying CLI is installed and authenticated. Paseo
+          These work out of the box once the underlying CLI is installed and authenticated. PolyHive
           discovers them automatically, wires up modes, and exposes them in the app and CLI.
         </p>
         <ul className="text-white/60 space-y-3 list-disc list-inside">
@@ -71,7 +71,7 @@ function Providers() {
         <p className="text-white/60 leading-relaxed">
           Everything beyond the defaults lives under{" "}
           <code className="font-mono">agents.providers</code> in{" "}
-          <code className="font-mono">~/.paseo/config.json</code>. You can:
+          <code className="font-mono">~/.polyhive/config.json</code>. You can:
         </p>
         <ul className="text-white/60 space-y-2 list-disc list-inside">
           <li>
@@ -255,7 +255,7 @@ function Providers() {
             ACP
           </a>{" "}
           over stdio can be added with <code className="font-mono">extends: "acp"</code> and a{" "}
-          <code className="font-mono">command</code>. Paseo spawns the process, sends an{" "}
+          <code className="font-mono">command</code>. PolyHive spawns the process, sends an{" "}
           <code className="font-mono">initialize</code> JSON-RPC request, and the agent reports its
           capabilities, modes, and models at runtime.
         </p>

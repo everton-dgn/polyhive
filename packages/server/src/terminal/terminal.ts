@@ -193,7 +193,7 @@ export function buildTerminalEnvironment(
   const originalZdotdir = baseEnv.ZDOTDIR ?? "";
   return {
     ...baseEnv,
-    PASEO_ZSH_ZDOTDIR: originalZdotdir,
+    POLYHIVE_ZSH_ZDOTDIR: originalZdotdir,
     ZDOTDIR: resolveZshShellIntegrationDir(),
   };
 }

@@ -31,8 +31,8 @@ describe("Claude agent env", () => {
     let capturedEnv: Record<string, string | undefined> | undefined;
     const launchContext: AgentLaunchContext = {
       env: {
-        PASEO_AGENT_ID: "00000000-0000-4000-8000-000000000201",
-        PASEO_TEST_FLAG: "launch-value",
+        POLYHIVE_AGENT_ID: "00000000-0000-4000-8000-000000000201",
+        POLYHIVE_TEST_FLAG: "launch-value",
       },
     };
     const queryFactory = vi.fn(
@@ -79,8 +79,8 @@ describe("Claude agent env", () => {
     try {
       const result = await session.run("env check");
       expect(result.sessionId).toBe("managed-agent-env-session");
-      expect(capturedEnv?.PASEO_AGENT_ID).toBe(launchContext.env?.PASEO_AGENT_ID);
-      expect(capturedEnv?.PASEO_TEST_FLAG).toBe(launchContext.env?.PASEO_TEST_FLAG);
+      expect(capturedEnv?.POLYHIVE_AGENT_ID).toBe(launchContext.env?.POLYHIVE_AGENT_ID);
+      expect(capturedEnv?.POLYHIVE_TEST_FLAG).toBe(launchContext.env?.POLYHIVE_TEST_FLAG);
     } finally {
       await session.close();
     }
@@ -90,8 +90,8 @@ describe("Claude agent env", () => {
     let capturedEnv: Record<string, string | undefined> | undefined;
     const launchContext: AgentLaunchContext = {
       env: {
-        PASEO_AGENT_ID: "00000000-0000-4000-8000-000000000202",
-        PASEO_TEST_FLAG: "resume-launch-value",
+        POLYHIVE_AGENT_ID: "00000000-0000-4000-8000-000000000202",
+        POLYHIVE_TEST_FLAG: "resume-launch-value",
       },
     };
     const queryFactory = vi.fn(
@@ -144,8 +144,8 @@ describe("Claude agent env", () => {
     try {
       const result = await session.run("resume env check");
       expect(result.sessionId).toBe("persisted-session");
-      expect(capturedEnv?.PASEO_AGENT_ID).toBe(launchContext.env?.PASEO_AGENT_ID);
-      expect(capturedEnv?.PASEO_TEST_FLAG).toBe(launchContext.env?.PASEO_TEST_FLAG);
+      expect(capturedEnv?.POLYHIVE_AGENT_ID).toBe(launchContext.env?.POLYHIVE_AGENT_ID);
+      expect(capturedEnv?.POLYHIVE_TEST_FLAG).toBe(launchContext.env?.POLYHIVE_TEST_FLAG);
     } finally {
       await session.close();
     }

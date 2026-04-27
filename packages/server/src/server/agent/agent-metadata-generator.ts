@@ -26,7 +26,7 @@ export type AgentMetadataGenerationOptions = {
   cwd: string;
   initialPrompt?: string | null;
   explicitTitle?: string | null;
-  paseoHome?: string;
+  polyhiveHome?: string;
   logger: Logger;
   deps?: AgentMetadataGeneratorDeps;
 };
@@ -64,7 +64,7 @@ async function canRenameBranch(
     return false;
   }
 
-  if (!snapshot.git.isGit || !snapshot.git.isPaseoOwnedWorktree) {
+  if (!snapshot.git.isGit || !snapshot.git.isPolyHiveOwnedWorktree) {
     return false;
   }
 
@@ -79,7 +79,7 @@ async function canRenameBranch(
 export async function determineAgentMetadataNeeds(
   options: Pick<
     AgentMetadataGenerationOptions,
-    "initialPrompt" | "explicitTitle" | "cwd" | "paseoHome" | "deps"
+    "initialPrompt" | "explicitTitle" | "cwd" | "polyhiveHome" | "deps"
   >,
 ): Promise<AgentMetadataNeeds> {
   const prompt = options.initialPrompt?.trim();
@@ -224,7 +224,11 @@ export async function generateAndApplyAgentMetadata(
       return;
     }
 
-    if (!snapshot.git.isGit || !snapshot.git.isPaseoOwnedWorktree || !snapshot.git.currentBranch) {
+    if (
+      !snapshot.git.isGit ||
+      !snapshot.git.isPolyHiveOwnedWorktree ||
+      !snapshot.git.currentBranch
+    ) {
       return;
     }
 

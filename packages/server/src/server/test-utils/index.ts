@@ -1,4 +1,4 @@
-export { createTestPaseoDaemon, type TestPaseoDaemon } from "./paseo-daemon.js";
+export { createTestPolyHiveDaemon, type TestPolyHiveDaemon } from "./polyhive-daemon.js";
 export {
   DaemonClient,
   type DaemonClientConfig,

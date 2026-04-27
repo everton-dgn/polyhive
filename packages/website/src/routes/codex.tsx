@@ -5,7 +5,7 @@ import { pageMeta } from "~/meta";
 export const Route = createFileRoute("/codex")({
   head: () => ({
     meta: pageMeta(
-      "Codex Web - Run Codex from your browser | Paseo",
+      "Codex Web - Run Codex from your browser | PolyHive",
       "Run OpenAI Codex on your Mac and control it from a browser. Kick off agents, monitor progress, and ship code while your code stays on your machine.",
     ),
   }),

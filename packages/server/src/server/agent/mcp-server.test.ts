@@ -13,9 +13,9 @@ import type { ProviderDefinition } from "./provider-registry.js";
 import { AgentSnapshotPayloadSchema } from "../../shared/messages.js";
 import type { PersistedProjectRecord, PersistedWorkspaceRecord } from "../workspace-registry.js";
 import {
-  createPaseoWorktree as createPaseoWorktreeService,
-  type CreatePaseoWorktreeFn,
-} from "../paseo-worktree-service.js";
+  createPolyHiveWorktree as createPolyHiveWorktreeService,
+  type CreatePolyHiveWorktreeFn,
+} from "../polyhive-worktree-service.js";
 import { createWorktreeCoreDeps } from "../worktree-core.js";
 import { WorkspaceGitServiceImpl } from "../workspace-git-service.js";
 import type { GitHubService } from "../../services/github-service.js";
@@ -151,23 +151,23 @@ function createGitHubServiceStub(): GitHubService {
   };
 }
 
-function createPaseoWorktreeForMcpTest(options: {
-  paseoHome: string;
+function createPolyHiveWorktreeForMcpTest(options: {
+  polyhiveHome: string;
   broadcasts: string[];
   createdWorkspaceIds?: string[];
-}): CreatePaseoWorktreeFn {
+}): CreatePolyHiveWorktreeFn {
   const projects = new Map<string, PersistedProjectRecord>();
   const workspaces = new Map<string, PersistedWorkspaceRecord>();
   const github = createGitHubServiceStub();
   const workspaceGitService = new WorkspaceGitServiceImpl({
     logger: createTestLogger(),
-    paseoHome: options.paseoHome,
+    polyhiveHome: options.polyhiveHome,
     deps: { github },
   });
 
   return async (input, serviceOptions) => {
     const coreDeps = createWorktreeCoreDeps(github);
-    const result = await createPaseoWorktreeService(input, {
+    const result = await createPolyHiveWorktreeService(input, {
       ...coreDeps,
       ...(serviceOptions?.resolveDefaultBranch
         ? { resolveDefaultBranch: serviceOptions.resolveDefaultBranch }
@@ -401,9 +401,9 @@ describe("create_agent MCP tool", () => {
 
   it("registers and broadcasts a workspace when create_agent creates a worktree", async () => {
     const { agentManager, agentStorage, spies } = createTestDeps();
-    const tempDir = await mkdtemp(join(tmpdir(), "paseo-mcp-worktree-"));
+    const tempDir = await mkdtemp(join(tmpdir(), "polyhive-mcp-worktree-"));
     const repoDir = join(tempDir, "repo");
-    const paseoHome = join(tempDir, ".paseo");
+    const polyhiveHome = join(tempDir, ".polyhive");
     const broadcasts: string[] = [];
     const createdWorkspaceIds: string[] = [];
 
@@ -428,9 +428,9 @@ describe("create_agent MCP tool", () => {
       const server = await createAgentMcpServer({
         agentManager,
         agentStorage,
-        paseoHome,
-        createPaseoWorktree: createPaseoWorktreeForMcpTest({
-          paseoHome,
+        polyhiveHome,
+        createPolyHiveWorktree: createPolyHiveWorktreeForMcpTest({
+          polyhiveHome,
           broadcasts,
           createdWorkspaceIds,
         }),
@@ -463,9 +463,9 @@ describe("create_agent MCP tool", () => {
 
   it("registers and broadcasts a workspace when create_worktree creates a worktree", async () => {
     const { agentManager, agentStorage } = createTestDeps();
-    const tempDir = await mkdtemp(join(tmpdir(), "paseo-mcp-create-worktree-"));
+    const tempDir = await mkdtemp(join(tmpdir(), "polyhive-mcp-create-worktree-"));
     const repoDir = join(tempDir, "repo");
-    const paseoHome = join(tempDir, ".paseo");
+    const polyhiveHome = join(tempDir, ".polyhive");
     const broadcasts: string[] = [];
 
     try {
@@ -483,8 +483,8 @@ describe("create_agent MCP tool", () => {
       const server = await createAgentMcpServer({
         agentManager,
         agentStorage,
-        paseoHome,
-        createPaseoWorktree: createPaseoWorktreeForMcpTest({ paseoHome, broadcasts }),
+        polyhiveHome,
+        createPolyHiveWorktree: createPolyHiveWorktreeForMcpTest({ polyhiveHome, broadcasts }),
         workspaceGitService: workspaceGitService as any,
         logger,
       });
@@ -517,9 +517,9 @@ describe("create_agent MCP tool", () => {
 
   it("forces a workspace git snapshot refresh when archive_worktree deletes a worktree", async () => {
     const { agentManager, agentStorage } = createTestDeps();
-    const tempDir = await mkdtemp(join(tmpdir(), "paseo-mcp-archive-worktree-"));
+    const tempDir = await mkdtemp(join(tmpdir(), "polyhive-mcp-archive-worktree-"));
     const repoDir = join(tempDir, "repo");
-    const paseoHome = join(tempDir, ".paseo");
+    const polyhiveHome = join(tempDir, ".polyhive");
 
     try {
       execSync(`git init ${JSON.stringify(repoDir)}`, { stdio: "pipe" });
@@ -536,8 +536,8 @@ describe("create_agent MCP tool", () => {
       const server = await createAgentMcpServer({
         agentManager,
         agentStorage,
-        paseoHome,
-        createPaseoWorktree: createPaseoWorktreeForMcpTest({ paseoHome, broadcasts: [] }),
+        polyhiveHome,
+        createPolyHiveWorktree: createPolyHiveWorktreeForMcpTest({ polyhiveHome, broadcasts: [] }),
         workspaceGitService: workspaceGitService as any,
         logger,
       });
@@ -570,7 +570,7 @@ describe("create_agent MCP tool", () => {
       getSnapshot: vi.fn(async () => null),
       listWorktrees: vi.fn(async () => [
         {
-          path: "/tmp/paseo/worktrees/repo/feature",
+          path: "/tmp/polyhive/worktrees/repo/feature",
           branchName: "feature",
           createdAt: "2026-04-12T00:00:00.000Z",
         },
@@ -591,7 +591,7 @@ describe("create_agent MCP tool", () => {
     });
     expect(response.structuredContent.worktrees).toEqual([
       {
-        path: "/tmp/paseo/worktrees/repo/feature",
+        path: "/tmp/polyhive/worktrees/repo/feature",
         branchName: "feature",
         createdAt: "2026-04-12T00:00:00.000Z",
       },
@@ -616,7 +616,7 @@ describe("create_agent MCP tool", () => {
 
   it("allows caller agents to override cwd and applies caller context labels", async () => {
     const { agentManager, agentStorage, spies } = createTestDeps();
-    const baseDir = await mkdtemp(join(tmpdir(), "paseo-mcp-test-"));
+    const baseDir = await mkdtemp(join(tmpdir(), "polyhive-mcp-test-"));
     const subdir = join(baseDir, "subdir");
     await mkdir(subdir, { recursive: true });
     spies.agentManager.getAgent.mockReturnValue({
@@ -660,7 +660,7 @@ describe("create_agent MCP tool", () => {
       undefined,
       {
         labels: {
-          "paseo.parent-agent-id": "voice-agent",
+          "polyhive.parent-agent-id": "voice-agent",
           source: "voice",
         },
       },

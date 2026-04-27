@@ -44,12 +44,12 @@ describe("resolveWorkspaceArchiveRedirectWorkspaceId", () => {
   it("redirects an archived worktree to the visible local checkout for the same project", () => {
     const workspaces = [
       workspace({ id: "/repo", workspaceKind: "checkout", name: "main" }),
-      workspace({ id: "/repo/.paseo/worktrees/feature", name: "feature" }),
+      workspace({ id: "/repo/.polyhive/worktrees/feature", name: "feature" }),
     ];
 
     expect(
       resolveWorkspaceArchiveRedirectWorkspaceId({
-        archivedWorkspaceId: "/repo/.paseo/worktrees/feature",
+        archivedWorkspaceId: "/repo/.polyhive/worktrees/feature",
         workspaces,
       }),
     ).toBe("/repo");
@@ -58,7 +58,7 @@ describe("resolveWorkspaceArchiveRedirectWorkspaceId", () => {
   it("falls back to the host root route when no sibling workspace target exists", () => {
     const workspaces = [
       workspace({
-        id: "/repo/.paseo/worktrees/feature",
+        id: "/repo/.polyhive/worktrees/feature",
         name: "feature",
         projectRootPath: "/repo",
       }),
@@ -67,7 +67,7 @@ describe("resolveWorkspaceArchiveRedirectWorkspaceId", () => {
     expect(
       buildWorkspaceArchiveRedirectRoute({
         serverId: "server-1",
-        archivedWorkspaceId: "/repo/.paseo/worktrees/feature",
+        archivedWorkspaceId: "/repo/.polyhive/worktrees/feature",
         workspaces,
       }),
     ).toBe("/h/server-1");

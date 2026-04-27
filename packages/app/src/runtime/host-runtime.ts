@@ -1097,12 +1097,12 @@ export class HostRuntimeController {
   }
 }
 
-const REGISTRY_STORAGE_KEY = "@paseo:daemon-registry";
+const REGISTRY_STORAGE_KEY = "@polyhive:daemon-registry";
 const DEFAULT_LOCALHOST_ENDPOINT = process.env.EXPO_PUBLIC_LOCAL_DAEMON?.trim() || "localhost:6767";
-const DEFAULT_LOCALHOST_BOOTSTRAP_KEY = "@paseo:default-localhost-bootstrap-v1";
+const DEFAULT_LOCALHOST_BOOTSTRAP_KEY = "@polyhive:default-localhost-bootstrap-v1";
 const DEFAULT_LOCALHOST_BOOTSTRAP_TIMEOUT_MS = 2500;
 const CONNECTION_ONLINE_TIMEOUT_MS = 15_000;
-const E2E_STORAGE_KEY = "@paseo:e2e";
+const E2E_STORAGE_KEY = "@polyhive:e2e";
 
 export class HostRuntimeStore {
   private controllers = new Map<string, HostRuntimeController>();
@@ -1866,7 +1866,7 @@ export class HostRuntimeStore {
 }
 
 let singletonHostRuntimeStore: HostRuntimeStore | null = null;
-const HOST_RUNTIME_STORE_GLOBAL_KEY = "__paseoHostRuntimeStore";
+const HOST_RUNTIME_STORE_GLOBAL_KEY = "__polyhiveHostRuntimeStore";
 
 type HostRuntimeGlobal = typeof globalThis & {
   [HOST_RUNTIME_STORE_GLOBAL_KEY]?: HostRuntimeStore;

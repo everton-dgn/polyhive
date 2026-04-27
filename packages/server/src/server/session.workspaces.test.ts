@@ -73,7 +73,7 @@ function createNoopWorkspaceGitService() {
           mainRepoRoot: null,
           currentBranch: null,
           remoteUrl: null,
-          isPaseoOwnedWorktree: false,
+          isPolyHiveOwnedWorktree: false,
           isDirty: null,
           aheadBehind: null,
           aheadOfOrigin: null,
@@ -98,7 +98,7 @@ function createNoopWorkspaceGitService() {
         mainRepoRoot: null,
         currentBranch: null,
         remoteUrl: null,
-        isPaseoOwnedWorktree: false,
+        isPolyHiveOwnedWorktree: false,
         isDirty: null,
         aheadBehind: null,
         aheadOfOrigin: null,
@@ -140,7 +140,7 @@ function createWorkspaceRuntimeSnapshot(
       mainRepoRoot: null,
       currentBranch: "main",
       remoteUrl: "https://github.com/acme/repo.git",
-      isPaseoOwnedWorktree: false,
+      isPolyHiveOwnedWorktree: false,
       isDirty: false,
       baseRef: "main",
       aheadBehind: { ahead: 0, behind: 0 },
@@ -206,7 +206,7 @@ function createSessionForWorkspaceTests(
     onMessage: vi.fn(),
     logger: logger as any,
     downloadTokenStore: {} as any,
-    paseoHome: "/tmp/paseo-test",
+    polyhiveHome: "/tmp/polyhive-test",
     agentManager: {
       subscribe: () => () => {},
       listAgents: () => [],
@@ -302,7 +302,7 @@ describe("workspace aggregation", () => {
       onMessage: (message) => emitted.push(message as any),
       logger: logger as any,
       downloadTokenStore: {} as any,
-      paseoHome: "/tmp/paseo-test",
+      polyhiveHome: "/tmp/polyhive-test",
       agentManager: {
         subscribe: () => () => {},
         listAgents: () => [],
@@ -460,7 +460,7 @@ describe("workspace aggregation", () => {
       onMessage: (message) => emitted.push(message as any),
       logger: sessionLogger as any,
       downloadTokenStore: {} as any,
-      paseoHome: "/tmp/paseo-test",
+      polyhiveHome: "/tmp/polyhive-test",
       agentManager: {
         subscribe: () => () => {},
         listAgents: () => [],
@@ -620,7 +620,7 @@ describe("workspace aggregation", () => {
       onMessage: (message) => emitted.push(message as any),
       logger: sessionLogger as any,
       downloadTokenStore: {} as any,
-      paseoHome: "/tmp/paseo-test",
+      polyhiveHome: "/tmp/polyhive-test",
       agentManager: {
         subscribe: () => () => {},
         listAgents: () => [],
@@ -773,7 +773,7 @@ describe("workspace aggregation", () => {
       onMessage: (message) => emitted.push(message as any),
       logger: sessionLogger as any,
       downloadTokenStore: {} as any,
-      paseoHome: "/tmp/paseo-test",
+      polyhiveHome: "/tmp/polyhive-test",
       agentManager: {
         subscribe: () => () => {},
         listAgents: () => [],
@@ -956,7 +956,7 @@ describe("workspace aggregation", () => {
         currentBranch: "feature/name-from-server",
         remoteUrl: "https://github.com/acme/repo-branch.git",
         worktreeRoot: cwd,
-        isPaseoOwnedWorktree: false,
+        isPolyHiveOwnedWorktree: false,
         mainRepoRoot: null,
       },
     });
@@ -1064,7 +1064,7 @@ describe("workspace aggregation", () => {
       onMessage: (message) => emitted.push(message as any),
       logger: logger as any,
       downloadTokenStore: {} as any,
-      paseoHome: "/tmp/paseo-test",
+      polyhiveHome: "/tmp/polyhive-test",
       agentManager: {
         subscribe: () => () => {},
         listAgents: () => [],
@@ -1179,11 +1179,11 @@ describe("workspace aggregation", () => {
     });
   });
 
-  test("create paseo worktree request returns a registered workspace descriptor", async () => {
+  test("create polyhive worktree request returns a registered workspace descriptor", async () => {
     const emitted: Array<{ type: string; payload: unknown }> = [];
     const tempDir = realpathSync(mkdtempSync(path.join(tmpdir(), "session-worktree-test-")));
     const repoDir = path.join(tempDir, "repo");
-    const paseoHome = path.join(tempDir, "paseo-home");
+    const polyhiveHome = path.join(tempDir, "polyhive-home");
     execSync(`mkdir -p ${repoDir}`);
     execSync("git init -b main", { cwd: repoDir, stdio: "pipe" });
     execSync("git config user.email 'test@test.com'", { cwd: repoDir, stdio: "pipe" });
@@ -1199,7 +1199,7 @@ describe("workspace aggregation", () => {
             repoRoot: repoDir,
             currentBranch: "main",
             remoteUrl: null,
-            isPaseoOwnedWorktree: false,
+            isPolyHiveOwnedWorktree: false,
             mainRepoRoot: null,
           },
         });
@@ -1211,7 +1211,7 @@ describe("workspace aggregation", () => {
             repoRoot: cwd,
             currentBranch: "worktree-123",
             remoteUrl: null,
-            isPaseoOwnedWorktree: true,
+            isPolyHiveOwnedWorktree: true,
             mainRepoRoot: repoDir,
           },
         });
@@ -1222,7 +1222,7 @@ describe("workspace aggregation", () => {
           repoRoot: cwd,
           currentBranch: "main",
           remoteUrl: null,
-          isPaseoOwnedWorktree: false,
+          isPolyHiveOwnedWorktree: false,
           mainRepoRoot: null,
         },
       });
@@ -1233,7 +1233,7 @@ describe("workspace aggregation", () => {
 
     const workspaces = new Map();
     const projects = new Map();
-    session.paseoHome = paseoHome;
+    session.polyhiveHome = polyhiveHome;
     session.workspaceRegistry.get = async (workspaceId: string) =>
       workspaces.get(workspaceId) ?? null;
     session.workspaceRegistry.list = async () => Array.from(workspaces.values());
@@ -1249,8 +1249,8 @@ describe("workspace aggregation", () => {
       emitted.push(message);
     };
     try {
-      await session.handleCreatePaseoWorktreeRequest({
-        type: "create_paseo_worktree_request",
+      await session.handleCreatePolyHiveWorktreeRequest({
+        type: "create_polyhive_worktree_request",
         cwd: repoDir,
         worktreeSlug: "worktree-123",
         requestId: "req-worktree",
@@ -1259,9 +1259,9 @@ describe("workspace aggregation", () => {
       rmSync(tempDir, { recursive: true, force: true });
     }
 
-    const response = emitted.find((message) => message.type === "create_paseo_worktree_response") as
-      | { type: "create_paseo_worktree_response"; payload: any }
-      | undefined;
+    const response = emitted.find(
+      (message) => message.type === "create_polyhive_worktree_response",
+    ) as { type: "create_polyhive_worktree_response"; payload: any } | undefined;
 
     expect(response?.payload.error).toBeNull();
     expect(response?.payload.workspace).toMatchObject({
@@ -1388,7 +1388,7 @@ describe("workspace aggregation", () => {
         currentBranch: null,
         remoteUrl: null,
         worktreeRoot: null,
-        isPaseoOwnedWorktree: false,
+        isPolyHiveOwnedWorktree: false,
         mainRepoRoot: null,
       },
     });
@@ -1501,7 +1501,7 @@ describe("workspace aggregation", () => {
         currentBranch: "main",
         remoteUrl: null,
         worktreeRoot: repoRoot,
-        isPaseoOwnedWorktree: false,
+        isPolyHiveOwnedWorktree: false,
         mainRepoRoot: null,
       },
     });
@@ -1641,7 +1641,7 @@ describe("workspace aggregation", () => {
 
     const tempDir = realpathSync(mkdtempSync(path.join(tmpdir(), "session-workspace-reconcile-")));
     const mainWorkspaceId = path.join(tempDir, "inkwell");
-    const worktreeWorkspaceId = path.join(mainWorkspaceId, ".paseo", "worktrees", "feature-a");
+    const worktreeWorkspaceId = path.join(mainWorkspaceId, ".polyhive", "worktrees", "feature-a");
     const localProjectId = mainWorkspaceId;
     const remoteProjectId = "remote:github.com/zimakki/inkwell";
 
@@ -1709,7 +1709,7 @@ describe("workspace aggregation", () => {
         currentBranch: cwd === mainWorkspaceId ? "main" : "feature-a",
         remoteUrl: "https://github.com/zimakki/inkwell.git",
         worktreeRoot: cwd,
-        isPaseoOwnedWorktree: cwd !== mainWorkspaceId,
+        isPolyHiveOwnedWorktree: cwd !== mainWorkspaceId,
         mainRepoRoot: cwd === mainWorkspaceId ? null : mainWorkspaceId,
       },
     });
@@ -1746,7 +1746,7 @@ describe("workspace aggregation", () => {
 
     const tempDir = realpathSync(mkdtempSync(path.join(tmpdir(), "session-workspace-fetch-")));
     const mainWorkspaceId = path.join(tempDir, "inkwell");
-    const worktreeWorkspaceId = path.join(mainWorkspaceId, ".paseo", "worktrees", "feature-a");
+    const worktreeWorkspaceId = path.join(mainWorkspaceId, ".polyhive", "worktrees", "feature-a");
     const oldProjectId = "remote:github.com/old-owner/inkwell";
     const newProjectId = "remote:github.com/new-owner/inkwell";
 
@@ -1812,7 +1812,7 @@ describe("workspace aggregation", () => {
         currentBranch: cwd === mainWorkspaceId ? "main" : "feature-a",
         remoteUrl: "https://github.com/new-owner/inkwell.git",
         worktreeRoot: cwd,
-        isPaseoOwnedWorktree: cwd !== mainWorkspaceId,
+        isPolyHiveOwnedWorktree: cwd !== mainWorkspaceId,
         mainRepoRoot: cwd === mainWorkspaceId ? null : mainWorkspaceId,
       },
     });
@@ -1916,7 +1916,7 @@ describe("workspace aggregation", () => {
         currentBranch: "main",
         remoteUrl: "https://github.com/acme/repo.git",
         worktreeRoot: repoRoot,
-        isPaseoOwnedWorktree: false,
+        isPolyHiveOwnedWorktree: false,
         mainRepoRoot: null,
       },
     });
@@ -2054,7 +2054,7 @@ describe("workspace aggregation", () => {
         currentBranch: runtimeSnapshot.git.currentBranch,
         remoteUrl: runtimeSnapshot.git.remoteUrl,
         worktreeRoot: cwd,
-        isPaseoOwnedWorktree: false,
+        isPolyHiveOwnedWorktree: false,
         mainRepoRoot: null,
       },
     });
@@ -2075,7 +2075,7 @@ describe("workspace aggregation", () => {
         gitRuntime: {
           currentBranch: "runtime-branch",
           remoteUrl: "https://github.com/acme/repo.git",
-          isPaseoOwnedWorktree: false,
+          isPolyHiveOwnedWorktree: false,
           isDirty: true,
           aheadBehind: { ahead: 3, behind: 1 },
           aheadOfOrigin: 3,
@@ -2162,7 +2162,7 @@ describe("workspace aggregation", () => {
         currentBranch: runtimeSnapshot.git.currentBranch,
         remoteUrl: runtimeSnapshot.git.remoteUrl,
         worktreeRoot: cwd,
-        isPaseoOwnedWorktree: false,
+        isPolyHiveOwnedWorktree: false,
         mainRepoRoot: null,
       },
     });

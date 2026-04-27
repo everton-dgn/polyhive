@@ -22,7 +22,7 @@ function createPiSession(prompt: () => Promise<void>): PiDirectSessionAdapter {
     },
     sessionManager: {
       getSessionFile: () => "/tmp/pi-session.json",
-      getCwd: () => "/tmp/paseo-pi-test",
+      getCwd: () => "/tmp/polyhive-pi-test",
     },
     subscribe: vi.fn(),
     prompt,
@@ -40,7 +40,7 @@ describe("PiDirectAgentSession", () => {
       { find: vi.fn(), getAll: vi.fn(() => []) },
       {
         provider: "pi",
-        cwd: "/tmp/paseo-pi-test",
+        cwd: "/tmp/polyhive-pi-test",
       },
     );
     const events: AgentStreamEvent[] = [];

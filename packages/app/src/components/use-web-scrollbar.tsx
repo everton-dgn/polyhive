@@ -13,7 +13,7 @@ import {
 } from "./web-desktop-scrollbar";
 
 const METRICS_EPSILON = 0.5;
-const HIDE_SCROLLBAR_STYLE_ID = "paseo-hide-scrollbar";
+const HIDE_SCROLLBAR_STYLE_ID = "polyhive-hide-scrollbar";
 
 function ensureHideScrollbarStyle(): void {
   if (typeof document === "undefined") return;

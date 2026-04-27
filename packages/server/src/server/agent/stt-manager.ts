@@ -16,7 +16,7 @@ const DEFAULT_BATCH_COMMIT_EVERY_SECONDS = 15;
 const BATCH_FINAL_TIMEOUT_MS = 120_000;
 
 function resolveBatchCommitEverySeconds(): number {
-  const fromEnv = process.env.PASEO_STT_BATCH_COMMIT_EVERY_SECONDS;
+  const fromEnv = process.env.POLYHIVE_STT_BATCH_COMMIT_EVERY_SECONDS;
   if (!fromEnv) {
     return DEFAULT_BATCH_COMMIT_EVERY_SECONDS;
   }
@@ -88,8 +88,8 @@ export class STTManager {
     }
 
     const language =
-      process.env.PASEO_VOICE_LANGUAGE?.trim() ||
-      process.env.PASEO_DICTATION_LANGUAGE?.trim() ||
+      process.env.POLYHIVE_VOICE_LANGUAGE?.trim() ||
+      process.env.POLYHIVE_DICTATION_LANGUAGE?.trim() ||
       "en";
 
     const session = stt.createSession({

@@ -33,7 +33,7 @@ describe("ScriptRouteStore", () => {
     store.registerRoute({
       hostname: "route-a.example.localhost",
       port: 3000,
-      workspaceId: "/repo/.paseo/worktrees/feature-a",
+      workspaceId: "/repo/.polyhive/worktrees/feature-a",
       projectSlug: "repo",
       scriptName: "editor",
     });
@@ -47,7 +47,7 @@ describe("ScriptRouteStore", () => {
     store.registerRoute({
       hostname: "route-a.example.localhost",
       port: 3000,
-      workspaceId: "/repo/.paseo/worktrees/feature-a",
+      workspaceId: "/repo/.polyhive/worktrees/feature-a",
       projectSlug: "repo",
       scriptName: "editor",
     });
@@ -61,7 +61,7 @@ describe("ScriptRouteStore", () => {
     store.registerRoute({
       hostname: "editor.example.localhost",
       port: 3000,
-      workspaceId: "/repo/.paseo/worktrees/feature-a",
+      workspaceId: "/repo/.polyhive/worktrees/feature-a",
       projectSlug: "repo",
       scriptName: "editor",
     });
@@ -75,14 +75,14 @@ describe("ScriptRouteStore", () => {
     store.registerRoute({
       hostname: "a.localhost",
       port: 3000,
-      workspaceId: "/repo/.paseo/worktrees/feature-a",
+      workspaceId: "/repo/.polyhive/worktrees/feature-a",
       projectSlug: "repo",
       scriptName: "web",
     });
     store.registerRoute({
       hostname: "b.localhost",
       port: 4000,
-      workspaceId: "/repo/.paseo/worktrees/feature-b",
+      workspaceId: "/repo/.polyhive/worktrees/feature-b",
       projectSlug: "repo",
       scriptName: "docs",
     });
@@ -92,14 +92,14 @@ describe("ScriptRouteStore", () => {
     expect(routes).toContainEqual({
       hostname: "a.localhost",
       port: 3000,
-      workspaceId: "/repo/.paseo/worktrees/feature-a",
+      workspaceId: "/repo/.polyhive/worktrees/feature-a",
       projectSlug: "repo",
       scriptName: "web",
     });
     expect(routes).toContainEqual({
       hostname: "b.localhost",
       port: 4000,
-      workspaceId: "/repo/.paseo/worktrees/feature-b",
+      workspaceId: "/repo/.polyhive/worktrees/feature-b",
       projectSlug: "repo",
       scriptName: "docs",
     });
@@ -110,37 +110,37 @@ describe("ScriptRouteStore", () => {
     store.registerRoute({
       hostname: "a.localhost",
       port: 3000,
-      workspaceId: "/repo/.paseo/worktrees/feature-a",
+      workspaceId: "/repo/.polyhive/worktrees/feature-a",
       projectSlug: "repo",
       scriptName: "web",
     });
     store.registerRoute({
       hostname: "b.localhost",
       port: 4000,
-      workspaceId: "/repo/.paseo/worktrees/feature-b",
+      workspaceId: "/repo/.polyhive/worktrees/feature-b",
       projectSlug: "repo",
       scriptName: "docs",
     });
     store.registerRoute({
       hostname: "c.localhost",
       port: 5000,
-      workspaceId: "/repo/.paseo/worktrees/feature-a",
+      workspaceId: "/repo/.polyhive/worktrees/feature-a",
       projectSlug: "repo",
       scriptName: "api",
     });
 
-    expect(store.listRoutesForWorkspace("/repo/.paseo/worktrees/feature-a")).toEqual([
+    expect(store.listRoutesForWorkspace("/repo/.polyhive/worktrees/feature-a")).toEqual([
       {
         hostname: "a.localhost",
         port: 3000,
-        workspaceId: "/repo/.paseo/worktrees/feature-a",
+        workspaceId: "/repo/.polyhive/worktrees/feature-a",
         projectSlug: "repo",
         scriptName: "web",
       },
       {
         hostname: "c.localhost",
         port: 5000,
-        workspaceId: "/repo/.paseo/worktrees/feature-a",
+        workspaceId: "/repo/.polyhive/worktrees/feature-a",
         projectSlug: "repo",
         scriptName: "api",
       },
@@ -152,7 +152,7 @@ describe("ScriptRouteStore", () => {
     store.registerRoute({
       hostname: "route-a.example.localhost",
       port: 3000,
-      workspaceId: "/repo/.paseo/worktrees/feature-a",
+      workspaceId: "/repo/.polyhive/worktrees/feature-a",
       projectSlug: "repo",
       scriptName: "editor",
     });
@@ -166,14 +166,14 @@ describe("ScriptRouteStore", () => {
     store.registerRoute({
       hostname: "route-a.example.localhost",
       port: 3000,
-      workspaceId: "/repo/.paseo/worktrees/feature-a",
+      workspaceId: "/repo/.polyhive/worktrees/feature-a",
       projectSlug: "repo",
       scriptName: "editor",
     });
 
     store.removeRoute("route-a.example.localhost");
 
-    expect(store.listRoutesForWorkspace("/repo/.paseo/worktrees/feature-a")).toEqual([]);
+    expect(store.listRoutesForWorkspace("/repo/.polyhive/worktrees/feature-a")).toEqual([]);
   });
 
   it("removeRoutesForPort works", () => {
@@ -181,21 +181,21 @@ describe("ScriptRouteStore", () => {
     store.registerRoute({
       hostname: "a.localhost",
       port: 3000,
-      workspaceId: "/repo/.paseo/worktrees/feature-a",
+      workspaceId: "/repo/.polyhive/worktrees/feature-a",
       projectSlug: "repo",
       scriptName: "web",
     });
     store.registerRoute({
       hostname: "b.localhost",
       port: 3000,
-      workspaceId: "/repo/.paseo/worktrees/feature-a",
+      workspaceId: "/repo/.polyhive/worktrees/feature-a",
       projectSlug: "repo",
       scriptName: "api",
     });
     store.registerRoute({
       hostname: "c.localhost",
       port: 4000,
-      workspaceId: "/repo/.paseo/worktrees/feature-b",
+      workspaceId: "/repo/.polyhive/worktrees/feature-b",
       projectSlug: "repo",
       scriptName: "docs",
     });
@@ -215,21 +215,21 @@ describe("ScriptRouteStore", () => {
     store.registerRoute({
       hostname: "a.localhost",
       port: 3000,
-      workspaceId: "/repo/.paseo/worktrees/feature-a",
+      workspaceId: "/repo/.polyhive/worktrees/feature-a",
       projectSlug: "repo",
       scriptName: "web",
     });
     store.registerRoute({
       hostname: "b.localhost",
       port: 3000,
-      workspaceId: "/repo/.paseo/worktrees/feature-a",
+      workspaceId: "/repo/.polyhive/worktrees/feature-a",
       projectSlug: "repo",
       scriptName: "api",
     });
 
     store.removeRoutesForPort(3000);
 
-    expect(store.listRoutesForWorkspace("/repo/.paseo/worktrees/feature-a")).toEqual([]);
+    expect(store.listRoutesForWorkspace("/repo/.polyhive/worktrees/feature-a")).toEqual([]);
   });
 
   it("findRoute returns null for unknown hosts", () => {
@@ -237,7 +237,7 @@ describe("ScriptRouteStore", () => {
     store.registerRoute({
       hostname: "route-a.example.localhost",
       port: 3000,
-      workspaceId: "/repo/.paseo/worktrees/feature-a",
+      workspaceId: "/repo/.polyhive/worktrees/feature-a",
       projectSlug: "repo",
       scriptName: "editor",
     });

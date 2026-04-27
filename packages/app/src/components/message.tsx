@@ -105,15 +105,15 @@ function useDisableOuterSpacing(disableOuterSpacing: boolean | undefined) {
   return disableOuterSpacing ?? contextValue;
 }
 
-const WEB_TOOLCALL_SHIMMER_KEYFRAME_ID = "paseo-toolcall-shimmer-keyframes";
-const WEB_TOOLCALL_SHIMMER_ANIMATION_NAME = "paseo-toolcall-shimmer";
+const WEB_TOOLCALL_SHIMMER_KEYFRAME_ID = "polyhive-toolcall-shimmer-keyframes";
+const WEB_TOOLCALL_SHIMMER_ANIMATION_NAME = "polyhive-toolcall-shimmer";
 const WEB_TOOLCALL_SHIMMER_KEYFRAME_CSS = `
   @keyframes ${WEB_TOOLCALL_SHIMMER_ANIMATION_NAME} {
     0% {
-      background-position: var(--paseo-shimmer-start, -200px) 0;
+      background-position: var(--polyhive-shimmer-start, -200px) 0;
     }
     100% {
-      background-position: var(--paseo-shimmer-end, 200px) 0;
+      background-position: var(--polyhive-shimmer-end, 200px) 0;
     }
   }
 `;
@@ -1682,8 +1682,8 @@ const ExpandableBadge = memo(function ExpandableBadge({
         WebkitBackgroundClip: "text",
         WebkitTextFillColor: "transparent",
         animation: `${WEB_TOOLCALL_SHIMMER_ANIMATION_NAME} ${shimmerDuration}s linear infinite`,
-        "--paseo-shimmer-start": `${webShimmerTrackStart - labelOffsetX}px`,
-        "--paseo-shimmer-end": `${webShimmerTrackEnd - labelOffsetX}px`,
+        "--polyhive-shimmer-start": `${webShimmerTrackStart - labelOffsetX}px`,
+        "--polyhive-shimmer-end": `${webShimmerTrackEnd - labelOffsetX}px`,
       } as never)
     : null;
 
@@ -1698,8 +1698,8 @@ const ExpandableBadge = memo(function ExpandableBadge({
         WebkitBackgroundClip: "text",
         WebkitTextFillColor: "transparent",
         animation: `${WEB_TOOLCALL_SHIMMER_ANIMATION_NAME} ${shimmerDuration}s linear infinite`,
-        "--paseo-shimmer-start": `${webShimmerTrackStart - secondaryOffsetX}px`,
-        "--paseo-shimmer-end": `${webShimmerTrackEnd - secondaryOffsetX}px`,
+        "--polyhive-shimmer-start": `${webShimmerTrackStart - secondaryOffsetX}px`,
+        "--polyhive-shimmer-end": `${webShimmerTrackEnd - secondaryOffsetX}px`,
       } as never)
     : null;
 

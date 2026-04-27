@@ -15,8 +15,8 @@ describe("buildNewAgentRoute", () => {
   });
 
   it("encodes the working directory as a workspace path segment", () => {
-    expect(buildNewAgentRoute("srv-1", "/Users/me/dev/paseo")).toBe(
-      "/h/srv-1/workspace/b64_L1VzZXJzL21lL2Rldi9wYXNlbw",
+    expect(buildNewAgentRoute("srv-1", "/Users/me/dev/polyhive")).toBe(
+      "/h/srv-1/workspace/b64_L1VzZXJzL21lL2Rldi9wb2x5aGl2ZQ",
     );
   });
 });
@@ -27,17 +27,17 @@ describe("resolveNewAgentWorkingDir", () => {
   });
 
   it("falls back to repo root when checkout metadata is unavailable", () => {
-    expect(resolveNewAgentWorkingDir("/repo/.paseo/worktrees/feature", null)).toBe("/repo");
+    expect(resolveNewAgentWorkingDir("/repo/.polyhive/worktrees/feature", null)).toBe("/repo");
   });
 
-  it("returns the main repo root for paseo-owned worktrees", () => {
+  it("returns the main repo root for polyhive-owned worktrees", () => {
     const checkout = {
-      isPaseoOwnedWorktree: true,
-      worktreeRoot: "/repo/.paseo/worktrees/feature",
+      isPolyHiveOwnedWorktree: true,
+      worktreeRoot: "/repo/.polyhive/worktrees/feature",
       mainRepoRoot: "/repo/main",
     } as unknown as CheckoutStatusPayload;
 
-    expect(resolveNewAgentWorkingDir("/repo/.paseo/worktrees/feature", checkout)).toBe(
+    expect(resolveNewAgentWorkingDir("/repo/.polyhive/worktrees/feature", checkout)).toBe(
       "/repo/main",
     );
   });

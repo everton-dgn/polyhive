@@ -4,38 +4,38 @@ import { mkdir, mkdtemp, rm } from "node:fs/promises";
 
 import pino from "pino";
 import {
-  createPaseoDaemon,
-  type PaseoDaemonConfig,
-  type PaseoOpenAIConfig,
-  type PaseoSpeechConfig,
+  createPolyHiveDaemon,
+  type PolyHiveDaemonConfig,
+  type PolyHiveOpenAIConfig,
+  type PolyHiveSpeechConfig,
 } from "../bootstrap.js";
 import type { AgentClient, AgentProvider } from "../agent/agent-sdk-types.js";
 import { createTestAgentClients } from "./fake-agent-client.js";
 
-type TestPaseoDaemonOptions = {
+type TestPolyHiveDaemonOptions = {
   downloadTokenTtlMs?: number;
   corsAllowedOrigins?: string[];
   listen?: string;
-  logger?: Parameters<typeof createPaseoDaemon>[1];
+  logger?: Parameters<typeof createPolyHiveDaemon>[1];
   relayEnabled?: boolean;
   relayEndpoint?: string;
   agentClients?: Partial<Record<AgentProvider, AgentClient>>;
-  paseoHomeRoot?: string;
+  polyhiveHomeRoot?: string;
   staticDir?: string;
   cleanup?: boolean;
-  openai?: PaseoOpenAIConfig;
-  speech?: PaseoSpeechConfig;
-  voiceLlmProvider?: PaseoDaemonConfig["voiceLlmProvider"];
+  openai?: PolyHiveOpenAIConfig;
+  speech?: PolyHiveSpeechConfig;
+  voiceLlmProvider?: PolyHiveDaemonConfig["voiceLlmProvider"];
   voiceLlmProviderExplicit?: boolean;
   voiceLlmModel?: string | null;
   dictationFinalTimeoutMs?: number;
 };
 
-export type TestPaseoDaemon = {
-  config: PaseoDaemonConfig;
-  daemon: Awaited<ReturnType<typeof createPaseoDaemon>>;
+export type TestPolyHiveDaemon = {
+  config: PolyHiveDaemonConfig;
+  daemon: Awaited<ReturnType<typeof createPolyHiveDaemon>>;
   port: number;
-  paseoHome: string;
+  polyhiveHome: string;
   staticDir: string;
   close: () => Promise<void>;
 };
@@ -43,7 +43,7 @@ export type TestPaseoDaemon = {
 const TEST_DAEMON_START_TIMEOUT_MS = 20_000;
 
 async function startDaemonWithTimeout(
-  daemon: Awaited<ReturnType<typeof createPaseoDaemon>>,
+  daemon: Awaited<ReturnType<typeof createPolyHiveDaemon>>,
   timeoutMs: number,
 ): Promise<void> {
   await new Promise<void>((resolve, reject) => {
@@ -68,32 +68,33 @@ async function startDaemonWithTimeout(
   });
 }
 
-export async function createTestPaseoDaemon(
-  options: TestPaseoDaemonOptions = {},
-): Promise<TestPaseoDaemon> {
+export async function createTestPolyHiveDaemon(
+  options: TestPolyHiveDaemonOptions = {},
+): Promise<TestPolyHiveDaemon> {
   const maxAttempts = 8;
   let lastError: unknown;
 
   for (let attempt = 0; attempt < maxAttempts; attempt += 1) {
-    const paseoHomeRoot =
-      options.paseoHomeRoot ?? (await mkdtemp(path.join(os.tmpdir(), "paseo-home-")));
-    const paseoHome = path.join(paseoHomeRoot, ".paseo");
-    await mkdir(paseoHome, { recursive: true });
-    const staticDir = options.staticDir ?? (await mkdtemp(path.join(os.tmpdir(), "paseo-static-")));
+    const polyhiveHomeRoot =
+      options.polyhiveHomeRoot ?? (await mkdtemp(path.join(os.tmpdir(), "polyhive-home-")));
+    const polyhiveHome = path.join(polyhiveHomeRoot, ".polyhive");
+    await mkdir(polyhiveHome, { recursive: true });
+    const staticDir =
+      options.staticDir ?? (await mkdtemp(path.join(os.tmpdir(), "polyhive-static-")));
     const listenHost = options.listen ?? "127.0.0.1";
-    const config: PaseoDaemonConfig = {
+    const config: PolyHiveDaemonConfig = {
       listen: `${listenHost}:0`,
-      paseoHome,
+      polyhiveHome,
       corsAllowedOrigins: options.corsAllowedOrigins ?? [],
       hostnames: true,
       mcpEnabled: true,
       staticDir,
       mcpDebug: false,
       agentClients: options.agentClients ?? createTestAgentClients(),
-      agentStoragePath: path.join(paseoHome, "agents"),
+      agentStoragePath: path.join(polyhiveHome, "agents"),
       relayEnabled: options.relayEnabled ?? false,
-      relayEndpoint: options.relayEndpoint ?? "relay.paseo.sh:443",
-      appBaseUrl: "https://app.paseo.sh",
+      relayEndpoint: options.relayEndpoint ?? "relay.polyhive.sh:443",
+      appBaseUrl: "https://app.polyhive.sh",
       openai: options.openai,
       speech: options.speech,
       voiceLlmProvider: options.voiceLlmProvider ?? null,
@@ -104,7 +105,7 @@ export async function createTestPaseoDaemon(
     };
 
     const logger = options.logger ?? pino({ level: "silent" });
-    const daemon = await createPaseoDaemon(config, logger);
+    const daemon = await createPolyHiveDaemon(config, logger);
     try {
       await startDaemonWithTimeout(daemon, TEST_DAEMON_START_TIMEOUT_MS);
       const listenTarget = daemon.getListenTarget();
@@ -117,7 +118,12 @@ export async function createTestPaseoDaemon(
         await daemon.agentManager.flush().catch(() => undefined);
         if (options.cleanup ?? true) {
           await new Promise((r) => setTimeout(r, 50));
-          await rm(paseoHomeRoot, { recursive: true, force: true, maxRetries: 3, retryDelay: 100 });
+          await rm(polyhiveHomeRoot, {
+            recursive: true,
+            force: true,
+            maxRetries: 3,
+            retryDelay: 100,
+          });
           await rm(staticDir, { recursive: true, force: true, maxRetries: 3, retryDelay: 100 });
         }
       };
@@ -126,14 +132,14 @@ export async function createTestPaseoDaemon(
         config,
         daemon,
         port: listenTarget.port,
-        paseoHome,
+        polyhiveHome,
         staticDir,
         close,
       };
     } catch (error) {
       lastError = error;
       await daemon.stop().catch(() => undefined);
-      await rm(paseoHomeRoot, { recursive: true, force: true, maxRetries: 3, retryDelay: 100 });
+      await rm(polyhiveHomeRoot, { recursive: true, force: true, maxRetries: 3, retryDelay: 100 });
       await rm(staticDir, { recursive: true, force: true, maxRetries: 3, retryDelay: 100 });
 
       if (

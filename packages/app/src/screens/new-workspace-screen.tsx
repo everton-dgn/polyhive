@@ -300,7 +300,7 @@ export function NewWorkspaceScreen({
       }
 
       const connectedClient = withConnectedClient();
-      const payload = await connectedClient.createPaseoWorktree(buildCreateWorktreeInput(input));
+      const payload = await connectedClient.createPolyHiveWorktree(buildCreateWorktreeInput(input));
 
       if (payload.error || !payload.workspace) {
         throw new Error(payload.error ?? "Failed to create worktree");

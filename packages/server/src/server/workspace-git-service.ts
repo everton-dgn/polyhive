@@ -21,7 +21,7 @@ import {
 import { createGitHubService, type GitHubService } from "../services/github-service.js";
 import { parseGitRevParsePath } from "../utils/git-rev-parse-path.js";
 import { runGitCommand } from "../utils/run-git-command.js";
-import { listPaseoWorktrees, type PaseoWorktreeInfo } from "../utils/worktree.js";
+import { listPolyHiveWorktrees, type PolyHiveWorktreeInfo } from "../utils/worktree.js";
 import { READ_ONLY_GIT_ENV } from "./checkout-git-utils.js";
 import {
   buildWorkspaceGitMetadataFromSnapshot,
@@ -46,7 +46,7 @@ export type WorkspaceGitRuntimeSnapshot = {
     mainRepoRoot: string | null;
     currentBranch: string | null;
     remoteUrl: string | null;
-    isPaseoOwnedWorktree: boolean;
+    isPolyHiveOwnedWorktree: boolean;
     isDirty: boolean | null;
     baseRef: string | null;
     aheadBehind: { ahead: number; behind: number } | null;
@@ -156,19 +156,19 @@ export interface WorkspaceGitBranchSuggestionsOptions {
 }
 
 export interface WorkspaceGitStashListOptions {
-  paseoOnly?: boolean;
+  polyhiveOnly?: boolean;
 }
 
 export interface WorkspaceGitStashEntry {
   index: number;
   message: string;
   branch: string | null;
-  isPaseo: boolean;
+  isPolyHive: boolean;
 }
 
 export type WorkspaceGitBranchValidationResult = BranchCheckoutResolution;
 export type WorkspaceGitBranchSuggestion = BranchSuggestion;
-export type WorkspaceGitWorktreeInfo = PaseoWorktreeInfo;
+export type WorkspaceGitWorktreeInfo = PolyHiveWorktreeInfo;
 
 export type WorkspaceGitSnapshotOptions =
   | {
@@ -218,7 +218,7 @@ interface WorkspaceGitServiceDependencies {
   resolveBranchCheckout: typeof resolveBranchCheckout;
   resolveRepositoryDefaultBranch: typeof resolveRepositoryDefaultBranch;
   listBranchSuggestions: typeof listBranchSuggestions;
-  listPaseoWorktrees: typeof listPaseoWorktrees;
+  listPolyHiveWorktrees: typeof listPolyHiveWorktrees;
   github: GitHubService;
   resolveAbsoluteGitDir: (cwd: string) => Promise<string | null>;
   hasOriginRemote: (cwd: string) => Promise<boolean>;
@@ -229,7 +229,7 @@ interface WorkspaceGitServiceDependencies {
 
 interface WorkspaceGitServiceOptions {
   logger: pino.Logger;
-  paseoHome: string;
+  polyhiveHome: string;
   deps?: Partial<WorkspaceGitServiceDependencies>;
 }
 
@@ -276,7 +276,7 @@ interface WorkspaceGitAuxiliaryReadCacheEntry<T> {
 
 export class WorkspaceGitServiceImpl implements WorkspaceGitService {
   private readonly logger: pino.Logger;
-  private readonly paseoHome: string;
+  private readonly polyhiveHome: string;
   private readonly deps: WorkspaceGitServiceDependencies;
   private readonly workspaceTargets = new Map<string, WorkspaceGitTarget>();
   private readonly repoTargets = new Map<string, RepoGitTarget>();
@@ -314,7 +314,7 @@ export class WorkspaceGitServiceImpl implements WorkspaceGitService {
 
   constructor(options: WorkspaceGitServiceOptions) {
     this.logger = options.logger.child({ module: "workspace-git-service" });
-    this.paseoHome = options.paseoHome;
+    this.polyhiveHome = options.polyhiveHome;
     this.deps = {
       watch: options.deps?.watch ?? watch,
       readdir: options.deps?.readdir ?? readdir,
@@ -326,7 +326,7 @@ export class WorkspaceGitServiceImpl implements WorkspaceGitService {
       resolveRepositoryDefaultBranch:
         options.deps?.resolveRepositoryDefaultBranch ?? resolveRepositoryDefaultBranch,
       listBranchSuggestions: options.deps?.listBranchSuggestions ?? listBranchSuggestions,
-      listPaseoWorktrees: options.deps?.listPaseoWorktrees ?? listPaseoWorktrees,
+      listPolyHiveWorktrees: options.deps?.listPolyHiveWorktrees ?? listPolyHiveWorktrees,
       github: options.deps?.github ?? createGitHubService(),
       resolveAbsoluteGitDir: options.deps?.resolveAbsoluteGitDir ?? resolveAbsoluteGitDir,
       hasOriginRemote: options.deps?.hasOriginRemote ?? hasOriginRemote,
@@ -386,7 +386,9 @@ export class WorkspaceGitServiceImpl implements WorkspaceGitService {
     const normalizedOptions = this.normalizeCheckoutDiffOptions(options);
     const key = this.buildCheckoutDiffCacheKey(normalizedCwd, normalizedOptions);
     return this.readAuxiliaryCache(this.checkoutDiffCache, key, readOptions, () =>
-      this.deps.getCheckoutDiff(normalizedCwd, normalizedOptions, { paseoHome: this.paseoHome }),
+      this.deps.getCheckoutDiff(normalizedCwd, normalizedOptions, {
+        polyhiveHome: this.polyhiveHome,
+      }),
     );
   }
 
@@ -462,14 +464,14 @@ export class WorkspaceGitServiceImpl implements WorkspaceGitService {
     readOptions?: WorkspaceGitReadOptions,
   ): Promise<WorkspaceGitStashEntry[]> {
     const normalizedCwd = normalizeWorkspaceId(cwd);
-    const paseoOnly = options?.paseoOnly !== false;
-    const key = JSON.stringify(["stashes", normalizedCwd, paseoOnly]);
+    const polyhiveOnly = options?.polyhiveOnly !== false;
+    const key = JSON.stringify(["stashes", normalizedCwd, polyhiveOnly]);
     return this.readAuxiliaryCache(this.stashListCache, key, readOptions, async () => {
       const { stdout } = await this.deps.runGitCommand(["stash", "list", "--format=%gd%x00%s"], {
         cwd: normalizedCwd,
         env: READ_ONLY_GIT_ENV,
       });
-      return parseWorkspaceGitStashList(stdout, { paseoOnly });
+      return parseWorkspaceGitStashList(stdout, { polyhiveOnly });
     });
   }
 
@@ -480,9 +482,9 @@ export class WorkspaceGitServiceImpl implements WorkspaceGitService {
     const repoRoot = await this.resolveRepoRoot(cwdOrRepoRoot, options);
     const key = JSON.stringify(["worktrees", repoRoot]);
     return this.readAuxiliaryCache(this.worktreeListCache, key, options, () =>
-      this.deps.listPaseoWorktrees({
+      this.deps.listPolyHiveWorktrees({
         cwd: repoRoot,
-        paseoHome: this.paseoHome,
+        polyhiveHome: this.polyhiveHome,
       }),
     );
   }
@@ -493,7 +495,7 @@ export class WorkspaceGitServiceImpl implements WorkspaceGitService {
       throw new Error("Create worktree requires a git repository");
     }
 
-    return snapshot.git.isPaseoOwnedWorktree
+    return snapshot.git.isPolyHiveOwnedWorktree
       ? (snapshot.git.mainRepoRoot ?? snapshot.git.repoRoot ?? normalizeWorkspaceId(cwd))
       : (snapshot.git.repoRoot ?? normalizeWorkspaceId(cwd));
   }
@@ -1192,7 +1194,7 @@ export class WorkspaceGitServiceImpl implements WorkspaceGitService {
     }
     const snapshot = await loadWorkspaceGitRuntimeSnapshot(
       target.cwd,
-      { paseoHome: this.paseoHome },
+      { polyhiveHome: this.polyhiveHome },
       now,
       this.deps,
       { force: request.force, forceGitHub, reason: request.reason },
@@ -1377,10 +1379,10 @@ async function loadWorkspaceGitRuntimeSnapshot(
     git: {
       isGit: true,
       repoRoot: checkoutStatus.repoRoot,
-      mainRepoRoot: checkoutStatus.isPaseoOwnedWorktree ? checkoutStatus.mainRepoRoot : null,
+      mainRepoRoot: checkoutStatus.isPolyHiveOwnedWorktree ? checkoutStatus.mainRepoRoot : null,
       currentBranch: checkoutStatus.currentBranch,
       remoteUrl: checkoutStatus.remoteUrl,
-      isPaseoOwnedWorktree: checkoutStatus.isPaseoOwnedWorktree,
+      isPolyHiveOwnedWorktree: checkoutStatus.isPolyHiveOwnedWorktree,
       isDirty: checkoutStatus.isDirty,
       baseRef: checkoutStatus.baseRef,
       aheadBehind: checkoutStatus.aheadBehind,
@@ -1458,7 +1460,7 @@ function hasGitHubRemoteUrl(remoteUrl: string | null): boolean {
 
 function parseWorkspaceGitStashList(
   stdout: string,
-  options: { paseoOnly: boolean },
+  options: { polyhiveOnly: boolean },
 ): WorkspaceGitStashEntry[] {
   const entries: WorkspaceGitStashEntry[] = [];
   const lines = stdout.trim().split("\n").filter(Boolean);
@@ -1477,16 +1479,16 @@ function parseWorkspaceGitStashList(
     }
 
     const index = Number(indexMatch[1]);
-    const prefix = "paseo-auto-stash:";
+    const prefix = "polyhive-auto-stash:";
     const prefixIdx = subject.indexOf(prefix);
-    const isPaseo = prefixIdx >= 0;
-    const branch = isPaseo ? subject.slice(prefixIdx + prefix.length).trim() || null : null;
+    const isPolyHive = prefixIdx >= 0;
+    const branch = isPolyHive ? subject.slice(prefixIdx + prefix.length).trim() || null : null;
 
-    if (options.paseoOnly && !isPaseo) {
+    if (options.polyhiveOnly && !isPolyHive) {
       continue;
     }
 
-    entries.push({ index, message: subject, branch, isPaseo });
+    entries.push({ index, message: subject, branch, isPolyHive });
   }
 
   return entries;
@@ -1501,7 +1503,7 @@ function buildNotGitSnapshot(cwd: string): WorkspaceGitRuntimeSnapshot {
       mainRepoRoot: null,
       currentBranch: null,
       remoteUrl: null,
-      isPaseoOwnedWorktree: false,
+      isPolyHiveOwnedWorktree: false,
       isDirty: null,
       baseRef: null,
       aheadBehind: null,

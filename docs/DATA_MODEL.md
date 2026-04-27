@@ -1,15 +1,15 @@
 # Data Model
 
-Paseo uses **file-based JSON persistence** instead of a traditional database. All data is validated at runtime with Zod schemas and written atomically (write to temp file, then rename). There are no migrations — schemas use optional fields with defaults for forward compatibility.
+PolyHive uses **file-based JSON persistence** instead of a traditional database. All data is validated at runtime with Zod schemas and written atomically (write to temp file, then rename). There are no migrations — schemas use optional fields with defaults for forward compatibility.
 
-All server-side stores live under `$PASEO_HOME` (defaults to `~/.paseo`).
+All server-side stores live under `$POLYHIVE_HOME` (defaults to `~/.polyhive`).
 
 ---
 
 ## Directory layout
 
 ```
-$PASEO_HOME/
+$POLYHIVE_HOME/
 ├── config.json                          # Daemon configuration
 ├── agents/
 │   └── {project-dir}/
@@ -29,7 +29,7 @@ $PASEO_HOME/
 
 ## 1. Agent Record
 
-**Path:** `$PASEO_HOME/agents/{project-dir}/{agentId}.json`
+**Path:** `$POLYHIVE_HOME/agents/{project-dir}/{agentId}.json`
 
 Each agent is stored as a separate JSON file, grouped by project directory.
 
@@ -120,7 +120,7 @@ Each agent is stored as a separate JSON file, grouped by project directory.
 
 ## 2. Daemon Configuration
 
-**Path:** `$PASEO_HOME/config.json`
+**Path:** `$POLYHIVE_HOME/config.json`
 
 Single file, validated with `PersistedConfigSchema`.
 
@@ -167,7 +167,7 @@ All fields are optional with sensible defaults.
 
 ## 3. Schedule
 
-**Path:** `$PASEO_HOME/schedules/{id}.json`
+**Path:** `$POLYHIVE_HOME/schedules/{id}.json`
 
 One file per schedule. ID is 8 hex characters.
 
@@ -215,7 +215,7 @@ One file per schedule. ID is 8 hex characters.
 
 ## 4. Chat
 
-**Path:** `$PASEO_HOME/chat/rooms.json`
+**Path:** `$POLYHIVE_HOME/chat/rooms.json`
 
 Single file containing all rooms and messages.
 
@@ -252,7 +252,7 @@ Single file containing all rooms and messages.
 
 ## 5. Loop
 
-**Path:** `$PASEO_HOME/loops/loops.json`
+**Path:** `$POLYHIVE_HOME/loops/loops.json`
 
 Single file containing an array of all loop records.
 
@@ -339,7 +339,7 @@ Single file containing an array of all loop records.
 
 ## 6. Project Registry
 
-**Path:** `$PASEO_HOME/projects/projects.json`
+**Path:** `$POLYHIVE_HOME/projects/projects.json`
 
 Array of project records.
 
@@ -357,7 +357,7 @@ Array of project records.
 
 ## 7. Workspace Registry
 
-**Path:** `$PASEO_HOME/projects/workspaces.json`
+**Path:** `$POLYHIVE_HOME/projects/workspaces.json`
 
 Array of workspace records. A workspace is a specific working directory within a project.
 
@@ -380,7 +380,7 @@ These live in React Native `AsyncStorage` or browser `IndexedDB`, not on the dae
 
 ### Draft Store
 
-**AsyncStorage key:** `paseo-drafts` (version 2)
+**AsyncStorage key:** `polyhive-drafts` (version 2)
 
 ```typescript
 {
@@ -396,7 +396,7 @@ These live in React Native `AsyncStorage` or browser `IndexedDB`, not on the dae
 
 ### Attachment Store (Web)
 
-**IndexedDB database:** `paseo-attachment-bytes`, object store: `attachments`
+**IndexedDB database:** `polyhive-attachment-bytes`, object store: `attachments`
 
 Stores binary attachment blobs keyed by attachment ID.
 

@@ -1,6 +1,6 @@
 # Custom Provider Configuration
 
-Paseo supports configuring custom agent providers through `config.json` (located at `$PASEO_HOME/config.json`, typically `~/.paseo/config.json`). You can extend built-in providers with different API backends, add ACP-compatible agents, set custom binaries, disable providers, and create multiple profiles for the same underlying provider.
+PolyHive supports configuring custom agent providers through `config.json` (located at `$POLYHIVE_HOME/config.json`, typically `~/.polyhive/config.json`). You can extend built-in providers with different API backends, add ACP-compatible agents, set custom binaries, disable providers, and create multiple profiles for the same underlying provider.
 
 All provider configuration lives under `agents.providers` in config.json:
 
@@ -210,7 +210,7 @@ Example: two different Anthropic accounts as separate profiles:
 }
 ```
 
-Each profile appears as a separate provider in the Paseo app. You can select which one to use when launching an agent.
+Each profile appears as a separate provider in the PolyHive app. You can select which one to use when launching an agent.
 
 You can also combine profiles with model overrides to pin specific models per profile:
 
@@ -287,7 +287,7 @@ Override the command used to launch any provider with the `command` field. This 
 }
 ```
 
-The `command` array completely replaces the default command for that provider. The binary must exist on the system — Paseo checks for its availability and will mark the provider as unavailable if not found.
+The `command` array completely replaces the default command for that provider. The binary must exist on the system — PolyHive checks for its availability and will mark the provider as unavailable if not found.
 
 ---
 
@@ -312,9 +312,9 @@ This works for both built-in and custom providers. To re-enable, set `enabled: t
 
 ## ACP providers
 
-The [Agent Client Protocol (ACP)](https://agentclientprotocol.com) is an open standard for communication between editors and AI coding agents — think LSP but for AI agents. Any agent that supports ACP can be added to Paseo as a custom provider.
+The [Agent Client Protocol (ACP)](https://agentclientprotocol.com) is an open standard for communication between editors and AI coding agents — think LSP but for AI agents. Any agent that supports ACP can be added to PolyHive as a custom provider.
 
-ACP agents communicate over JSON-RPC 2.0 on stdio. Paseo spawns the agent process and talks to it through stdin/stdout.
+ACP agents communicate over JSON-RPC 2.0 on stdio. PolyHive spawns the agent process and talks to it through stdin/stdout.
 
 ### Adding a generic ACP provider
 
@@ -392,14 +392,14 @@ Ref: [Gemini CLI ACP mode docs](https://github.com/google-gemini/gemini-cli/blob
 
 Ref: [Hermes ACP docs](https://hermes-agent.nousresearch.com/docs/user-guide/features/acp)
 
-### How ACP providers work in Paseo
+### How ACP providers work in PolyHive
 
 When you launch an agent with an ACP provider:
 
-1. Paseo spawns the process using the configured `command`
+1. PolyHive spawns the process using the configured `command`
 2. Sends an `initialize` JSON-RPC request over stdin
 3. The agent responds with its capabilities, available modes, and models
-4. Paseo creates a session and sends prompts through the ACP protocol
+4. PolyHive creates a session and sends prompts through the ACP protocol
 5. The agent streams responses, tool calls, and permission requests back over stdout
 
 Models and modes are discovered dynamically at runtime from the agent process. If you want to override the model list (e.g., to curate which models appear in the UI), use the `models` field:

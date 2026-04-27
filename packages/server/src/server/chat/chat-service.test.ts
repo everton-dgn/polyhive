@@ -6,20 +6,20 @@ import pino from "pino";
 import { ChatServiceError, FileBackedChatService, parseMentionAgentIds } from "./chat-service.js";
 
 describe("FileBackedChatService", () => {
-  let paseoHome: string;
+  let polyhiveHome: string;
   let service: FileBackedChatService;
 
   beforeEach(async () => {
-    paseoHome = await mkdtemp(path.join(tmpdir(), "paseo-chat-service-"));
+    polyhiveHome = await mkdtemp(path.join(tmpdir(), "polyhive-chat-service-"));
     service = new FileBackedChatService({
-      paseoHome,
+      polyhiveHome,
       logger: pino({ level: "silent" }),
     });
     await service.initialize();
   });
 
   afterEach(async () => {
-    await rm(paseoHome, { recursive: true, force: true });
+    await rm(polyhiveHome, { recursive: true, force: true });
   });
 
   test("creates rooms, enforces unique names, and persists to disk", async () => {
@@ -36,7 +36,7 @@ describe("FileBackedChatService", () => {
       code: "chat_room_name_taken",
     });
 
-    const raw = await readFile(path.join(paseoHome, "chat", "rooms.json"), "utf8");
+    const raw = await readFile(path.join(polyhiveHome, "chat", "rooms.json"), "utf8");
     expect(raw).toContain("cli-features-epic");
     expect(created.name).toBe("cli-features-epic");
     expect(created.purpose).toBe("Coordination room");

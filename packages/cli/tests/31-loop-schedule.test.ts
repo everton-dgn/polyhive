@@ -15,7 +15,7 @@ const ctx = await createE2ETestContext({ timeout: 30000 });
 try {
   {
     console.log("Test 1: schedule create/ls/inspect/pause/resume/delete work");
-    const created = await ctx.paseo(
+    const created = await ctx.polyhive(
       ["schedule", "create", "Review new PRs", "--every", "5m", "--name", "review-prs", "--json"],
       { timeout: 30000 },
     );
@@ -29,7 +29,7 @@ try {
       created.stdout,
     );
 
-    const listed = await ctx.paseo(["schedule", "ls", "--json"]);
+    const listed = await ctx.polyhive(["schedule", "ls", "--json"]);
     assert.strictEqual(listed.exitCode, 0, listed.stderr);
     const listedJson = JSON.parse(listed.stdout);
     assert(Array.isArray(listedJson), listed.stdout);
@@ -38,21 +38,21 @@ try {
       listed.stdout,
     );
 
-    const inspected = await ctx.paseo(["schedule", "inspect", createdJson.id, "--json"]);
+    const inspected = await ctx.polyhive(["schedule", "inspect", createdJson.id, "--json"]);
     assert.strictEqual(inspected.exitCode, 0, inspected.stderr);
     const inspectedJson = JSON.parse(inspected.stdout);
     assert.strictEqual(inspectedJson.status, "active");
     assert.strictEqual(inspectedJson.prompt, "Review new PRs");
 
-    const paused = await ctx.paseo(["schedule", "pause", createdJson.id, "--json"]);
+    const paused = await ctx.polyhive(["schedule", "pause", createdJson.id, "--json"]);
     assert.strictEqual(paused.exitCode, 0, paused.stderr);
     assert.strictEqual(JSON.parse(paused.stdout).status, "paused");
 
-    const resumed = await ctx.paseo(["schedule", "resume", createdJson.id, "--json"]);
+    const resumed = await ctx.polyhive(["schedule", "resume", createdJson.id, "--json"]);
     assert.strictEqual(resumed.exitCode, 0, resumed.stderr);
     assert.strictEqual(JSON.parse(resumed.stdout).status, "active");
 
-    const deleted = await ctx.paseo(["schedule", "delete", createdJson.id, "--json"]);
+    const deleted = await ctx.polyhive(["schedule", "delete", createdJson.id, "--json"]);
     assert.strictEqual(deleted.exitCode, 0, deleted.stderr);
     assert.strictEqual(JSON.parse(deleted.stdout).id, createdJson.id);
     console.log("schedule commands work\n");
@@ -60,7 +60,7 @@ try {
 
   {
     console.log("Test 1b: schedule create accepts provider/model syntax for new-agent runs");
-    const created = await ctx.paseo(
+    const created = await ctx.polyhive(
       [
         "schedule",
         "create",
@@ -77,20 +77,20 @@ try {
     const createdJson = JSON.parse(created.stdout);
     assert.strictEqual(createdJson.target, "new-agent:codex/gpt-5.4");
 
-    const inspected = await ctx.paseo(["schedule", "inspect", createdJson.id, "--json"]);
+    const inspected = await ctx.polyhive(["schedule", "inspect", createdJson.id, "--json"]);
     assert.strictEqual(inspected.exitCode, 0, inspected.stderr);
     const inspectedJson = JSON.parse(inspected.stdout);
     assert.strictEqual(inspectedJson.target.config.provider, "codex");
     assert.strictEqual(inspectedJson.target.config.model, "gpt-5.4");
 
-    const deleted = await ctx.paseo(["schedule", "delete", createdJson.id, "--json"]);
+    const deleted = await ctx.polyhive(["schedule", "delete", createdJson.id, "--json"]);
     assert.strictEqual(deleted.exitCode, 0, deleted.stderr);
     console.log("schedule provider/model syntax works\n");
   }
 
   {
     console.log("Test 1c: schedule create rejects provider with self target");
-    const result = await ctx.paseo(
+    const result = await ctx.polyhive(
       [
         "schedule",
         "create",
@@ -115,7 +115,7 @@ try {
 
   {
     console.log("Test 2: loop run/ls/inspect/logs/stop work");
-    const run = await ctx.paseo(
+    const run = await ctx.polyhive(
       [
         "loop",
         "run",
@@ -132,7 +132,7 @@ try {
     const runJson = JSON.parse(run.stdout);
     assert.strictEqual(runJson.name, "smoke-loop");
 
-    const listed = await ctx.paseo(["loop", "ls", "--json"]);
+    const listed = await ctx.polyhive(["loop", "ls", "--json"]);
     assert.strictEqual(listed.exitCode, 0, listed.stderr);
     const listedJson = JSON.parse(listed.stdout);
     assert(Array.isArray(listedJson), listed.stdout);
@@ -143,7 +143,7 @@ try {
 
     let status = "running";
     for (let attempt = 0; attempt < 40; attempt += 1) {
-      const inspect = await ctx.paseo(["loop", "inspect", runJson.id, "--json"]);
+      const inspect = await ctx.polyhive(["loop", "inspect", runJson.id, "--json"]);
       assert.strictEqual(inspect.exitCode, 0, inspect.stderr);
       const inspectJson = JSON.parse(inspect.stdout);
       status = inspectJson.status;
@@ -155,11 +155,11 @@ try {
     }
     assert.strictEqual(status, "succeeded");
 
-    const logs = await ctx.paseo(["loop", "logs", runJson.id], { timeout: 15000 });
+    const logs = await ctx.polyhive(["loop", "logs", runJson.id], { timeout: 15000 });
     assert.strictEqual(logs.exitCode, 0, logs.stderr);
     assert(logs.stdout.includes("verify-check"), logs.stdout);
 
-    const stopped = await ctx.paseo(["loop", "stop", runJson.id, "--json"]);
+    const stopped = await ctx.polyhive(["loop", "stop", runJson.id, "--json"]);
     assert.strictEqual(stopped.exitCode, 0, stopped.stderr);
     const stoppedJson = JSON.parse(stopped.stdout);
     assert(["succeeded", "stopped"].includes(stoppedJson.status), stopped.stdout);
@@ -167,7 +167,7 @@ try {
   }
 } finally {
   await ctx.stop();
-  await rm(ctx.paseoHome, { recursive: true, force: true });
+  await rm(ctx.polyhiveHome, { recursive: true, force: true });
   await rm(ctx.workDir, { recursive: true, force: true });
 }
 

@@ -15,84 +15,84 @@ console.log("=== CLI IPC Target Helpers ===\n");
 
 {
   console.log("Test 1: unix hosts resolve to ws+unix URLs");
-  const target = resolveDaemonTarget("unix:///tmp/paseo.sock");
+  const target = resolveDaemonTarget("unix:///tmp/polyhive.sock");
   assert.deepStrictEqual(target, {
     type: "ipc",
-    url: "ws+unix:///tmp/paseo.sock:/ws",
-    socketPath: "/tmp/paseo.sock",
+    url: "ws+unix:///tmp/polyhive.sock:/ws",
+    socketPath: "/tmp/polyhive.sock",
   });
   console.log("✓ unix hosts resolve to ws+unix URLs\n");
 }
 
 {
   console.log("Test 3: local unix socket paths normalize into IPC daemon targets");
-  assert.strictEqual(normalizeDaemonHost("/tmp/paseo.sock"), "unix:///tmp/paseo.sock");
+  assert.strictEqual(normalizeDaemonHost("/tmp/polyhive.sock"), "unix:///tmp/polyhive.sock");
   console.log("✓ local unix socket paths normalize into IPC daemon targets\n");
 }
 
 {
   console.log("Test 4: default host resolution tries local IPC first, then localhost fallback");
-  const paseoHome = mkdtempSync(path.join(os.tmpdir(), "paseo-client-targets-"));
+  const polyhiveHome = mkdtempSync(path.join(os.tmpdir(), "polyhive-client-targets-"));
   try {
-    mkdirSync(paseoHome, { recursive: true });
+    mkdirSync(polyhiveHome, { recursive: true });
     writeFileSync(
-      path.join(paseoHome, "paseo.pid"),
-      JSON.stringify({ pid: process.pid, listen: "/tmp/paseo-from-pid.sock" }),
+      path.join(polyhiveHome, "polyhive.pid"),
+      JSON.stringify({ pid: process.pid, listen: "/tmp/polyhive-from-pid.sock" }),
     );
-    assert.deepStrictEqual(resolveDefaultDaemonHosts({ PASEO_HOME: paseoHome }), [
-      "unix:///tmp/paseo-from-pid.sock",
+    assert.deepStrictEqual(resolveDefaultDaemonHosts({ POLYHIVE_HOME: polyhiveHome }), [
+      "unix:///tmp/polyhive-from-pid.sock",
       "localhost:6767",
     ]);
-    const previousHome = process.env.PASEO_HOME;
-    const previousHost = process.env.PASEO_HOST;
-    process.env.PASEO_HOME = paseoHome;
-    delete process.env.PASEO_HOST;
-    assert.strictEqual(getDaemonHost(), "unix:///tmp/paseo-from-pid.sock");
-    if (previousHome === undefined) delete process.env.PASEO_HOME;
-    else process.env.PASEO_HOME = previousHome;
-    if (previousHost === undefined) delete process.env.PASEO_HOST;
-    else process.env.PASEO_HOST = previousHost;
+    const previousHome = process.env.POLYHIVE_HOME;
+    const previousHost = process.env.POLYHIVE_HOST;
+    process.env.POLYHIVE_HOME = polyhiveHome;
+    delete process.env.POLYHIVE_HOST;
+    assert.strictEqual(getDaemonHost(), "unix:///tmp/polyhive-from-pid.sock");
+    if (previousHome === undefined) delete process.env.POLYHIVE_HOME;
+    else process.env.POLYHIVE_HOME = previousHome;
+    if (previousHost === undefined) delete process.env.POLYHIVE_HOST;
+    else process.env.POLYHIVE_HOST = previousHost;
   } finally {
-    rmSync(paseoHome, { recursive: true, force: true });
+    rmSync(polyhiveHome, { recursive: true, force: true });
   }
   console.log("✓ default host resolution tries local IPC first, then localhost fallback\n");
 }
 
 {
   console.log("Test 5: configured TCP host is preserved before the localhost fallback");
-  const paseoHome = mkdtempSync(path.join(os.tmpdir(), "paseo-client-targets-tcp-"));
+  const polyhiveHome = mkdtempSync(path.join(os.tmpdir(), "polyhive-client-targets-tcp-"));
   try {
     assert.deepStrictEqual(
       resolveDefaultDaemonHosts({
-        PASEO_HOME: paseoHome,
-        PASEO_LISTEN: "127.0.0.1:7777",
+        POLYHIVE_HOME: polyhiveHome,
+        POLYHIVE_LISTEN: "127.0.0.1:7777",
       }),
       ["127.0.0.1:7777", "localhost:6767"],
     );
   } finally {
-    rmSync(paseoHome, { recursive: true, force: true });
+    rmSync(polyhiveHome, { recursive: true, force: true });
   }
   console.log("✓ configured TCP host is preserved before the localhost fallback\n");
 }
 
 {
   console.log("Test 6: local IPC still takes priority over configured TCP hosts");
-  const paseoHome = mkdtempSync(path.join(os.tmpdir(), "paseo-client-targets-order-"));
+  const polyhiveHome = mkdtempSync(path.join(os.tmpdir(), "polyhive-client-targets-order-"));
   try {
-    mkdirSync(paseoHome, { recursive: true });
+    mkdirSync(polyhiveHome, { recursive: true });
     writeFileSync(
-      path.join(paseoHome, "paseo.pid"),
-      JSON.stringify({ pid: process.pid, listen: "/tmp/paseo-priority.sock" }),
+      path.join(polyhiveHome, "polyhive.pid"),
+      JSON.stringify({ pid: process.pid, listen: "/tmp/polyhive-priority.sock" }),
     );
     assert.deepStrictEqual(
       resolveDefaultDaemonHosts({
-        PASEO_HOME: paseoHome,
-        PASEO_LISTEN: "127.0.0.1:7777",
+        POLYHIVE_HOME: polyhiveHome,
+        POLYHIVE_LISTEN: "127.0.0.1:7777",
       }),
-      ["unix:///tmp/paseo-priority.sock", "127.0.0.1:7777", "localhost:6767"],
+      ["unix:///tmp/polyhive-priority.sock", "127.0.0.1:7777", "localhost:6767"],
     );
   } finally {
-    rmSync(paseoHome, { recursive: true, force: true });
+    rmSync(polyhiveHome, { recursive: true, force: true });
   }
   console.log("✓ local IPC still takes priority over configured TCP hosts\n");
 }

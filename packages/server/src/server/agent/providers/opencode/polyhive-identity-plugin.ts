@@ -2,22 +2,22 @@ import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { pathToFileURL } from "node:url";
 import { dirname, join } from "node:path";
 
-export const PASEO_IDENTITY_PLUGIN_FILE = "paseo-identity-plugin.mjs";
+export const POLYHIVE_IDENTITY_PLUGIN_FILE = "polyhive-identity-plugin.mjs";
 
-export const PASEO_IDENTITY_PLUGIN_ID = "paseo-identity";
+export const POLYHIVE_IDENTITY_PLUGIN_ID = "polyhive-identity";
 
-export const PASEO_SESSION_MAP_ENV_VAR = "PASEO_OPENCODE_SESSION_MAP_PATH";
+export const POLYHIVE_SESSION_MAP_ENV_VAR = "POLYHIVE_OPENCODE_SESSION_MAP_PATH";
 
-export const PASEO_IDENTITY_PLUGIN_SOURCE = `// Paseo identity plugin for OpenCode.
-// Auto-installed by the Paseo daemon. Do not edit manually — changes will be overwritten.
+export const POLYHIVE_IDENTITY_PLUGIN_SOURCE = `// PolyHive identity plugin for OpenCode.
+// Auto-installed by the PolyHive daemon. Do not edit manually — changes will be overwritten.
 //
-// Injects PASEO_AGENT_ID into the shell environment of every tool call based on
+// Injects POLYHIVE_AGENT_ID into the shell environment of every tool call based on
 // the OpenCode sessionID reported by the runtime. The mapping is maintained by
-// the Paseo daemon at the file named in ${PASEO_SESSION_MAP_ENV_VAR}.
+// the PolyHive daemon at the file named in ${POLYHIVE_SESSION_MAP_ENV_VAR}.
 
 import { existsSync, readFileSync, statSync } from "node:fs";
 
-const SESSION_MAP_PATH = process.env.${PASEO_SESSION_MAP_ENV_VAR} ?? "";
+const SESSION_MAP_PATH = process.env.${POLYHIVE_SESSION_MAP_ENV_VAR} ?? "";
 
 let cached = { mtimeMs: 0, map: /** @type {Record<string, string>} */ ({}) };
 
@@ -45,14 +45,14 @@ function resolveAgentId(sessionId) {
 // File-loaded OpenCode plugins must export an "id" so the runtime loader can
 // register them. Both the named export and the PluginModule-shaped default
 // export are provided to be compatible with either resolver path.
-export const id = "${PASEO_IDENTITY_PLUGIN_ID}";
+export const id = "${POLYHIVE_IDENTITY_PLUGIN_ID}";
 
 export const server = async () => {
   return {
     "shell.env": async (input, output) => {
       const agentId = resolveAgentId(input?.sessionID);
       if (agentId) {
-        output.env.PASEO_AGENT_ID = agentId;
+        output.env.POLYHIVE_AGENT_ID = agentId;
       }
     },
   };
@@ -66,8 +66,8 @@ export interface InstalledIdentityPlugin {
   fileUrl: string;
 }
 
-export function installIdentityPlugin(paseoHome: string): InstalledIdentityPlugin {
-  const filePath = join(paseoHome, PASEO_IDENTITY_PLUGIN_FILE);
+export function installIdentityPlugin(polyhiveHome: string): InstalledIdentityPlugin {
+  const filePath = join(polyhiveHome, POLYHIVE_IDENTITY_PLUGIN_FILE);
   mkdirSync(dirname(filePath), { recursive: true });
 
   let existing: string | null = null;
@@ -77,8 +77,8 @@ export function installIdentityPlugin(paseoHome: string): InstalledIdentityPlugi
     existing = null;
   }
 
-  if (existing !== PASEO_IDENTITY_PLUGIN_SOURCE) {
-    writeFileSync(filePath, PASEO_IDENTITY_PLUGIN_SOURCE, "utf8");
+  if (existing !== POLYHIVE_IDENTITY_PLUGIN_SOURCE) {
+    writeFileSync(filePath, POLYHIVE_IDENTITY_PLUGIN_SOURCE, "utf8");
   }
 
   return {

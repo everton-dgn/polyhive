@@ -5,7 +5,7 @@ import { pageMeta } from "~/meta";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: pageMeta(
-      "Paseo - Run Claude Code, Codex, and OpenCode from your Mac",
+      "PolyHive - Run Claude Code, Codex, and OpenCode from your Mac",
       "A self-hosted daemon for Claude Code, Codex, and OpenCode. Agents run on your Mac with your full dev environment. Connect from the macOS app, browser, phone browser, or terminal.",
     ),
   }),

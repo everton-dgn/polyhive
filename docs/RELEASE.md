@@ -23,7 +23,7 @@ npm run release:patch
 
 This bumps the version across all workspaces, runs checks, publishes to npm, and pushes the branch + tag (triggering the desktop workflow).
 
-If asked to "release paseo" without specifying major/minor, treat it as a patch release.
+If asked to "release polyhive" without specifying major/minor, treat it as a patch release.
 
 Use the direct stable path when the current `main` changes are ready to become the public release immediately.
 
@@ -92,7 +92,7 @@ This ensures the checkout ref matches the actual code on `main` with the fix inc
 
 ## Notes
 
-- `version:all:*` bumps root + syncs workspace versions and `@getpaseo/*` dependency versions
+- `version:all:*` bumps root + syncs workspace versions and PolyHive internal dependency versions
 - `release:prepare` refreshes workspace `node_modules` links to prevent stale types
 - `npm run dev:desktop` and `npm run build:desktop` target the Electron desktop package in `packages/desktop`
 - If `release:publish` partially fails, re-run it — npm skips already-published versions
@@ -120,11 +120,11 @@ No prefix (`v`), no extra text. The parser matches the first `## X.Y.Z` line to 
 ## Changelog ownership
 
 - **Only Claude should write changelog entries.**
-- If you are Codex and a stable release needs a changelog entry, launch a Claude agent with Paseo to draft it, then review and commit the result.
+- If you are Codex and a stable release needs a changelog entry, launch a Claude agent with PolyHive to draft it, then review and commit the result.
 
 ## Changelog voice
 
-The changelog is shown on the Paseo homepage. Write it for **end users**, not developers.
+The changelog is shown on the PolyHive homepage. Write it for **end users**, not developers.
 
 - **Frame everything from the user's perspective.** Describe what changed in the app, not what changed in the code. Users care that "workspaces load instantly" — not that a component no longer remounts.
 - **Never mention component names, internal modules, or implementation details.** No `WorkingIndicator`, no `accumulatedUsage`, no `reconcileAndEmitWorkspaceUpdates`.
@@ -172,7 +172,7 @@ Entries within each section (Added, Improved, Fixed) are ordered by user impact:
 
 Before cutting any release (beta or stable), run a Codex review of the diff as a last line of defense against shipping bugs.
 
-Load the `paseo` skill and launch a **Codex 5.4** agent with a prompt like:
+Load the `polyhive` skill and launch a **Codex 5.4** agent with a prompt like:
 
 > Review the diff between the latest release tag and HEAD. Focus on:
 >

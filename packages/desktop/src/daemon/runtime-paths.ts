@@ -1,6 +1,6 @@
 import { existsSync, readFileSync } from "node:fs";
 import { spawnSync } from "node:child_process";
-import { spawnProcess } from "@getpaseo/server";
+import { spawnProcess } from "polyhive-server";
 import { createRequire } from "node:module";
 import path from "node:path";
 import { app } from "electron";
@@ -14,9 +14,9 @@ import {
   type NodeEntrypointSpec,
 } from "./node-entrypoint-launcher.js";
 
-const CLI_PACKAGE_NAME = "@getpaseo/cli";
-const SERVER_PACKAGE_NAME = "@getpaseo/server";
-const CLI_BIN_ENTRY = `${CLI_PACKAGE_NAME}/bin/paseo`;
+const CLI_PACKAGE_NAME = "polyhive";
+const SERVER_PACKAGE_NAME = "polyhive-server";
+const CLI_BIN_ENTRY = `${CLI_PACKAGE_NAME}/bin/polyhive`;
 
 type PackageInfo = {
   root: string;
@@ -111,8 +111,7 @@ export function resolveDaemonRunnerEntrypoint(): NodeEntrypointSpec {
         filePath: path.join(
           resolvePackagedAsarPath(),
           "node_modules",
-          "@getpaseo",
-          "server",
+          "polyhive-server",
           "dist",
           "scripts",
           "supervisor-entrypoint.js",
@@ -148,8 +147,7 @@ export function resolveCliEntrypoint(): NodeEntrypointSpec {
         filePath: path.join(
           resolvePackagedAsarPath(),
           "node_modules",
-          "@getpaseo",
-          "cli",
+          "polyhive",
           "dist",
           "index.js",
         ),

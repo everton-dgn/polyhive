@@ -127,11 +127,11 @@ describe("STTManager", () => {
 
   it("defaults to English when no language env vars are set", async () => {
     const original = {
-      voice: process.env.PASEO_VOICE_LANGUAGE,
-      dictation: process.env.PASEO_DICTATION_LANGUAGE,
+      voice: process.env.POLYHIVE_VOICE_LANGUAGE,
+      dictation: process.env.POLYHIVE_DICTATION_LANGUAGE,
     };
-    delete process.env.PASEO_VOICE_LANGUAGE;
-    delete process.env.PASEO_DICTATION_LANGUAGE;
+    delete process.env.POLYHIVE_VOICE_LANGUAGE;
+    delete process.env.POLYHIVE_DICTATION_LANGUAGE;
 
     try {
       const fakeStt = new FakeStt({ text: "hi", isLowConfidence: false });
@@ -139,21 +139,21 @@ describe("STTManager", () => {
       await manager.transcribe(Buffer.alloc(2), "audio/pcm;rate=24000");
       expect(fakeStt.lastLanguage).toBe("en");
     } finally {
-      if (original.voice !== undefined) process.env.PASEO_VOICE_LANGUAGE = original.voice;
-      else delete process.env.PASEO_VOICE_LANGUAGE;
+      if (original.voice !== undefined) process.env.POLYHIVE_VOICE_LANGUAGE = original.voice;
+      else delete process.env.POLYHIVE_VOICE_LANGUAGE;
       if (original.dictation !== undefined)
-        process.env.PASEO_DICTATION_LANGUAGE = original.dictation;
-      else delete process.env.PASEO_DICTATION_LANGUAGE;
+        process.env.POLYHIVE_DICTATION_LANGUAGE = original.dictation;
+      else delete process.env.POLYHIVE_DICTATION_LANGUAGE;
     }
   });
 
-  it("uses PASEO_VOICE_LANGUAGE over PASEO_DICTATION_LANGUAGE", async () => {
+  it("uses POLYHIVE_VOICE_LANGUAGE over POLYHIVE_DICTATION_LANGUAGE", async () => {
     const original = {
-      voice: process.env.PASEO_VOICE_LANGUAGE,
-      dictation: process.env.PASEO_DICTATION_LANGUAGE,
+      voice: process.env.POLYHIVE_VOICE_LANGUAGE,
+      dictation: process.env.POLYHIVE_DICTATION_LANGUAGE,
     };
-    process.env.PASEO_VOICE_LANGUAGE = "pt";
-    process.env.PASEO_DICTATION_LANGUAGE = "es";
+    process.env.POLYHIVE_VOICE_LANGUAGE = "pt";
+    process.env.POLYHIVE_DICTATION_LANGUAGE = "es";
 
     try {
       const fakeStt = new FakeStt({ text: "oi", isLowConfidence: false });
@@ -161,21 +161,21 @@ describe("STTManager", () => {
       await manager.transcribe(Buffer.alloc(2), "audio/pcm;rate=24000");
       expect(fakeStt.lastLanguage).toBe("pt");
     } finally {
-      if (original.voice !== undefined) process.env.PASEO_VOICE_LANGUAGE = original.voice;
-      else delete process.env.PASEO_VOICE_LANGUAGE;
+      if (original.voice !== undefined) process.env.POLYHIVE_VOICE_LANGUAGE = original.voice;
+      else delete process.env.POLYHIVE_VOICE_LANGUAGE;
       if (original.dictation !== undefined)
-        process.env.PASEO_DICTATION_LANGUAGE = original.dictation;
-      else delete process.env.PASEO_DICTATION_LANGUAGE;
+        process.env.POLYHIVE_DICTATION_LANGUAGE = original.dictation;
+      else delete process.env.POLYHIVE_DICTATION_LANGUAGE;
     }
   });
 
-  it("falls back to PASEO_DICTATION_LANGUAGE when PASEO_VOICE_LANGUAGE is unset", async () => {
+  it("falls back to POLYHIVE_DICTATION_LANGUAGE when POLYHIVE_VOICE_LANGUAGE is unset", async () => {
     const original = {
-      voice: process.env.PASEO_VOICE_LANGUAGE,
-      dictation: process.env.PASEO_DICTATION_LANGUAGE,
+      voice: process.env.POLYHIVE_VOICE_LANGUAGE,
+      dictation: process.env.POLYHIVE_DICTATION_LANGUAGE,
     };
-    delete process.env.PASEO_VOICE_LANGUAGE;
-    process.env.PASEO_DICTATION_LANGUAGE = "pt";
+    delete process.env.POLYHIVE_VOICE_LANGUAGE;
+    process.env.POLYHIVE_DICTATION_LANGUAGE = "pt";
 
     try {
       const fakeStt = new FakeStt({ text: "oi", isLowConfidence: false });
@@ -183,21 +183,21 @@ describe("STTManager", () => {
       await manager.transcribe(Buffer.alloc(2), "audio/pcm;rate=24000");
       expect(fakeStt.lastLanguage).toBe("pt");
     } finally {
-      if (original.voice !== undefined) process.env.PASEO_VOICE_LANGUAGE = original.voice;
-      else delete process.env.PASEO_VOICE_LANGUAGE;
+      if (original.voice !== undefined) process.env.POLYHIVE_VOICE_LANGUAGE = original.voice;
+      else delete process.env.POLYHIVE_VOICE_LANGUAGE;
       if (original.dictation !== undefined)
-        process.env.PASEO_DICTATION_LANGUAGE = original.dictation;
-      else delete process.env.PASEO_DICTATION_LANGUAGE;
+        process.env.POLYHIVE_DICTATION_LANGUAGE = original.dictation;
+      else delete process.env.POLYHIVE_DICTATION_LANGUAGE;
     }
   });
 
   it("treats empty env vars as unset and falls back to default", async () => {
     const original = {
-      voice: process.env.PASEO_VOICE_LANGUAGE,
-      dictation: process.env.PASEO_DICTATION_LANGUAGE,
+      voice: process.env.POLYHIVE_VOICE_LANGUAGE,
+      dictation: process.env.POLYHIVE_DICTATION_LANGUAGE,
     };
-    process.env.PASEO_VOICE_LANGUAGE = "";
-    process.env.PASEO_DICTATION_LANGUAGE = "  ";
+    process.env.POLYHIVE_VOICE_LANGUAGE = "";
+    process.env.POLYHIVE_DICTATION_LANGUAGE = "  ";
 
     try {
       const fakeStt = new FakeStt({ text: "hi", isLowConfidence: false });
@@ -205,17 +205,17 @@ describe("STTManager", () => {
       await manager.transcribe(Buffer.alloc(2), "audio/pcm;rate=24000");
       expect(fakeStt.lastLanguage).toBe("en");
     } finally {
-      if (original.voice !== undefined) process.env.PASEO_VOICE_LANGUAGE = original.voice;
-      else delete process.env.PASEO_VOICE_LANGUAGE;
+      if (original.voice !== undefined) process.env.POLYHIVE_VOICE_LANGUAGE = original.voice;
+      else delete process.env.POLYHIVE_VOICE_LANGUAGE;
       if (original.dictation !== undefined)
-        process.env.PASEO_DICTATION_LANGUAGE = original.dictation;
-      else delete process.env.PASEO_DICTATION_LANGUAGE;
+        process.env.POLYHIVE_DICTATION_LANGUAGE = original.dictation;
+      else delete process.env.POLYHIVE_DICTATION_LANGUAGE;
     }
   });
 
   it("uses streaming segmentation for batch transcription and concatenates segment finals", async () => {
-    const original = process.env.PASEO_STT_BATCH_COMMIT_EVERY_SECONDS;
-    process.env.PASEO_STT_BATCH_COMMIT_EVERY_SECONDS = "1";
+    const original = process.env.POLYHIVE_STT_BATCH_COMMIT_EVERY_SECONDS;
+    process.env.POLYHIVE_STT_BATCH_COMMIT_EVERY_SECONDS = "1";
 
     try {
       const manager = new STTManager(
@@ -232,9 +232,9 @@ describe("STTManager", () => {
       expect(result.byteLength).toBe(threeSecondsPcm.length);
     } finally {
       if (original === undefined) {
-        delete process.env.PASEO_STT_BATCH_COMMIT_EVERY_SECONDS;
+        delete process.env.POLYHIVE_STT_BATCH_COMMIT_EVERY_SECONDS;
       } else {
-        process.env.PASEO_STT_BATCH_COMMIT_EVERY_SECONDS = original;
+        process.env.POLYHIVE_STT_BATCH_COMMIT_EVERY_SECONDS = original;
       }
     }
   });

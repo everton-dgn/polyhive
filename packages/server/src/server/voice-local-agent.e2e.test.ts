@@ -10,7 +10,7 @@ import { OpenAITTS } from "./speech/providers/openai/tts.js";
 
 const openaiApiKey = process.env.OPENAI_API_KEY ?? null;
 const shouldRun =
-  process.env.PASEO_VOICE_LOCAL_AGENT_E2E === "1" && Boolean(openaiApiKey) && !process.env.CI;
+  process.env.POLYHIVE_VOICE_LOCAL_AGENT_E2E === "1" && Boolean(openaiApiKey) && !process.env.CI;
 
 function waitForSignal<T>(
   timeoutMs: number,

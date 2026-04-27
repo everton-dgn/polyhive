@@ -2,12 +2,12 @@ import { existsSync, mkdirSync, readFileSync, writeFileSync } from "fs";
 import { isAbsolute, join, resolve } from "path";
 import { z } from "zod";
 
-const PaseoWorktreeMetadataV1Schema = z.object({
+const PolyHiveWorktreeMetadataV1Schema = z.object({
   version: z.literal(1),
   baseRefName: z.string().min(1),
 });
 
-const PaseoWorktreeMetadataV2Schema = z.object({
+const PolyHiveWorktreeMetadataV2Schema = z.object({
   version: z.literal(2),
   baseRefName: z.string().min(1),
   runtime: z
@@ -17,12 +17,12 @@ const PaseoWorktreeMetadataV2Schema = z.object({
     .optional(),
 });
 
-const PaseoWorktreeMetadataSchema = z.union([
-  PaseoWorktreeMetadataV1Schema,
-  PaseoWorktreeMetadataV2Schema,
+const PolyHiveWorktreeMetadataSchema = z.union([
+  PolyHiveWorktreeMetadataV1Schema,
+  PolyHiveWorktreeMetadataV2Schema,
 ]);
 
-export type PaseoWorktreeMetadata = z.infer<typeof PaseoWorktreeMetadataSchema>;
+export type PolyHiveWorktreeMetadata = z.infer<typeof PolyHiveWorktreeMetadataSchema>;
 
 function getGitDirForWorktreeRoot(worktreeRoot: string): string {
   const gitPath = join(worktreeRoot, ".git");
@@ -46,9 +46,9 @@ function getGitDirForWorktreeRoot(worktreeRoot: string): string {
   return gitPath;
 }
 
-export function getPaseoWorktreeMetadataPath(worktreeRoot: string): string {
+export function getPolyHiveWorktreeMetadataPath(worktreeRoot: string): string {
   const gitDir = getGitDirForWorktreeRoot(worktreeRoot);
-  return join(gitDir, "paseo", "worktree.json");
+  return join(gitDir, "polyhive", "worktree.json");
 }
 
 export function normalizeBaseRefName(input: string): string {
@@ -62,7 +62,7 @@ export function normalizeBaseRefName(input: string): string {
   return trimmed;
 }
 
-export function writePaseoWorktreeMetadata(
+export function writePolyHiveWorktreeMetadata(
   worktreeRoot: string,
   options: { baseRefName: string },
 ): void {
@@ -77,13 +77,13 @@ export function writePaseoWorktreeMetadata(
     throw new Error(`Invalid base branch: ${baseRefName}`);
   }
 
-  const metadataPath = getPaseoWorktreeMetadataPath(worktreeRoot);
-  mkdirSync(join(getGitDirForWorktreeRoot(worktreeRoot), "paseo"), { recursive: true });
-  const metadata: PaseoWorktreeMetadata = { version: 1, baseRefName };
+  const metadataPath = getPolyHiveWorktreeMetadataPath(worktreeRoot);
+  mkdirSync(join(getGitDirForWorktreeRoot(worktreeRoot), "polyhive"), { recursive: true });
+  const metadata: PolyHiveWorktreeMetadata = { version: 1, baseRefName };
   writeFileSync(metadataPath, `${JSON.stringify(metadata, null, 2)}\n`, "utf8");
 }
 
-export function writePaseoWorktreeRuntimeMetadata(
+export function writePolyHiveWorktreeRuntimeMetadata(
   worktreeRoot: string,
   options: { worktreePort: number },
 ): void {
@@ -91,14 +91,14 @@ export function writePaseoWorktreeRuntimeMetadata(
     throw new Error(`Invalid worktree runtime port: ${options.worktreePort}`);
   }
 
-  const current = readPaseoWorktreeMetadata(worktreeRoot);
+  const current = readPolyHiveWorktreeMetadata(worktreeRoot);
   if (!current) {
     throw new Error("Cannot persist worktree runtime metadata: missing base metadata");
   }
 
-  const metadataPath = getPaseoWorktreeMetadataPath(worktreeRoot);
-  mkdirSync(join(getGitDirForWorktreeRoot(worktreeRoot), "paseo"), { recursive: true });
-  const next: PaseoWorktreeMetadata = {
+  const metadataPath = getPolyHiveWorktreeMetadataPath(worktreeRoot);
+  mkdirSync(join(getGitDirForWorktreeRoot(worktreeRoot), "polyhive"), { recursive: true });
+  const next: PolyHiveWorktreeMetadata = {
     version: 2,
     baseRefName: current.baseRefName,
     runtime: {
@@ -108,26 +108,28 @@ export function writePaseoWorktreeRuntimeMetadata(
   writeFileSync(metadataPath, `${JSON.stringify(next, null, 2)}\n`, "utf8");
 }
 
-export function readPaseoWorktreeMetadata(worktreeRoot: string): PaseoWorktreeMetadata | null {
-  const metadataPath = getPaseoWorktreeMetadataPath(worktreeRoot);
+export function readPolyHiveWorktreeMetadata(
+  worktreeRoot: string,
+): PolyHiveWorktreeMetadata | null {
+  const metadataPath = getPolyHiveWorktreeMetadataPath(worktreeRoot);
   if (!existsSync(metadataPath)) {
     return null;
   }
   const parsed = JSON.parse(readFileSync(metadataPath, "utf8"));
-  return PaseoWorktreeMetadataSchema.parse(parsed);
+  return PolyHiveWorktreeMetadataSchema.parse(parsed);
 }
 
-export function requirePaseoWorktreeBaseRefName(worktreeRoot: string): string {
-  const metadataPath = getPaseoWorktreeMetadataPath(worktreeRoot);
-  const metadata = readPaseoWorktreeMetadata(worktreeRoot);
+export function requirePolyHiveWorktreeBaseRefName(worktreeRoot: string): string {
+  const metadataPath = getPolyHiveWorktreeMetadataPath(worktreeRoot);
+  const metadata = readPolyHiveWorktreeMetadata(worktreeRoot);
   if (!metadata) {
-    throw new Error(`Missing Paseo worktree base metadata: ${metadataPath}`);
+    throw new Error(`Missing PolyHive worktree base metadata: ${metadataPath}`);
   }
   return metadata.baseRefName;
 }
 
-export function readPaseoWorktreeRuntimePort(worktreeRoot: string): number | null {
-  const metadata = readPaseoWorktreeMetadata(worktreeRoot);
+export function readPolyHiveWorktreeRuntimePort(worktreeRoot: string): number | null {
+  const metadata = readPolyHiveWorktreeMetadata(worktreeRoot);
   if (!metadata) {
     return null;
   }

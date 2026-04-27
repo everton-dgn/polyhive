@@ -46,7 +46,7 @@ import {
   darkHighlightColors,
   lightHighlightColors,
   type HighlightStyle as HighlightStyleKey,
-} from "@getpaseo/highlight";
+} from "polyhive-highlight";
 import { WORKSPACE_SECONDARY_HEADER_HEIGHT } from "@/constants/layout";
 import { Fonts } from "@/constants/theme";
 import { shouldAnchorHeaderBeforeCollapse } from "@/utils/git-diff-scroll";
@@ -689,7 +689,7 @@ export function GitDiffPane({ serverId, workspaceId, cwd, hideHeaderRow }: GitDi
     if (!gitStatus?.repoRoot) {
       return null;
     }
-    return `@paseo:changes-ship-default:${gitStatus.repoRoot}`;
+    return `@polyhive:changes-ship-default:${gitStatus.repoRoot}`;
   }, [gitStatus?.repoRoot]);
 
   useEffect(() => {
@@ -1057,12 +1057,12 @@ export function GitDiffPane({ serverId, workspaceId, cwd, hideHeaderRow }: GitDi
   }, [baseRefLabel, branchLabel]);
   const hasPullRequest = Boolean(prStatus?.url);
   const hasRemote = gitStatus?.hasRemote ?? false;
-  const isPaseoOwnedWorktree = gitStatus?.isPaseoOwnedWorktree ?? false;
+  const isPolyHiveOwnedWorktree = gitStatus?.isPolyHiveOwnedWorktree ?? false;
   const isMergedPullRequest = Boolean(prStatus?.isMerged);
   const currentBranch = gitStatus?.currentBranch;
   const isOnBaseBranch = currentBranch === baseRefLabel;
   const shouldPromoteArchive =
-    isPaseoOwnedWorktree &&
+    isPolyHiveOwnedWorktree &&
     !hasUncommittedChanges &&
     (postShipArchiveSuggested || isMergedPullRequest);
 
@@ -1166,7 +1166,7 @@ export function GitDiffPane({ serverId, workspaceId, cwd, hideHeaderRow }: GitDi
       hasPullRequest,
       pullRequestUrl: prStatus?.url ?? null,
       hasRemote,
-      isPaseoOwnedWorktree,
+      isPolyHiveOwnedWorktree,
       isOnBaseBranch,
       hasUncommittedChanges,
       baseRefAvailable: Boolean(baseRef),
@@ -1235,7 +1235,7 @@ export function GitDiffPane({ serverId, workspaceId, cwd, hideHeaderRow }: GitDi
     prStatus?.url,
     aheadCount,
     behindBaseCount,
-    isPaseoOwnedWorktree,
+    isPolyHiveOwnedWorktree,
     isOnBaseBranch,
     githubFeaturesEnabled,
     hasUncommittedChanges,

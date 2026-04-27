@@ -9,7 +9,7 @@ import {
 import { dirname, join } from "node:path";
 import type { Logger } from "pino";
 
-import { resolvePaseoHome } from "../../../paseo-home.js";
+import { resolvePolyHiveHome } from "../../../polyhive-home.js";
 
 export const SESSION_MAP_FILE_NAME = "opencode-session-map.json";
 
@@ -18,7 +18,7 @@ export interface SessionAgentMapSnapshot {
 }
 
 export interface SessionAgentMapOptions {
-  paseoHome?: string;
+  polyhiveHome?: string;
   logger?: Logger;
 }
 
@@ -28,7 +28,7 @@ export class SessionAgentMap {
   private readonly logger?: Logger;
 
   constructor(options: SessionAgentMapOptions = {}) {
-    const home = options.paseoHome ?? resolvePaseoHome();
+    const home = options.polyhiveHome ?? resolvePolyHiveHome();
     this.filePath = join(home, SESSION_MAP_FILE_NAME);
     this.logger = options.logger;
     this.loadFromDisk();

@@ -1180,8 +1180,8 @@ export const StashPopRequestSchema = z.object({
 export const StashListRequestSchema = z.object({
   type: z.literal("stash_list_request"),
   cwd: z.string(),
-  /** If true, only return paseo-created stashes. Default true. */
-  paseoOnly: z.boolean().optional(),
+  /** If true, only return polyhive-created stashes. Default true. */
+  polyhiveOnly: z.boolean().optional(),
   requestId: z.string(),
 });
 
@@ -1227,23 +1227,23 @@ export const DirectorySuggestionsRequestSchema = z.object({
   requestId: z.string(),
 });
 
-export const PaseoWorktreeListRequestSchema = z.object({
-  type: z.literal("paseo_worktree_list_request"),
+export const PolyHiveWorktreeListRequestSchema = z.object({
+  type: z.literal("polyhive_worktree_list_request"),
   cwd: z.string().optional(),
   repoRoot: z.string().optional(),
   requestId: z.string(),
 });
 
-export const PaseoWorktreeArchiveRequestSchema = z.object({
-  type: z.literal("paseo_worktree_archive_request"),
+export const PolyHiveWorktreeArchiveRequestSchema = z.object({
+  type: z.literal("polyhive_worktree_archive_request"),
   worktreePath: z.string().optional(),
   repoRoot: z.string().optional(),
   branchName: z.string().optional(),
   requestId: z.string(),
 });
 
-export const CreatePaseoWorktreeRequestSchema = z.object({
-  type: z.literal("create_paseo_worktree_request"),
+export const CreatePolyHiveWorktreeRequestSchema = z.object({
+  type: z.literal("create_polyhive_worktree_request"),
   cwd: z.string(),
   worktreeSlug: z.string().optional(),
   attachments: AgentAttachmentsSchema,
@@ -1586,9 +1586,9 @@ export const SessionInboundMessageSchema = z.discriminatedUnion("type", [
   BranchSuggestionsRequestSchema,
   GitHubSearchRequestSchema,
   DirectorySuggestionsRequestSchema,
-  PaseoWorktreeListRequestSchema,
-  PaseoWorktreeArchiveRequestSchema,
-  CreatePaseoWorktreeRequestSchema,
+  PolyHiveWorktreeListRequestSchema,
+  PolyHiveWorktreeArchiveRequestSchema,
+  CreatePolyHiveWorktreeRequestSchema,
   WorkspaceSetupStatusRequestSchema,
   ListAvailableEditorsRequestSchema,
   OpenInEditorRequestSchema,
@@ -1920,7 +1920,7 @@ export const ProjectCheckoutLiteNotGitPayloadSchema = z
     currentBranch: z.null(),
     remoteUrl: z.null(),
     worktreeRoot: z.null().optional(),
-    isPaseoOwnedWorktree: z.literal(false),
+    isPolyHiveOwnedWorktree: z.literal(false),
     mainRepoRoot: z.null(),
   })
   .transform((value) => ({
@@ -1928,14 +1928,14 @@ export const ProjectCheckoutLiteNotGitPayloadSchema = z
     worktreeRoot: null,
   }));
 
-export const ProjectCheckoutLiteGitNonPaseoPayloadSchema = z
+export const ProjectCheckoutLiteGitNonPolyHivePayloadSchema = z
   .object({
     cwd: z.string(),
     isGit: z.literal(true),
     currentBranch: z.string().nullable(),
     remoteUrl: z.string().nullable(),
     worktreeRoot: z.string().optional(),
-    isPaseoOwnedWorktree: z.literal(false),
+    isPolyHiveOwnedWorktree: z.literal(false),
     mainRepoRoot: z.null(),
   })
   .transform((value) => ({
@@ -1943,14 +1943,14 @@ export const ProjectCheckoutLiteGitNonPaseoPayloadSchema = z
     worktreeRoot: value.worktreeRoot ?? value.cwd,
   }));
 
-export const ProjectCheckoutLiteGitPaseoPayloadSchema = z
+export const ProjectCheckoutLiteGitPolyHivePayloadSchema = z
   .object({
     cwd: z.string(),
     isGit: z.literal(true),
     currentBranch: z.string().nullable(),
     remoteUrl: z.string().nullable(),
     worktreeRoot: z.string().optional(),
-    isPaseoOwnedWorktree: z.literal(true),
+    isPolyHiveOwnedWorktree: z.literal(true),
     mainRepoRoot: z.string(),
   })
   .transform((value) => ({
@@ -1960,8 +1960,8 @@ export const ProjectCheckoutLiteGitPaseoPayloadSchema = z
 
 export const ProjectCheckoutLitePayloadSchema = z.union([
   ProjectCheckoutLiteNotGitPayloadSchema,
-  ProjectCheckoutLiteGitNonPaseoPayloadSchema,
-  ProjectCheckoutLiteGitPaseoPayloadSchema,
+  ProjectCheckoutLiteGitNonPolyHivePayloadSchema,
+  ProjectCheckoutLiteGitPolyHivePayloadSchema,
 ]);
 
 export const ProjectPlacementPayloadSchema = z.object({
@@ -1989,7 +1989,7 @@ const WorkspaceGitRuntimePayloadSchema = z
   .object({
     currentBranch: z.string().nullable().optional(),
     remoteUrl: z.string().nullable().optional(),
-    isPaseoOwnedWorktree: z.boolean().optional(),
+    isPolyHiveOwnedWorktree: z.boolean().optional(),
     isDirty: z.boolean().nullable().optional(),
     aheadBehind: z
       .object({
@@ -2404,7 +2404,7 @@ const CheckoutStatusCommonSchema = z.object({
 
 const CheckoutStatusNotGitSchema = CheckoutStatusCommonSchema.extend({
   isGit: z.literal(false),
-  isPaseoOwnedWorktree: z.literal(false),
+  isPolyHiveOwnedWorktree: z.literal(false),
   repoRoot: z.null(),
   currentBranch: z.null(),
   isDirty: z.null(),
@@ -2416,9 +2416,9 @@ const CheckoutStatusNotGitSchema = CheckoutStatusCommonSchema.extend({
   remoteUrl: z.null(),
 });
 
-const CheckoutStatusGitNonPaseoSchema = CheckoutStatusCommonSchema.extend({
+const CheckoutStatusGitNonPolyHiveSchema = CheckoutStatusCommonSchema.extend({
   isGit: z.literal(true),
-  isPaseoOwnedWorktree: z.literal(false),
+  isPolyHiveOwnedWorktree: z.literal(false),
   repoRoot: z.string(),
   currentBranch: z.string().nullable(),
   isDirty: z.boolean(),
@@ -2430,9 +2430,9 @@ const CheckoutStatusGitNonPaseoSchema = CheckoutStatusCommonSchema.extend({
   remoteUrl: z.string().nullable(),
 });
 
-const CheckoutStatusGitPaseoSchema = CheckoutStatusCommonSchema.extend({
+const CheckoutStatusGitPolyHiveSchema = CheckoutStatusCommonSchema.extend({
   isGit: z.literal(true),
-  isPaseoOwnedWorktree: z.literal(true),
+  isPolyHiveOwnedWorktree: z.literal(true),
   repoRoot: z.string(),
   mainRepoRoot: z.string(),
   currentBranch: z.string().nullable(),
@@ -2449,8 +2449,8 @@ export const CheckoutStatusResponseSchema = z.object({
   type: z.literal("checkout_status_response"),
   payload: z.union([
     CheckoutStatusNotGitSchema,
-    CheckoutStatusGitNonPaseoSchema,
-    CheckoutStatusGitPaseoSchema,
+    CheckoutStatusGitNonPolyHiveSchema,
+    CheckoutStatusGitPolyHiveSchema,
   ]),
 });
 
@@ -2498,8 +2498,8 @@ export const CheckoutStatusUpdateSchema = z.object({
   payload: z
     .union([
       CheckoutStatusNotGitSchema,
-      CheckoutStatusGitNonPaseoSchema,
-      CheckoutStatusGitPaseoSchema,
+      CheckoutStatusGitNonPolyHiveSchema,
+      CheckoutStatusGitPolyHiveSchema,
     ])
     .and(CheckoutStatusUpdateMetadataSchema),
 });
@@ -2686,7 +2686,7 @@ const StashEntrySchema = z.object({
   index: z.number().int().min(0),
   message: z.string(),
   branch: z.string().nullable(),
-  isPaseo: z.boolean(),
+  isPolyHive: z.boolean(),
 });
 
 export const StashSaveResponseSchema = z.object({
@@ -2777,24 +2777,24 @@ export const DirectorySuggestionsResponseSchema = z.object({
   }),
 });
 
-const PaseoWorktreeSchema = z.object({
+const PolyHiveWorktreeSchema = z.object({
   worktreePath: z.string(),
   createdAt: z.string(),
   branchName: z.string().nullable().optional(),
   head: z.string().nullable().optional(),
 });
 
-export const PaseoWorktreeListResponseSchema = z.object({
-  type: z.literal("paseo_worktree_list_response"),
+export const PolyHiveWorktreeListResponseSchema = z.object({
+  type: z.literal("polyhive_worktree_list_response"),
   payload: z.object({
-    worktrees: z.array(PaseoWorktreeSchema),
+    worktrees: z.array(PolyHiveWorktreeSchema),
     error: CheckoutErrorSchema.nullable(),
     requestId: z.string(),
   }),
 });
 
-export const PaseoWorktreeArchiveResponseSchema = z.object({
-  type: z.literal("paseo_worktree_archive_response"),
+export const PolyHiveWorktreeArchiveResponseSchema = z.object({
+  type: z.literal("polyhive_worktree_archive_response"),
   payload: z.object({
     success: z.boolean(),
     removedAgents: z.array(z.string()).optional(),
@@ -2803,8 +2803,8 @@ export const PaseoWorktreeArchiveResponseSchema = z.object({
   }),
 });
 
-export const CreatePaseoWorktreeResponseSchema = z.object({
-  type: z.literal("create_paseo_worktree_response"),
+export const CreatePolyHiveWorktreeResponseSchema = z.object({
+  type: z.literal("create_polyhive_worktree_response"),
   payload: z.object({
     workspace: WorkspaceDescriptorPayloadSchema.nullable(),
     error: z.string().nullable(),
@@ -3147,9 +3147,9 @@ export const SessionOutboundMessageSchema = z.discriminatedUnion("type", [
   BranchSuggestionsResponseSchema,
   GitHubSearchResponseSchema,
   DirectorySuggestionsResponseSchema,
-  PaseoWorktreeListResponseSchema,
-  PaseoWorktreeArchiveResponseSchema,
-  CreatePaseoWorktreeResponseSchema,
+  PolyHiveWorktreeListResponseSchema,
+  PolyHiveWorktreeArchiveResponseSchema,
+  CreatePolyHiveWorktreeResponseSchema,
   FileExplorerResponseSchema,
   ProjectIconResponseSchema,
   FileDownloadTokenResponseSchema,
@@ -3394,13 +3394,13 @@ export type GitHubSearchItem = z.infer<typeof GitHubSearchItemSchema>;
 export type GitHubSearchKind = z.infer<typeof GitHubSearchKindSchema>;
 export type GitHubSearchRequest = z.infer<typeof GitHubSearchRequestSchema>;
 export type GitHubSearchResponse = z.infer<typeof GitHubSearchResponseSchema>;
-export type CreatePaseoWorktreeRequest = z.infer<typeof CreatePaseoWorktreeRequestSchema>;
+export type CreatePolyHiveWorktreeRequest = z.infer<typeof CreatePolyHiveWorktreeRequestSchema>;
 export type DirectorySuggestionsRequest = z.infer<typeof DirectorySuggestionsRequestSchema>;
 export type DirectorySuggestionsResponse = z.infer<typeof DirectorySuggestionsResponseSchema>;
-export type PaseoWorktreeListRequest = z.infer<typeof PaseoWorktreeListRequestSchema>;
-export type PaseoWorktreeListResponse = z.infer<typeof PaseoWorktreeListResponseSchema>;
-export type PaseoWorktreeArchiveRequest = z.infer<typeof PaseoWorktreeArchiveRequestSchema>;
-export type PaseoWorktreeArchiveResponse = z.infer<typeof PaseoWorktreeArchiveResponseSchema>;
+export type PolyHiveWorktreeListRequest = z.infer<typeof PolyHiveWorktreeListRequestSchema>;
+export type PolyHiveWorktreeListResponse = z.infer<typeof PolyHiveWorktreeListResponseSchema>;
+export type PolyHiveWorktreeArchiveRequest = z.infer<typeof PolyHiveWorktreeArchiveRequestSchema>;
+export type PolyHiveWorktreeArchiveResponse = z.infer<typeof PolyHiveWorktreeArchiveResponseSchema>;
 export type WorkspaceSetupStatusRequest = z.infer<typeof WorkspaceSetupStatusRequestSchema>;
 export type ListAvailableEditorsRequest = z.infer<typeof ListAvailableEditorsRequestSchema>;
 export type OpenInEditorRequest = z.infer<typeof OpenInEditorRequestSchema>;

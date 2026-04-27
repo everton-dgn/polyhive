@@ -1,7 +1,8 @@
 const DEFAULT_SITE_HOST = "https://polyhive.vercel.app";
 const DEFAULT_GITHUB_REPO = "everton-dgn/polyhive";
 const DEFAULT_WEB_APP_URL = "https://polyhive-app.vercel.app";
-const DEFAULT_CLI_START_COMMAND = "paseo";
+const DEFAULT_CLI_INSTALL_COMMAND = "npm install -g polyhive";
+const DEFAULT_CLI_START_COMMAND = "polyhive";
 
 function readEnv(key: string): string | undefined {
   const value = import.meta.env[key];
@@ -13,23 +14,18 @@ function readEnv(key: string): string | undefined {
 function requireForkEnv(key: string, fallback: string): string {
   const value = readEnv(key);
   if (value) return value;
-  if (import.meta.env.PROD) {
-    throw new Error(
-      `[fork-identity] Missing required env var ${key} in production build. ` +
-        `Configure it in Vercel project settings.`,
-    );
-  }
-  console.warn(`[fork-identity] ${key} not set; using dev fallback ${fallback}`);
+  console.warn(`[fork-identity] ${key} not set; using fallback ${fallback}`);
   return fallback;
 }
 
-export const SITE_HOST = requireForkEnv("VITE_PASEO_SITE_HOST", DEFAULT_SITE_HOST);
-export const GITHUB_REPO = requireForkEnv("VITE_PASEO_GITHUB_REPO", DEFAULT_GITHUB_REPO);
-export const WEB_APP_URL = requireForkEnv("VITE_PASEO_WEB_APP_URL", DEFAULT_WEB_APP_URL);
-export const HOMEBREW_CASK_COMMAND = readEnv("VITE_PASEO_HOMEBREW_CASK_COMMAND") ?? "";
-export const CLI_INSTALL_COMMAND = readEnv("VITE_PASEO_CLI_INSTALL_COMMAND") ?? "";
+export const SITE_HOST = requireForkEnv("VITE_POLYHIVE_SITE_HOST", DEFAULT_SITE_HOST);
+export const GITHUB_REPO = requireForkEnv("VITE_POLYHIVE_GITHUB_REPO", DEFAULT_GITHUB_REPO);
+export const WEB_APP_URL = requireForkEnv("VITE_POLYHIVE_WEB_APP_URL", DEFAULT_WEB_APP_URL);
+export const HOMEBREW_CASK_COMMAND = readEnv("VITE_POLYHIVE_HOMEBREW_CASK_COMMAND") ?? "";
+export const CLI_INSTALL_COMMAND =
+  readEnv("VITE_POLYHIVE_CLI_INSTALL_COMMAND") ?? DEFAULT_CLI_INSTALL_COMMAND;
 export const CLI_START_COMMAND =
-  readEnv("VITE_PASEO_CLI_START_COMMAND") ?? DEFAULT_CLI_START_COMMAND;
+  readEnv("VITE_POLYHIVE_CLI_START_COMMAND") ?? DEFAULT_CLI_START_COMMAND;
 export const CLI_HEADLESS_COMMAND = CLI_INSTALL_COMMAND
   ? `${CLI_INSTALL_COMMAND} && ${CLI_START_COMMAND}`
   : "";

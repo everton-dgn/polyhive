@@ -278,7 +278,7 @@ function MultiProviderSection() {
   return (
     <FeatureSection
       title="Use the best agent for the job"
-      description="Run multiple providers from a single interface. Paseo runs the native agent harness as you'd normally run it, with your skills, config and MCP servers intact."
+      description="Run multiple providers from a single interface. PolyHive runs the native agent harness as you'd normally run it, with your skills, config and MCP servers intact."
     >
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         {providers.slice(0, 3).map((p) => (
@@ -591,7 +591,7 @@ function ServiceProxySection() {
   return (
     <FeatureSection
       title="Forget about ports"
-      description="When agents work in parallel, they all run dev servers. Paseo gives each one a URL based on the branch name, no port conflicts, no guessing."
+      description="When agents work in parallel, they all run dev servers. PolyHive gives each one a URL based on the branch name, no port conflicts, no guessing."
     >
       <div className="rounded-2xl border border-white/10 bg-white/[0.02] overflow-hidden">
         <div className="px-5 py-4 space-y-3">
@@ -981,7 +981,7 @@ function ServerInstallButton() {
         </span>
       }
       title="Run agents on a headless Mac"
-      description="For headless Macs you want to connect to from Paseo clients. The macOS app already includes a built-in daemon."
+      description="For headless Macs you want to connect to from PolyHive clients. The macOS app already includes a built-in daemon."
       command={CLI_HEADLESS_COMMAND}
       footnote={
         <>
@@ -1145,7 +1145,7 @@ const bashKeywords = new Set([
   "true",
   "false",
 ]);
-const bashCommands = new Set(["paseo", "echo", "jq"]);
+const bashCommands = new Set(["polyhive", "echo", "jq"]);
 
 function highlightBash(code: string): React.ReactNode {
   const tokens: React.ReactNode[] = [];
@@ -1352,38 +1352,38 @@ const cliExamples: CLIExample[] = [
     title: "Run agents",
     description:
       "Launch agents locally or on a remote Mac. The --worktree flag spins up an isolated git branch so you can run multiple agents on the same repo without conflicts.",
-    code: `paseo run "implement user authentication"
-paseo run --provider codex --worktree feature-x "implement feature X"
-paseo run --host macmini.local:6767 "run the full test suite"
+    code: `polyhive run "implement user authentication"
+polyhive run --provider codex --worktree feature-x "implement feature X"
+polyhive run --host macmini.local:6767 "run the full test suite"
 
-paseo ls                           # list running agents
-paseo attach abc123                # stream live output
-paseo send abc123 "also add tests" # follow-up task`,
+polyhive ls                           # list running agents
+polyhive attach abc123                # stream live output
+polyhive send abc123 "also add tests" # follow-up task`,
   },
   {
     title: "Loops",
     description:
       "Have one agent do the work, another verify the result, and loop until it passes. Built-in, no shell scripting needed.",
     code: `# Worker-verifier loop: fix tests until they pass
-paseo loop run "make all tests pass" \\
+polyhive loop run "make all tests pass" \\
   --verify "verify tests pass and the code is production-ready" \\
   --verify-check "npm test" \\
   --max-iterations 5
 
-paseo loop ls                        # list running loops
-paseo loop logs abc123               # stream loop output`,
+polyhive loop ls                        # list running loops
+polyhive loop logs abc123               # stream loop output`,
   },
   {
     title: "Schedules",
     description:
       "Run agents on a cron schedule. Automate recurring tasks like dependency updates, security audits, or report generation.",
     code: `# Run a security audit every Monday at 9am
-paseo schedule create --cron "0 9 * * 1" \\
+polyhive schedule create --cron "0 9 * * 1" \\
   "audit the codebase for security issues and open PRs for fixes"
 
-paseo schedule ls                    # list all schedules
-paseo schedule pause abc123          # pause a schedule
-paseo schedule delete abc123         # remove a schedule`,
+polyhive schedule ls                    # list all schedules
+polyhive schedule pause abc123          # pause a schedule
+polyhive schedule delete abc123         # remove a schedule`,
   },
 ];
 
@@ -1456,7 +1456,7 @@ function PhoneShowcase() {
         >
           <img
             src="/phone-1.webp"
-            alt="Paseo sessions list"
+            alt="PolyHive sessions list"
             className="w-full rounded-[40px] shadow-2xl border-[3px] border-black outline-[3px] outline-white/20"
           />
         </motion.div>
@@ -1470,7 +1470,7 @@ function PhoneShowcase() {
         >
           <img
             src="/phone-2.webp"
-            alt="Paseo agent chat"
+            alt="PolyHive agent chat"
             className="w-full rounded-[40px] shadow-2xl border-[3px] border-black outline-[3px] outline-white/20"
           />
         </motion.div>
@@ -1482,7 +1482,7 @@ function PhoneShowcase() {
         >
           <img
             src="/phone-3.webp"
-            alt="Paseo diff view"
+            alt="PolyHive diff view"
             className="w-full rounded-[40px] shadow-2xl border-[3px] border-black outline-[3px] outline-white/20"
           />
         </motion.div>
@@ -1555,12 +1555,12 @@ function FAQ() {
       <h2 className="text-3xl font-medium">FAQ</h2>
       <div className="space-y-6">
         <FAQItem question="Is this free?">
-          Yes. Paseo is free and open source. You need Claude Code, Codex, or OpenCode installed
+          Yes. PolyHive is free and open source. You need Claude Code, Codex, or OpenCode installed
           with your own credentials. Voice is local-first by default and can optionally use OpenAI
           speech providers if you configure them.
         </FAQItem>
         <FAQItem question="Does my code leave my machine?">
-          Paseo doesn't send your code anywhere. Agents run locally and talk to their own APIs as
+          PolyHive doesn't send your code anywhere. Agents run locally and talk to their own APIs as
           they normally would. For remote access, you can use the optional{" "}
           <a href="/docs/security" className="underline hover:text-white/80">
             end-to-end encrypted relay
@@ -1569,7 +1569,7 @@ function FAQ() {
         </FAQItem>
         <FAQItem question="What agents does it support?">
           Claude Code, Codex, and OpenCode. Each agent runs as its own process using its own CLI.
-          Paseo doesn't modify or wrap their behavior.
+          PolyHive doesn't modify or wrap their behavior.
         </FAQItem>
         {CLI_HEADLESS_COMMAND ? (
           <FAQItem question="Do I need the macOS app?">
@@ -1594,31 +1594,31 @@ function FAQ() {
           .
         </FAQItem>
         <FAQItem question="Can I connect from outside my network?">
-          Yes. You can use the hosted relay (end-to-end encrypted, Paseo can't read your traffic),
-          set up your own tunnel (Tailscale, Cloudflare Tunnel, etc.), or expose the daemon port
-          directly. See{" "}
+          Yes. You can use the hosted relay (end-to-end encrypted, PolyHive can't read your
+          traffic), set up your own tunnel (Tailscale, Cloudflare Tunnel, etc.), or expose the
+          daemon port directly. See{" "}
           <a href="/docs/configuration" className="underline hover:text-white/80">
             configuration
           </a>
           .
         </FAQItem>
         <FAQItem question="Do I need git or GitHub?">
-          No. Paseo works in any directory. Worktrees are optional and only relevant if you use git.
-          You can run agents anywhere you'd normally work.
+          No. PolyHive works in any directory. Worktrees are optional and only relevant if you use
+          git. You can run agents anywhere you'd normally work.
         </FAQItem>
-        <FAQItem question="Can I get banned for using Paseo?">
+        <FAQItem question="Can I get banned for using PolyHive?">
           <p>We can't make promises on behalf of providers.</p>
           <p>
-            That said, Paseo launches the official first-party CLIs (Claude Code, Codex, OpenCode)
-            as subprocesses. It doesn't extract tokens or call inference APIs directly. From the
-            provider's perspective, usage through Paseo is indistinguishable from running the CLI
-            yourself.
+            That said, PolyHive launches the official first-party CLIs (Claude Code, Codex,
+            OpenCode) as subprocesses. It doesn't extract tokens or call inference APIs directly.
+            From the provider's perspective, usage through PolyHive is indistinguishable from
+            running the CLI yourself.
           </p>
-          <p>I've been using Paseo with all providers for months without issue.</p>
+          <p>I've been using PolyHive with all providers for months without issue.</p>
         </FAQItem>
         <FAQItem question="How do worktrees work?">
           When you launch an agent with the worktree option (from the web client, macOS app, or
-          CLI), Paseo creates a git worktree and runs the agent inside it. The agent works on an
+          CLI), PolyHive creates a git worktree and runs the agent inside it. The agent works on an
           isolated branch without touching your main working directory. See the{" "}
           <a href="/docs/worktrees" className="underline hover:text-white/80">
             worktrees docs
@@ -1641,7 +1641,7 @@ function SponsorCTA() {
     >
       <div className="text-sm text-muted-foreground leading-relaxed space-y-3">
         <p>
-          I built Paseo because I wanted better tools for coding agents on my own setup. It's an
+          I built PolyHive because I wanted better tools for coding agents on my own setup. It's an
           independent open source project, built around freedom of choice and real workflows. If you
           like what I'm building, consider becoming a supporter.
         </p>

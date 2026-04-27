@@ -23,9 +23,9 @@ import {
 import type { WorktreeConfig } from "../utils/worktree.js";
 import type { WorktreeCreationIntent } from "./resolve-worktree-creation-intent.js";
 
-export interface CreatePaseoWorktreeInput extends CreateWorktreeCoreInput {}
+export interface CreatePolyHiveWorktreeInput extends CreateWorktreeCoreInput {}
 
-export interface CreatePaseoWorktreeResult {
+export interface CreatePolyHiveWorktreeResult {
   worktree: WorktreeConfig;
   intent: WorktreeCreationIntent;
   workspace: PersistedWorkspaceRecord;
@@ -33,14 +33,14 @@ export interface CreatePaseoWorktreeResult {
   created: boolean;
 }
 
-export type CreatePaseoWorktreeFn = (
-  input: CreatePaseoWorktreeInput,
+export type CreatePolyHiveWorktreeFn = (
+  input: CreatePolyHiveWorktreeInput,
   options?: {
     resolveDefaultBranch?: (repoRoot: string) => Promise<string>;
   },
-) => Promise<CreatePaseoWorktreeResult>;
+) => Promise<CreatePolyHiveWorktreeResult>;
 
-export interface CreatePaseoWorktreeDeps extends CreateWorktreeCoreDeps {
+export interface CreatePolyHiveWorktreeDeps extends CreateWorktreeCoreDeps {
   projectRegistry: Pick<ProjectRegistry, "get" | "upsert">;
   workspaceRegistry: Pick<WorkspaceRegistry, "get" | "list" | "upsert">;
   workspaceGitService: WorkspaceGitService;
@@ -48,10 +48,10 @@ export interface CreatePaseoWorktreeDeps extends CreateWorktreeCoreDeps {
   primeWorkspaceGitWatchFingerprints: (workspace: PersistedWorkspaceRecord) => Promise<void>;
 }
 
-export async function createPaseoWorktree(
-  input: CreatePaseoWorktreeInput,
-  deps: CreatePaseoWorktreeDeps,
-): Promise<CreatePaseoWorktreeResult> {
+export async function createPolyHiveWorktree(
+  input: CreatePolyHiveWorktreeInput,
+  deps: CreatePolyHiveWorktreeDeps,
+): Promise<CreatePolyHiveWorktreeResult> {
   const createdWorktree = await createWorktreeCore(input, deps);
   const workspace = await upsertWorkspaceForWorktree({
     worktree: createdWorktree.worktree,
@@ -74,7 +74,7 @@ export async function createPaseoWorktree(
 async function upsertWorkspaceForWorktree(options: {
   worktree: WorktreeConfig;
   deps: Pick<
-    CreatePaseoWorktreeDeps,
+    CreatePolyHiveWorktreeDeps,
     "projectRegistry" | "workspaceRegistry" | "workspaceGitService"
   >;
 }): Promise<PersistedWorkspaceRecord> {

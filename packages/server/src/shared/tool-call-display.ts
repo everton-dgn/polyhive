@@ -1,5 +1,8 @@
 import type { ToolCallTimelineItem } from "../server/agent/agent-sdk-types.js";
-import { getPaseoToolLeafName, isPaseoToolName } from "../server/agent/tool-name-normalization.js";
+import {
+  getPolyHiveToolLeafName,
+  isPolyHiveToolName,
+} from "../server/agent/tool-name-normalization.js";
 import { stripCwdPrefix } from "./path-utils.js";
 
 export type ToolCallDisplayInput = Pick<
@@ -33,8 +36,8 @@ function humanizeToolName(name: string): string {
   if (!trimmed) {
     return name;
   }
-  if (isPaseoToolName(trimmed)) {
-    const leaf = getPaseoToolLeafName(trimmed);
+  if (isPolyHiveToolName(trimmed)) {
+    const leaf = getPolyHiveToolLeafName(trimmed);
     if (leaf) {
       return humanizeToolName(leaf);
     }

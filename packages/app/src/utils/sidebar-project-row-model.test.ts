@@ -16,7 +16,7 @@ function workspace(overrides: Partial<SidebarWorkspaceEntry> = {}): SidebarWorks
     workspaceDirectory: "/repo",
     projectKind: "git",
     workspaceKind: "checkout",
-    name: "paseo",
+    name: "polyhive",
     statusBucket: "done",
     diffStat: null,
     scripts: [],
@@ -28,7 +28,7 @@ function workspace(overrides: Partial<SidebarWorkspaceEntry> = {}): SidebarWorks
 function project(overrides: Partial<SidebarProjectEntry> = {}): SidebarProjectEntry {
   return {
     projectKey: "project-1",
-    projectName: "paseo",
+    projectName: "polyhive",
     projectKind: "git",
     iconWorkingDir: "/repo",
     workspaces: [workspace()],

@@ -5,7 +5,7 @@ import { pageMeta } from "~/meta";
 export const Route = createFileRoute("/opencode")({
   head: () => ({
     meta: pageMeta(
-      "OpenCode Web - Code from your browser | Paseo",
+      "OpenCode Web - Code from your browser | PolyHive",
       "Run OpenCode on your Mac and control it from a browser. Launch agents, watch them work, and keep your code local.",
     ),
   }),

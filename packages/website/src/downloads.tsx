@@ -10,7 +10,7 @@ function releaseBase(version: string) {
 export function downloadUrls(version: string) {
   const base = releaseBase(version);
   return {
-    macAppleSilicon: `${base}/Paseo-${version}-arm64.dmg`,
+    macAppleSilicon: `${base}/PolyHive-${version}-arm64.dmg`,
   };
 }
 

@@ -55,7 +55,7 @@ describe("CheckoutDiffManager", () => {
 
     const manager = new CheckoutDiffManager({
       logger: logger as any,
-      paseoHome: "/tmp/paseo-test",
+      polyhiveHome: "/tmp/polyhive-test",
       workspaceGitService: workspaceGitService as any,
     });
 

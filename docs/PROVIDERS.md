@@ -1,4 +1,4 @@
-# Adding a New Provider to Paseo
+# Adding a New Provider to PolyHive
 
 This guide walks through adding a new agent provider end-to-end. There are two integration patterns, and this doc covers both.
 
@@ -319,16 +319,16 @@ Start the daemon if not already running, then:
 
 ```bash
 # Launch an agent with your provider
-paseo run --provider my-provider
+polyhive run --provider my-provider
 
 # Launch with a specific model and mode
-paseo run --provider my-provider --model some-model --mode default
+polyhive run --provider my-provider --model some-model --mode default
 
 # List running agents
-paseo ls -a -g
+polyhive ls -a -g
 
 # Check if the provider reports models
-paseo models --provider my-provider
+polyhive models --provider my-provider
 ```
 
 ### E2E test patterns

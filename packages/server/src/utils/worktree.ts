@@ -10,17 +10,17 @@ import stripAnsi from "strip-ansi";
 import { buildStringCommandShellInvocation } from "./string-command-shell.js";
 import {
   normalizeBaseRefName,
-  readPaseoWorktreeMetadata,
-  readPaseoWorktreeRuntimePort,
-  writePaseoWorktreeMetadata,
-  writePaseoWorktreeRuntimeMetadata,
+  readPolyHiveWorktreeMetadata,
+  readPolyHiveWorktreeRuntimePort,
+  writePolyHiveWorktreeMetadata,
+  writePolyHiveWorktreeRuntimeMetadata,
 } from "./worktree-metadata.js";
 import { runGitCommand } from "./run-git-command.js";
-import { resolvePaseoHome } from "../server/paseo-home.js";
+import { resolvePolyHiveHome } from "../server/polyhive-home.js";
 import { ensureNodePtySpawnHelperExecutableForCurrentPlatform } from "../terminal/terminal.js";
 import { parseGitRevParsePath, resolveGitRevParsePath } from "./git-rev-parse-path.js";
 
-interface PaseoConfig {
+interface PolyHiveConfig {
   worktree?: {
     setup?: string[];
     teardown?: string[];
@@ -48,11 +48,11 @@ export interface WorktreeConfig {
 }
 
 export type WorktreeRuntimeEnv = {
-  PASEO_SOURCE_CHECKOUT_PATH: string;
-  PASEO_ROOT_PATH: string;
-  PASEO_WORKTREE_PATH: string;
-  PASEO_BRANCH_NAME: string;
-  PASEO_WORKTREE_PORT: string;
+  POLYHIVE_SOURCE_CHECKOUT_PATH: string;
+  POLYHIVE_ROOT_PATH: string;
+  POLYHIVE_WORKTREE_PATH: string;
+  POLYHIVE_BRANCH_NAME: string;
+  POLYHIVE_WORKTREE_PORT: string;
 };
 
 export type WorktreeSetupCommandResult = {
@@ -138,14 +138,14 @@ export class WorktreeTeardownError extends Error {
   }
 }
 
-export interface PaseoWorktreeInfo {
+export interface PolyHiveWorktreeInfo {
   path: string;
   createdAt: string;
   branchName?: string;
   head?: string;
 }
 
-export type PaseoWorktreeOwnership = {
+export type PolyHiveWorktreeOwnership = {
   allowed: boolean;
   repoRoot?: string;
   worktreeRoot?: string;
@@ -169,13 +169,13 @@ export interface CreateWorktreeOptions {
   worktreeSlug: string;
   source: WorktreeSource;
   runSetup: boolean;
-  paseoHome?: string;
+  polyhiveHome?: string;
 }
 
 interface ResolveExistingWorktreeForSlugOptions {
   slug: string;
   repoRoot: string;
-  paseoHome?: string;
+  polyhiveHome?: string;
 }
 
 export class BranchAlreadyCheckedOutError extends Error {
@@ -200,20 +200,20 @@ export class UnknownBranchError extends Error {
   }
 }
 
-function readPaseoConfig(repoRoot: string): PaseoConfig | null {
-  const paseoConfigPath = join(repoRoot, "paseo.json");
-  if (!existsSync(paseoConfigPath)) {
+function readPolyHiveConfig(repoRoot: string): PolyHiveConfig | null {
+  const polyhiveConfigPath = join(repoRoot, "polyhive.json");
+  if (!existsSync(polyhiveConfigPath)) {
     return null;
   }
   try {
-    return JSON.parse(readFileSync(paseoConfigPath, "utf8"));
+    return JSON.parse(readFileSync(polyhiveConfigPath, "utf8"));
   } catch {
-    throw new Error(`Failed to parse paseo.json`);
+    throw new Error(`Failed to parse polyhive.json`);
   }
 }
 
 export function getWorktreeSetupCommands(repoRoot: string): string[] {
-  const config = readPaseoConfig(repoRoot);
+  const config = readPolyHiveConfig(repoRoot);
   const setupCommands = config?.worktree?.setup;
   if (!setupCommands || setupCommands.length === 0) {
     return [];
@@ -222,7 +222,7 @@ export function getWorktreeSetupCommands(repoRoot: string): string[] {
 }
 
 export function getWorktreeTeardownCommands(repoRoot: string): string[] {
-  const config = readPaseoConfig(repoRoot);
+  const config = readPolyHiveConfig(repoRoot);
   const teardownCommands = config?.worktree?.teardown;
   if (!teardownCommands || teardownCommands.length === 0) {
     return [];
@@ -231,7 +231,7 @@ export function getWorktreeTeardownCommands(repoRoot: string): string[] {
 }
 
 export function getWorktreeTerminalSpecs(repoRoot: string): WorktreeTerminalConfig[] {
-  const config = readPaseoConfig(repoRoot);
+  const config = readPolyHiveConfig(repoRoot);
   const terminals = config?.worktree?.terminals;
   if (!Array.isArray(terminals) || terminals.length === 0) {
     return [];
@@ -266,7 +266,7 @@ export function getWorktreeTerminalSpecs(repoRoot: string): WorktreeTerminalConf
 }
 
 export function getScriptConfigs(repoRoot: string): Map<string, ScriptConfig> {
-  const config = readPaseoConfig(repoRoot);
+  const config = readPolyHiveConfig(repoRoot);
   const scripts = config?.scripts;
   if (!scripts || typeof scripts !== "object") {
     return new Map();
@@ -592,7 +592,7 @@ export async function runWorktreeSetupCommands(options: {
   runtimeEnv?: WorktreeRuntimeEnv;
   onEvent?: (event: WorktreeSetupCommandProgressEvent) => void;
 }): Promise<WorktreeSetupCommandResult[]> {
-  // Read paseo.json from the worktree (it will have the same content as the source repo)
+  // Read polyhive.json from the worktree (it will have the same content as the source repo)
   const setupCommands = getWorktreeSetupCommands(options.worktreePath);
   if (setupCommands.length === 0) {
     return [];
@@ -675,12 +675,12 @@ export async function resolveWorktreeRuntimeEnv(options: {
   const branchName =
     options.branchName ?? (await resolveBranchNameForWorktreePath(options.worktreePath));
 
-  let worktreePort = readPaseoWorktreeRuntimePort(options.worktreePath);
+  let worktreePort = readPolyHiveWorktreeRuntimePort(options.worktreePath);
   if (worktreePort === null) {
     worktreePort = await getAvailablePort();
-    const metadata = readPaseoWorktreeMetadata(options.worktreePath);
+    const metadata = readPolyHiveWorktreeMetadata(options.worktreePath);
     if (metadata) {
-      writePaseoWorktreeRuntimeMetadata(options.worktreePath, { worktreePort });
+      writePolyHiveWorktreeRuntimeMetadata(options.worktreePath, { worktreePort });
     }
   } else {
     await assertPortAvailable(worktreePort);
@@ -690,12 +690,12 @@ export async function resolveWorktreeRuntimeEnv(options: {
     // Source checkout path is the original git repo root (shared across worktrees), not the
     // worktree itself. This allows setup scripts to copy local files (e.g. .env) from the
     // source checkout.
-    PASEO_SOURCE_CHECKOUT_PATH: repoRootPath,
+    POLYHIVE_SOURCE_CHECKOUT_PATH: repoRootPath,
     // Backward-compatible alias.
-    PASEO_ROOT_PATH: repoRootPath,
-    PASEO_WORKTREE_PATH: options.worktreePath,
-    PASEO_BRANCH_NAME: branchName,
-    PASEO_WORKTREE_PORT: String(worktreePort),
+    POLYHIVE_ROOT_PATH: repoRootPath,
+    POLYHIVE_WORKTREE_PATH: options.worktreePath,
+    POLYHIVE_BRANCH_NAME: branchName,
+    POLYHIVE_WORKTREE_PORT: String(worktreePort),
   };
 }
 
@@ -704,7 +704,7 @@ export async function runWorktreeTeardownCommands(options: {
   branchName?: string;
   repoRootPath?: string;
 }): Promise<WorktreeTeardownCommandResult[]> {
-  // Read paseo.json from the worktree (it will have the same content as the source repo)
+  // Read polyhive.json from the worktree (it will have the same content as the source repo)
   const teardownCommands = getWorktreeTeardownCommands(options.worktreePath);
   if (teardownCommands.length === 0) {
     return [];
@@ -714,19 +714,19 @@ export async function runWorktreeTeardownCommands(options: {
     options.repoRootPath ?? (await inferRepoRootPathFromWorktreePath(options.worktreePath));
   const branchName =
     options.branchName ?? (await resolveBranchNameForWorktreePath(options.worktreePath));
-  const worktreePort = readPaseoWorktreeRuntimePort(options.worktreePath);
+  const worktreePort = readPolyHiveWorktreeRuntimePort(options.worktreePath);
 
   const teardownEnv: NodeJS.ProcessEnv = {
     ...process.env,
     // Source checkout path is the original git repo root (shared across worktrees), not the
     // worktree itself. This allows lifecycle scripts to copy or clean resources using paths
     // from the source checkout.
-    PASEO_SOURCE_CHECKOUT_PATH: repoRootPath,
+    POLYHIVE_SOURCE_CHECKOUT_PATH: repoRootPath,
     // Backward-compatible alias.
-    PASEO_ROOT_PATH: repoRootPath,
-    PASEO_WORKTREE_PATH: options.worktreePath,
-    PASEO_BRANCH_NAME: branchName,
-    ...(worktreePort !== null ? { PASEO_WORKTREE_PORT: String(worktreePort) } : {}),
+    POLYHIVE_ROOT_PATH: repoRootPath,
+    POLYHIVE_WORKTREE_PATH: options.worktreePath,
+    POLYHIVE_BRANCH_NAME: branchName,
+    ...(worktreePort !== null ? { POLYHIVE_WORKTREE_PORT: String(worktreePort) } : {}),
   };
 
   const results: WorktreeTeardownCommandResult[] = [];
@@ -853,8 +853,11 @@ export async function deriveWorktreeProjectHash(cwd: string): Promise<string> {
   }
 }
 
-export async function getPaseoWorktreesRoot(cwd: string, paseoHome?: string): Promise<string> {
-  const home = paseoHome ? resolve(paseoHome) : resolvePaseoHome();
+export async function getPolyHiveWorktreesRoot(
+  cwd: string,
+  polyhiveHome?: string,
+): Promise<string> {
+  const home = polyhiveHome ? resolve(polyhiveHome) : resolvePolyHiveHome();
   const projectHash = await deriveWorktreeProjectHash(cwd);
   return join(home, "worktrees", projectHash);
 }
@@ -862,9 +865,9 @@ export async function getPaseoWorktreesRoot(cwd: string, paseoHome?: string): Pr
 export async function computeWorktreePath(
   cwd: string,
   slug: string,
-  paseoHome?: string,
+  polyhiveHome?: string,
 ): Promise<string> {
-  const worktreesRoot = await getPaseoWorktreesRoot(cwd, paseoHome);
+  const worktreesRoot = await getPolyHiveWorktreesRoot(cwd, polyhiveHome);
   return join(worktreesRoot, slug);
 }
 
@@ -883,10 +886,10 @@ function resolveRepoRootFromGitCommonDir(commonDir: string): string {
     : normalizedCommonDir;
 }
 
-export async function isPaseoOwnedWorktreeCwd(
+export async function isPolyHiveOwnedWorktreeCwd(
   cwd: string,
-  options?: { paseoHome?: string },
-): Promise<PaseoWorktreeOwnership> {
+  options?: { polyhiveHome?: string },
+): Promise<PolyHiveWorktreeOwnership> {
   const resolvedCwd = normalizePathForOwnership(cwd);
 
   // repoRoot is best-effort: git may be unreachable from the worktree (e.g. a
@@ -900,14 +903,16 @@ export async function isPaseoOwnedWorktreeCwd(
     // ignore
   }
 
-  const paseoHome = options?.paseoHome ? resolve(options.paseoHome) : resolvePaseoHome();
-  const paseoWorktreesPrefix = normalizePathForOwnership(join(paseoHome, "worktrees")) + sep;
+  const polyhiveHome = options?.polyhiveHome
+    ? resolve(options.polyhiveHome)
+    : resolvePolyHiveHome();
+  const polyhiveWorktreesPrefix = normalizePathForOwnership(join(polyhiveHome, "worktrees")) + sep;
 
-  // Ownership is defined by the path living under $PASEO_HOME/worktrees/<hash>/<slug>[/...].
-  // The <hash>/<slug> prefix is Paseo-private — nothing else writes there — so the
+  // Ownership is defined by the path living under $POLYHIVE_HOME/worktrees/<hash>/<slug>[/...].
+  // The <hash>/<slug> prefix is PolyHive-private — nothing else writes there — so the
   // path shape alone is sufficient proof of ownership, even when git has already
   // forgotten about the worktree.
-  if (!resolvedCwd.startsWith(paseoWorktreesPrefix)) {
+  if (!resolvedCwd.startsWith(polyhiveWorktreesPrefix)) {
     return {
       allowed: false,
       ...(repoRoot !== undefined ? { repoRoot } : {}),
@@ -915,7 +920,7 @@ export async function isPaseoOwnedWorktreeCwd(
     };
   }
 
-  const relative = resolvedCwd.slice(paseoWorktreesPrefix.length);
+  const relative = resolvedCwd.slice(polyhiveWorktreesPrefix.length);
   const parts = relative.split(sep).filter((part) => part.length > 0);
   if (parts.length < 2) {
     return {
@@ -925,7 +930,7 @@ export async function isPaseoOwnedWorktreeCwd(
     };
   }
 
-  const worktreesRoot = join(paseoHome, "worktrees", parts[0]!);
+  const worktreesRoot = join(polyhiveHome, "worktrees", parts[0]!);
   return {
     allowed: true,
     ...(repoRoot !== undefined ? { repoRoot } : {}),
@@ -934,11 +939,11 @@ export async function isPaseoOwnedWorktreeCwd(
   };
 }
 
-type ParsedPaseoWorktreeInfo = Omit<PaseoWorktreeInfo, "createdAt">;
+type ParsedPolyHiveWorktreeInfo = Omit<PolyHiveWorktreeInfo, "createdAt">;
 
-function parseWorktreeList(output: string): ParsedPaseoWorktreeInfo[] {
-  const entries: ParsedPaseoWorktreeInfo[] = [];
-  let current: ParsedPaseoWorktreeInfo | null = null;
+function parseWorktreeList(output: string): ParsedPolyHiveWorktreeInfo[] {
+  const entries: ParsedPolyHiveWorktreeInfo[] = [];
+  let current: ParsedPolyHiveWorktreeInfo | null = null;
 
   for (const line of output.split("\n")) {
     if (line.startsWith("worktree ")) {
@@ -985,14 +990,14 @@ function resolveWorktreeCreatedAtIso(worktreePath: string): string {
   }
 }
 
-export async function listPaseoWorktrees({
+export async function listPolyHiveWorktrees({
   cwd,
-  paseoHome,
+  polyhiveHome,
 }: {
   cwd: string;
-  paseoHome?: string;
-}): Promise<PaseoWorktreeInfo[]> {
-  const worktreesRoot = await getPaseoWorktreesRoot(cwd, paseoHome);
+  polyhiveHome?: string;
+}): Promise<PolyHiveWorktreeInfo[]> {
+  const worktreesRoot = await getPolyHiveWorktreesRoot(cwd, polyhiveHome);
   const { stdout } = await runGitCommand(["worktree", "list", "--porcelain"], {
     cwd,
     env: READ_ONLY_GIT_ENV,
@@ -1011,11 +1016,11 @@ export async function listPaseoWorktrees({
 export async function resolveExistingWorktreeForSlug({
   slug,
   repoRoot,
-  paseoHome,
+  polyhiveHome,
 }: ResolveExistingWorktreeForSlugOptions): Promise<WorktreeConfig | null> {
-  const worktrees = await listPaseoWorktrees({
+  const worktrees = await listPolyHiveWorktrees({
     cwd: repoRoot,
-    paseoHome,
+    polyhiveHome,
   });
   const slugSuffix = `${sep}${slug}`;
   const existingWorktree = worktrees.find((worktree) => worktree.path.endsWith(slugSuffix));
@@ -1038,9 +1043,9 @@ export async function resolveExistingWorktreeForSlug({
   };
 }
 
-export async function resolvePaseoWorktreeRootForCwd(
+export async function resolvePolyHiveWorktreeRootForCwd(
   cwd: string,
-  options?: { paseoHome?: string },
+  options?: { polyhiveHome?: string },
 ): Promise<{ repoRoot: string; worktreeRoot: string; worktreePath: string } | null> {
   let gitCommonDir: string;
   try {
@@ -1049,7 +1054,7 @@ export async function resolvePaseoWorktreeRootForCwd(
     return null;
   }
 
-  const worktreesRoot = await getPaseoWorktreesRoot(cwd, options?.paseoHome);
+  const worktreesRoot = await getPolyHiveWorktreesRoot(cwd, options?.polyhiveHome);
   const resolvedRoot = normalizePathForOwnership(worktreesRoot) + sep;
 
   let worktreeRoot: string | null = null;
@@ -1072,9 +1077,9 @@ export async function resolvePaseoWorktreeRootForCwd(
     return null;
   }
 
-  const knownWorktrees = await listPaseoWorktrees({
+  const knownWorktrees = await listPolyHiveWorktrees({
     cwd,
-    paseoHome: options?.paseoHome,
+    polyhiveHome: options?.polyhiveHome,
   });
   const match = knownWorktrees.find((entry) => entry.path === resolvedWorktreeRoot);
   if (!match) {
@@ -1088,18 +1093,18 @@ export async function resolvePaseoWorktreeRootForCwd(
   };
 }
 
-export async function deletePaseoWorktree({
+export async function deletePolyHiveWorktree({
   cwd,
   worktreePath,
   worktreeSlug,
   worktreesRoot,
-  paseoHome,
+  polyhiveHome,
 }: {
   cwd: string | null;
   worktreePath?: string;
   worktreeSlug?: string;
   worktreesRoot?: string;
-  paseoHome?: string;
+  polyhiveHome?: string;
 }): Promise<void> {
   if (!worktreePath && !worktreeSlug) {
     throw new Error("worktreePath or worktreeSlug is required");
@@ -1112,20 +1117,20 @@ export async function deletePaseoWorktree({
   if (worktreesRoot) {
     resolvedWorktreesRoot = worktreesRoot;
   } else if (cwd) {
-    resolvedWorktreesRoot = await getPaseoWorktreesRoot(cwd, paseoHome);
+    resolvedWorktreesRoot = await getPolyHiveWorktreesRoot(cwd, polyhiveHome);
   } else {
-    throw new Error("cwd or worktreesRoot is required to delete a Paseo worktree");
+    throw new Error("cwd or worktreesRoot is required to delete a PolyHive worktree");
   }
 
   const resolvedRoot = normalizePathForOwnership(resolvedWorktreesRoot) + sep;
   const requestedPath = worktreePath ?? join(resolvedWorktreesRoot, worktreeSlug!);
   const resolvedRequested = normalizePathForOwnership(requestedPath);
   const resolvedWorktree =
-    (await resolvePaseoWorktreeRootForCwd(requestedPath, { paseoHome }))?.worktreePath ??
+    (await resolvePolyHiveWorktreeRootForCwd(requestedPath, { polyhiveHome }))?.worktreePath ??
     resolvedRequested;
 
   if (!resolvedWorktree.startsWith(resolvedRoot)) {
-    throw new Error("Refusing to delete non-Paseo worktree");
+    throw new Error("Refusing to delete non-PolyHive worktree");
   }
 
   if (await pathExists(resolvedWorktree)) {
@@ -1208,10 +1213,10 @@ export const createWorktree = async ({
   source,
   worktreeSlug,
   runSetup,
-  paseoHome,
+  polyhiveHome,
 }: CreateWorktreeOptions): Promise<WorktreeConfig> => {
   const sourcePlan = await resolveWorktreeSourcePlan({ cwd, source, desiredSlug: worktreeSlug });
-  let worktreePath = join(await getPaseoWorktreesRoot(cwd, paseoHome), worktreeSlug);
+  let worktreePath = join(await getPolyHiveWorktreesRoot(cwd, polyhiveHome), worktreeSlug);
   mkdirSync(dirname(worktreePath), { recursive: true });
 
   // Also handle worktree path collision
@@ -1237,7 +1242,7 @@ export const createWorktree = async ({
     });
   }
 
-  writePaseoWorktreeMetadata(worktreePath, { baseRefName: sourcePlan.metadataBaseRefName });
+  writePolyHiveWorktreeMetadata(worktreePath, { baseRefName: sourcePlan.metadataBaseRefName });
 
   if (runSetup) {
     await runWorktreeSetupCommands({
@@ -1339,7 +1344,7 @@ async function resolveWorktreeSourcePlan({
         ...(source.pushRemoteUrl
           ? {
               pushRemote: {
-                name: `paseo-pr-${source.githubPrNumber}`,
+                name: `polyhive-pr-${source.githubPrNumber}`,
                 url: source.pushRemoteUrl,
                 headRef: source.headRef,
               },
@@ -1385,10 +1390,10 @@ function validateWorktreeBranchName(branchName: string): void {
 function normalizeRequiredBaseBranch(baseBranch: string): string {
   const normalizedBaseBranch = normalizeBaseRefName(baseBranch);
   if (!normalizedBaseBranch) {
-    throw new Error("Base branch is required when creating a Paseo worktree");
+    throw new Error("Base branch is required when creating a PolyHive worktree");
   }
   if (normalizedBaseBranch === "HEAD") {
-    throw new Error("Base branch cannot be HEAD when creating a Paseo worktree");
+    throw new Error("Base branch cannot be HEAD when creating a PolyHive worktree");
   }
   return normalizedBaseBranch;
 }

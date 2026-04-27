@@ -28,10 +28,10 @@ import type { GitHubService } from "../services/github-service.js";
 import type { CheckoutExistingBranchResult } from "../utils/checkout-git.js";
 import { expandTilde } from "../utils/path.js";
 import {
-  deletePaseoWorktree,
+  deletePolyHiveWorktree,
   getWorktreeSetupCommands,
-  isPaseoOwnedWorktreeCwd,
-  resolvePaseoWorktreeRootForCwd,
+  isPolyHiveOwnedWorktreeCwd,
+  resolvePolyHiveWorktreeRootForCwd,
   resolveWorktreeRuntimeEnv,
   runWorktreeSetupCommands,
   slugify,
@@ -42,9 +42,9 @@ import {
 } from "../utils/worktree.js";
 import { toCheckoutError } from "./checkout-git-utils.js";
 import type {
-  CreatePaseoWorktreeInput,
-  CreatePaseoWorktreeResult,
-} from "./paseo-worktree-service.js";
+  CreatePolyHiveWorktreeInput,
+  CreatePolyHiveWorktreeResult,
+} from "./polyhive-worktree-service.js";
 import { toWorktreeWireError } from "./worktree-errors.js";
 
 const SAFE_GIT_REF_PATTERN = /^[A-Za-z0-9._\/-]+$/;
@@ -64,15 +64,15 @@ export interface NormalizedGitOptions {
 type EmitSessionMessage = (message: SessionOutboundMessage) => void;
 
 type BuildAgentSessionConfigDependencies = {
-  paseoHome?: string;
+  polyhiveHome?: string;
   sessionLogger: Logger;
   workspaceGitService?: WorkspaceGitService;
-  createPaseoWorktree: (
-    input: CreatePaseoWorktreeInput,
+  createPolyHiveWorktree: (
+    input: CreatePolyHiveWorktreeInput,
     options?: {
       resolveDefaultBranch?: (repoRoot: string) => Promise<string>;
     },
-  ) => Promise<CreatePaseoWorktreeResult>;
+  ) => Promise<CreatePolyHiveWorktreeResult>;
   checkoutExistingBranch: (cwd: string, branch: string) => Promise<CheckoutExistingBranchResult>;
   createBranchFromBase: (params: {
     cwd: string;
@@ -82,8 +82,8 @@ type BuildAgentSessionConfigDependencies = {
   github?: Pick<GitHubService, "invalidate">;
 };
 
-type ArchivePaseoWorktreeDependencies = {
-  paseoHome?: string;
+type ArchivePolyHiveWorktreeDependencies = {
+  polyhiveHome?: string;
   github: GitHubService;
   workspaceGitService: WorkspaceGitService;
   agentManager: Pick<AgentManager, "listAgents" | "closeAgent">;
@@ -96,8 +96,8 @@ type ArchivePaseoWorktreeDependencies = {
   sessionLogger?: Logger;
 };
 
-type CreatePaseoWorktreeInBackgroundDependencies = {
-  paseoHome?: string;
+type CreatePolyHiveWorktreeInBackgroundDependencies = {
+  polyhiveHome?: string;
   emitWorkspaceUpdateForCwd: (cwd: string, options?: { dedupeGitState?: boolean }) => Promise<void>;
   cacheWorkspaceSetupSnapshot: (workspaceId: string, snapshot: WorkspaceSetupSnapshot) => void;
   emit: EmitSessionMessage;
@@ -116,13 +116,15 @@ type HandleWorkspaceSetupStatusRequestDependencies = {
   workspaceSetupSnapshots: ReadonlyMap<string, WorkspaceSetupSnapshot>;
 };
 
-type HandleCreatePaseoWorktreeRequestDependencies = {
-  paseoHome?: string;
+type HandleCreatePolyHiveWorktreeRequestDependencies = {
+  polyhiveHome?: string;
   describeWorkspaceRecord: (
     workspace: PersistedWorkspaceRecord,
   ) => Promise<WorkspaceDescriptorPayload>;
   emit: EmitSessionMessage;
-  createPaseoWorktree: (input: CreatePaseoWorktreeInput) => Promise<CreatePaseoWorktreeResult>;
+  createPolyHiveWorktree: (
+    input: CreatePolyHiveWorktreeInput,
+  ) => Promise<CreatePolyHiveWorktreeResult>;
   sessionLogger: Logger;
   runWorktreeSetupInBackground: (options: {
     requestCwd: string;
@@ -172,7 +174,7 @@ export async function buildAgentSessionConfig(
       "Creating worktree through createWorktreeCore",
     );
 
-    const createdWorktree = await dependencies.createPaseoWorktree(
+    const createdWorktree = await dependencies.createPolyHiveWorktree(
       {
         cwd,
         worktreeSlug: normalized.worktreeSlug,
@@ -181,7 +183,7 @@ export async function buildAgentSessionConfig(
         githubPrNumber: normalized.githubPrNumber,
         attachments,
         runSetup: false,
-        paseoHome: dependencies.paseoHome,
+        polyhiveHome: dependencies.polyhiveHome,
       },
       {
         resolveDefaultBranch: normalized.baseBranch
@@ -190,7 +192,7 @@ export async function buildAgentSessionConfig(
               resolveGitCreateBaseBranch(
                 repoRoot,
                 dependencies.workspaceGitService,
-                dependencies.paseoHome,
+                dependencies.polyhiveHome,
               ),
       },
     );
@@ -205,7 +207,7 @@ export async function buildAgentSessionConfig(
       (await resolveGitCreateBaseBranch(
         cwd,
         dependencies.workspaceGitService,
-        dependencies.paseoHome,
+        dependencies.polyhiveHome,
       ));
     await dependencies.createBranchFromBase({
       cwd,
@@ -309,7 +311,7 @@ export function assertSafeGitRef(ref: string, label: string): void {
 export async function resolveGitCreateBaseBranch(
   cwd: string,
   workspaceGitService?: WorkspaceGitService,
-  _paseoHome?: string,
+  _polyhiveHome?: string,
 ): Promise<string> {
   if (!workspaceGitService) {
     throw new Error("WorkspaceGitService is required to resolve the repository root");
@@ -318,19 +320,19 @@ export async function resolveGitCreateBaseBranch(
   return workspaceGitService.resolveDefaultBranch(cwd);
 }
 
-export async function handlePaseoWorktreeListRequest(
+export async function handlePolyHiveWorktreeListRequest(
   dependencies: {
     emit: EmitSessionMessage;
-    paseoHome?: string;
+    polyhiveHome?: string;
     workspaceGitService: WorkspaceGitService;
   },
-  msg: Extract<SessionInboundMessage, { type: "paseo_worktree_list_request" }>,
+  msg: Extract<SessionInboundMessage, { type: "polyhive_worktree_list_request" }>,
 ): Promise<void> {
   const { requestId } = msg;
   const cwd = msg.repoRoot ?? msg.cwd;
   if (!cwd) {
     dependencies.emit({
-      type: "paseo_worktree_list_response",
+      type: "polyhive_worktree_list_response",
       payload: {
         worktrees: [],
         error: { code: "UNKNOWN", message: "cwd or repoRoot is required" },
@@ -343,7 +345,7 @@ export async function handlePaseoWorktreeListRequest(
   try {
     const worktrees = await dependencies.workspaceGitService.listWorktrees(cwd);
     dependencies.emit({
-      type: "paseo_worktree_list_response",
+      type: "polyhive_worktree_list_response",
       payload: {
         worktrees: worktrees.map((entry) => ({
           worktreePath: entry.path,
@@ -357,7 +359,7 @@ export async function handlePaseoWorktreeListRequest(
     });
   } catch (error) {
     dependencies.emit({
-      type: "paseo_worktree_list_response",
+      type: "polyhive_worktree_list_response",
       payload: {
         worktrees: [],
         error: toCheckoutError(error),
@@ -367,8 +369,8 @@ export async function handlePaseoWorktreeListRequest(
   }
 }
 
-export async function archivePaseoWorktree(
-  dependencies: ArchivePaseoWorktreeDependencies,
+export async function archivePolyHiveWorktree(
+  dependencies: ArchivePolyHiveWorktreeDependencies,
   options: {
     targetPath: string;
     repoRoot: string | null;
@@ -377,8 +379,8 @@ export async function archivePaseoWorktree(
   },
 ): Promise<string[]> {
   let targetPath = options.targetPath;
-  const resolvedWorktree = await resolvePaseoWorktreeRootForCwd(targetPath, {
-    paseoHome: dependencies.paseoHome,
+  const resolvedWorktree = await resolvePolyHiveWorktreeRootForCwd(targetPath, {
+    polyhiveHome: dependencies.polyhiveHome,
   });
   if (resolvedWorktree) {
     targetPath = resolvedWorktree.worktreePath;
@@ -458,11 +460,11 @@ export async function archivePaseoWorktree(
     );
   });
 
-  await deletePaseoWorktree({
+  await deletePolyHiveWorktree({
     cwd: options.repoRoot,
     worktreePath: targetPath,
     worktreesRoot: options.worktreesRoot,
-    paseoHome: dependencies.paseoHome,
+    polyhiveHome: dependencies.polyhiveHome,
   });
 
   if (options.repoRoot) {
@@ -509,12 +511,12 @@ export async function archivePaseoWorktree(
   return Array.from(removedAgents);
 }
 
-export async function handlePaseoWorktreeArchiveRequest(
-  dependencies: Omit<ArchivePaseoWorktreeDependencies, "emitWorkspaceUpdatesForCwds"> & {
+export async function handlePolyHiveWorktreeArchiveRequest(
+  dependencies: Omit<ArchivePolyHiveWorktreeDependencies, "emitWorkspaceUpdatesForCwds"> & {
     emit: EmitSessionMessage;
     emitWorkspaceUpdatesForCwds: (cwds: Iterable<string>) => Promise<void>;
   },
-  msg: Extract<SessionInboundMessage, { type: "paseo_worktree_archive_request" }>,
+  msg: Extract<SessionInboundMessage, { type: "polyhive_worktree_archive_request" }>,
 ): Promise<void> {
   const { requestId } = msg;
   let targetPath = msg.worktreePath;
@@ -528,23 +530,23 @@ export async function handlePaseoWorktreeArchiveRequest(
       const worktrees = await dependencies.workspaceGitService.listWorktrees(repoRoot);
       const match = worktrees.find((entry) => entry.branchName === msg.branchName);
       if (!match) {
-        throw new Error(`Paseo worktree not found for branch ${msg.branchName}`);
+        throw new Error(`PolyHive worktree not found for branch ${msg.branchName}`);
       }
       targetPath = match.path;
     }
 
-    const ownership = await isPaseoOwnedWorktreeCwd(targetPath, {
-      paseoHome: dependencies.paseoHome,
+    const ownership = await isPolyHiveOwnedWorktreeCwd(targetPath, {
+      polyhiveHome: dependencies.polyhiveHome,
     });
     if (!ownership.allowed) {
       dependencies.emit({
-        type: "paseo_worktree_archive_response",
+        type: "polyhive_worktree_archive_response",
         payload: {
           success: false,
           removedAgents: [],
           error: {
             code: "NOT_ALLOWED",
-            message: "Worktree is not a Paseo-owned worktree",
+            message: "Worktree is not a PolyHive-owned worktree",
           },
           requestId,
         },
@@ -554,10 +556,10 @@ export async function handlePaseoWorktreeArchiveRequest(
 
     // repoRoot is best-effort: if git has forgotten about the worktree we
     // still proceed using the path-derived worktreesRoot, since the ownership
-    // check already proved the path lives under $PASEO_HOME/worktrees.
+    // check already proved the path lives under $POLYHIVE_HOME/worktrees.
     repoRoot = ownership.repoRoot ?? repoRoot ?? null;
 
-    const removedAgents = await archivePaseoWorktree(dependencies, {
+    const removedAgents = await archivePolyHiveWorktree(dependencies, {
       targetPath,
       repoRoot,
       worktreesRoot: ownership.worktreeRoot,
@@ -565,7 +567,7 @@ export async function handlePaseoWorktreeArchiveRequest(
     });
 
     dependencies.emit({
-      type: "paseo_worktree_archive_response",
+      type: "polyhive_worktree_archive_response",
       payload: {
         success: true,
         removedAgents,
@@ -575,7 +577,7 @@ export async function handlePaseoWorktreeArchiveRequest(
     });
   } catch (error) {
     dependencies.emit({
-      type: "paseo_worktree_archive_response",
+      type: "polyhive_worktree_archive_response",
       payload: {
         success: false,
         removedAgents: [],
@@ -586,12 +588,12 @@ export async function handlePaseoWorktreeArchiveRequest(
   }
 }
 
-export async function handleCreatePaseoWorktreeRequest(
-  dependencies: HandleCreatePaseoWorktreeRequestDependencies,
-  request: Extract<SessionInboundMessage, { type: "create_paseo_worktree_request" }>,
+export async function handleCreatePolyHiveWorktreeRequest(
+  dependencies: HandleCreatePolyHiveWorktreeRequestDependencies,
+  request: Extract<SessionInboundMessage, { type: "create_polyhive_worktree_request" }>,
 ): Promise<void> {
   try {
-    const createdWorktree = await dependencies.createPaseoWorktree({
+    const createdWorktree = await dependencies.createPolyHiveWorktree({
       cwd: request.cwd,
       worktreeSlug: request.worktreeSlug,
       refName: request.refName,
@@ -599,14 +601,14 @@ export async function handleCreatePaseoWorktreeRequest(
       githubPrNumber: request.githubPrNumber,
       attachments: request.attachments,
       runSetup: false,
-      paseoHome: dependencies.paseoHome,
+      polyhiveHome: dependencies.polyhiveHome,
     });
     const slug = basename(createdWorktree.worktree.worktreePath);
     const workspace = createdWorktree.workspace;
 
     const descriptor = await dependencies.describeWorkspaceRecord(workspace);
     dependencies.emit({
-      type: "create_paseo_worktree_response",
+      type: "create_polyhive_worktree_response",
       payload: {
         workspace: descriptor,
         error: null,
@@ -631,7 +633,7 @@ export async function handleCreatePaseoWorktreeRequest(
       "Failed to create worktree",
     );
     dependencies.emit({
-      type: "create_paseo_worktree_response",
+      type: "create_polyhive_worktree_response",
       payload: {
         workspace: null,
         error: wireError.message,
@@ -661,7 +663,7 @@ export async function handleWorkspaceSetupStatusRequest(
 }
 
 export async function runWorktreeSetupInBackground(
-  dependencies: CreatePaseoWorktreeInBackgroundDependencies,
+  dependencies: CreatePolyHiveWorktreeInBackgroundDependencies,
   options: {
     requestCwd: string;
     repoRoot: string;

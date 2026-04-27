@@ -134,10 +134,10 @@ test.describe("Settings host page", () => {
     // the desktop bootstrap flow so only the sidebar's status query runs.
     await page.addInitScript((localServerId) => {
       localStorage.setItem(
-        "@paseo:app-settings",
+        "@polyhive:app-settings",
         JSON.stringify({ theme: "auto", manageBuiltInDaemon: false, sendBehavior: "interrupt" }),
       );
-      (window as unknown as { paseoDesktop: unknown }).paseoDesktop = {
+      (window as unknown as { polyhiveDesktop: unknown }).polyhiveDesktop = {
         platform: "darwin",
         invoke: async (command: string) => {
           if (command === "desktop_daemon_status") {

@@ -181,7 +181,7 @@ async function isOpenAiApiKeyUsable(apiKey: string | undefined): Promise<boolean
 
 let daemonProcess: ChildProcess | null = null;
 let metroProcess: ChildProcess | null = null;
-let paseoHome: string | null = null;
+let polyhiveHome: string | null = null;
 let fakeGhBinDir: string | null = null;
 let relayProcess: ChildProcess | null = null;
 
@@ -193,7 +193,7 @@ type OfferPayload = {
 };
 
 async function createFakeGhBin(): Promise<string> {
-  const binDir = await mkdtemp(path.join(tmpdir(), "paseo-e2e-gh-bin-"));
+  const binDir = await mkdtemp(path.join(tmpdir(), "polyhive-e2e-gh-bin-"));
   const ghPath = path.join(binDir, "gh");
   await writeFile(
     ghPath,
@@ -209,7 +209,7 @@ if (args[0] === "pr" && args[1] === "list") {
     {
       number: 515,
       title: "Review selected start ref",
-      url: "https://github.com/getpaseo/paseo/pull/515",
+      url: "https://github.com/polyhive/polyhive/pull/515",
       state: "OPEN",
       body: "Fixture pull request for app e2e.",
       labels: [],
@@ -243,8 +243,8 @@ function ensureRelayBuildArtifact(repoRoot: string): void {
     return;
   }
 
-  console.log("[e2e] Building @getpaseo/relay for daemon startup");
-  execSync("npm run build --workspace=@getpaseo/relay", {
+  console.log("[e2e] Building polyhive-relay for daemon startup");
+  execSync("npm run build --workspace=polyhive-relay", {
     cwd: repoRoot,
     stdio: "inherit",
   });
@@ -266,7 +266,7 @@ function decodeOfferFromFragmentUrl(url: string): OfferPayload {
   return offer as OfferPayload;
 }
 
-function loadPairingOfferFromCli(repoRoot: string, paseoHomePath: string): OfferPayload {
+function loadPairingOfferFromCli(repoRoot: string, polyhiveHomePath: string): OfferPayload {
   const stdout = execFileSync(
     process.execPath,
     ["--import", "tsx", "packages/cli/src/index.ts", "daemon", "pair", "--json"],
@@ -274,7 +274,7 @@ function loadPairingOfferFromCli(repoRoot: string, paseoHomePath: string): Offer
       cwd: repoRoot,
       env: {
         ...process.env,
-        PASEO_HOME: paseoHomePath,
+        POLYHIVE_HOME: polyhiveHomePath,
       },
       encoding: "utf8",
     },
@@ -288,7 +288,7 @@ function loadPairingOfferFromCli(repoRoot: string, paseoHomePath: string): Offer
 
 async function waitForPairingOfferFromCli(args: {
   repoRoot: string;
-  paseoHome: string;
+  polyhiveHome: string;
   timeoutMs?: number;
 }): Promise<OfferPayload> {
   const timeoutMs = args.timeoutMs ?? 15000;
@@ -297,7 +297,7 @@ async function waitForPairingOfferFromCli(args: {
 
   while (Date.now() - start < timeoutMs) {
     try {
-      return loadPairingOfferFromCli(args.repoRoot, args.paseoHome);
+      return loadPairingOfferFromCli(args.repoRoot, args.polyhiveHome);
     } catch (error) {
       lastError = error;
       await sleep(100);
@@ -305,7 +305,7 @@ async function waitForPairingOfferFromCli(args: {
   }
 
   throw new Error(
-    `Timed out waiting for \`paseo daemon pair --json\` to produce a pairing offer: ${
+    `Timed out waiting for \`polyhive daemon pair --json\` to produce a pairing offer: ${
       lastError instanceof Error ? lastError.message : String(lastError)
     }`,
   );
@@ -322,7 +322,7 @@ export default async function globalSetup() {
   const port = await getAvailablePort();
   let relayPort = 0;
   const metroPort = await getAvailablePort();
-  paseoHome = await mkdtemp(path.join(tmpdir(), "paseo-e2e-home-"));
+  polyhiveHome = await mkdtemp(path.join(tmpdir(), "polyhive-e2e-home-"));
   fakeGhBinDir = await createFakeGhBin();
   let relayLineBuffer = createLineBuffer();
   const metroLineBuffer = createLineBuffer();
@@ -337,9 +337,9 @@ export default async function globalSetup() {
     daemonProcess = null;
     metroProcess = null;
     relayProcess = null;
-    if (paseoHome) {
-      await rm(paseoHome, { recursive: true, force: true });
-      paseoHome = null;
+    if (polyhiveHome) {
+      await rm(polyhiveHome, { recursive: true, force: true });
+      polyhiveHome = null;
     }
     if (fakeGhBinDir) {
       await rm(fakeGhBinDir, { recursive: true, force: true });
@@ -350,7 +350,7 @@ export default async function globalSetup() {
   const openAiUsable = await isOpenAiApiKeyUsable(process.env.OPENAI_API_KEY);
   const defaultLocalModelsDir = path.join(
     process.env.HOME ?? "",
-    ".paseo",
+    ".polyhive",
     "models",
     "local-speech",
   );
@@ -360,7 +360,7 @@ export default async function globalSetup() {
 
   if (dictationProvider === "local" && !hasDefaultLocalModelsDir) {
     throw new Error(
-      "OpenAI key is not usable and local speech models are unavailable at ~/.paseo/models/local-speech. " +
+      "OpenAI key is not usable and local speech models are unavailable at ~/.polyhive/models/local-speech. " +
         "Either provide a valid OPENAI_API_KEY or install local speech models before running app e2e tests.",
     );
   }
@@ -530,21 +530,21 @@ export default async function globalSetup() {
       env: {
         ...process.env,
         PATH: `${fakeGhBinDir}${path.delimiter}${process.env.PATH ?? ""}`,
-        PASEO_HOME: paseoHome,
-        PASEO_SERVER_ID: "srv_e2e_test_daemon",
-        PASEO_LISTEN: `0.0.0.0:${port}`,
-        PASEO_RELAY_ENDPOINT: `127.0.0.1:${relayPort}`,
-        PASEO_CORS_ORIGINS: `http://localhost:${metroPort}`,
-        PASEO_DICTATION_ENABLED: openAiUsable ? "1" : "0",
-        PASEO_VOICE_MODE_ENABLED: openAiUsable ? "1" : "0",
+        POLYHIVE_HOME: polyhiveHome,
+        POLYHIVE_SERVER_ID: "srv_e2e_test_daemon",
+        POLYHIVE_LISTEN: `0.0.0.0:${port}`,
+        POLYHIVE_RELAY_ENDPOINT: `127.0.0.1:${relayPort}`,
+        POLYHIVE_CORS_ORIGINS: `http://localhost:${metroPort}`,
+        POLYHIVE_DICTATION_ENABLED: openAiUsable ? "1" : "0",
+        POLYHIVE_VOICE_MODE_ENABLED: openAiUsable ? "1" : "0",
         ...(openAiUsable
           ? {
-              PASEO_DICTATION_STT_PROVIDER: "openai",
-              PASEO_VOICE_STT_PROVIDER: "openai",
-              PASEO_VOICE_TTS_PROVIDER: "openai",
+              POLYHIVE_DICTATION_STT_PROVIDER: "openai",
+              POLYHIVE_VOICE_STT_PROVIDER: "openai",
+              POLYHIVE_VOICE_TTS_PROVIDER: "openai",
             }
           : {}),
-        ...(localModelsDir ? { PASEO_LOCAL_MODELS_DIR: localModelsDir } : {}),
+        ...(localModelsDir ? { POLYHIVE_LOCAL_MODELS_DIR: localModelsDir } : {}),
         NODE_ENV: "development",
       },
       stdio: ["ignore", "pipe", "pipe"],
@@ -578,7 +578,7 @@ export default async function globalSetup() {
     // Wait for both daemon and Metro to be ready
     await Promise.all([
       waitForServer(port, {
-        label: "Paseo daemon",
+        label: "PolyHive daemon",
         childProcess: daemonProcess,
         getRecentOutput: daemonLineBuffer.dump,
       }),
@@ -592,7 +592,7 @@ export default async function globalSetup() {
 
     const offer = await waitForPairingOfferFromCli({
       repoRoot,
-      paseoHome,
+      polyhiveHome,
     });
 
     process.env.E2E_DAEMON_PORT = String(port);
@@ -601,7 +601,7 @@ export default async function globalSetup() {
     process.env.E2E_RELAY_DAEMON_PUBLIC_KEY = offer.daemonPublicKeyB64;
     process.env.E2E_METRO_PORT = String(metroPort);
     console.log(
-      `[e2e] Test daemon started on port ${port}, Metro on port ${metroPort}, home: ${paseoHome}`,
+      `[e2e] Test daemon started on port ${port}, Metro on port ${metroPort}, home: ${polyhiveHome}`,
     );
 
     return async () => {

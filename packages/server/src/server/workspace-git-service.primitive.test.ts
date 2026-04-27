@@ -67,7 +67,7 @@ function createCheckoutStatus(
     behindOfOrigin: 0,
     hasRemote: true,
     remoteUrl: "https://github.com/acme/repo.git",
-    isPaseoOwnedWorktree: false,
+    isPolyHiveOwnedWorktree: false,
     ...overrides,
   };
 }
@@ -117,7 +117,7 @@ function createSnapshot(
       mainRepoRoot: null,
       currentBranch: "main",
       remoteUrl: "https://github.com/acme/repo.git",
-      isPaseoOwnedWorktree: false,
+      isPolyHiveOwnedWorktree: false,
       isDirty: false,
       baseRef: "main",
       aheadBehind: { ahead: 0, behind: 0 },
@@ -200,7 +200,7 @@ function createService(options?: {
   resolveBranchCheckout?: ReturnType<typeof vi.fn>;
   resolveRepositoryDefaultBranch?: ReturnType<typeof vi.fn>;
   listBranchSuggestions?: ReturnType<typeof vi.fn>;
-  listPaseoWorktrees?: ReturnType<typeof vi.fn>;
+  listPolyHiveWorktrees?: ReturnType<typeof vi.fn>;
   github?: GitHubService;
   resolveAbsoluteGitDir?: ReturnType<typeof vi.fn>;
   hasOriginRemote?: ReturnType<typeof vi.fn>;
@@ -211,7 +211,7 @@ function createService(options?: {
 }) {
   return new WorkspaceGitServiceImpl({
     logger: createLogger() as never,
-    paseoHome: "/tmp/paseo-test",
+    polyhiveHome: "/tmp/polyhive-test",
     deps: {
       watch: options?.watch ?? ((() => createWatcher()) as never),
       readdir: vi.fn(async () => []),
@@ -232,7 +232,7 @@ function createService(options?: {
       resolveRepositoryDefaultBranch:
         options?.resolveRepositoryDefaultBranch ?? vi.fn(async () => "main"),
       listBranchSuggestions: options?.listBranchSuggestions ?? vi.fn(async () => []),
-      listPaseoWorktrees: options?.listPaseoWorktrees ?? vi.fn(async () => []),
+      listPolyHiveWorktrees: options?.listPolyHiveWorktrees ?? vi.fn(async () => []),
       github: options?.github ?? createGitHubServiceStub(),
       resolveAbsoluteGitDir: options?.resolveAbsoluteGitDir ?? vi.fn(async () => "/tmp/repo/.git"),
       hasOriginRemote: options?.hasOriginRemote ?? vi.fn(async () => false),
@@ -914,7 +914,7 @@ describe("WorkspaceGitServiceImpl D2 read methods", () => {
 
   test("listStashes cold-loads, warms, forces, and coalesces per cwd", async () => {
     let nowMs = 0;
-    const stashOutput = "stash@{0}\u0000paseo-auto-stash: feature\n";
+    const stashOutput = "stash@{0}\u0000polyhive-auto-stash: feature\n";
     const stashDeferred = createDeferred<{
       stdout: string;
       stderr: string;
@@ -937,8 +937,8 @@ describe("WorkspaceGitServiceImpl D2 read methods", () => {
       now: () => new Date(nowMs),
     });
 
-    const first = service.listStashes("/tmp/repo", { paseoOnly: true });
-    const second = service.listStashes("/tmp/repo/.", { paseoOnly: true });
+    const first = service.listStashes("/tmp/repo", { polyhiveOnly: true });
+    const second = service.listStashes("/tmp/repo/.", { polyhiveOnly: true });
     await flushPromises();
 
     expect(runGitCommand).toHaveBeenCalledTimes(1);
@@ -950,15 +950,15 @@ describe("WorkspaceGitServiceImpl D2 read methods", () => {
       signal: null,
     });
     await expect(Promise.all([first, second])).resolves.toEqual([
-      [{ index: 0, message: "paseo-auto-stash: feature", branch: "feature", isPaseo: true }],
-      [{ index: 0, message: "paseo-auto-stash: feature", branch: "feature", isPaseo: true }],
+      [{ index: 0, message: "polyhive-auto-stash: feature", branch: "feature", isPolyHive: true }],
+      [{ index: 0, message: "polyhive-auto-stash: feature", branch: "feature", isPolyHive: true }],
     ]);
 
     nowMs = 1_000;
-    await service.listStashes("/tmp/repo", { paseoOnly: true });
+    await service.listStashes("/tmp/repo", { polyhiveOnly: true });
     expect(runGitCommand).toHaveBeenCalledTimes(1);
 
-    await service.listStashes("/tmp/repo", { paseoOnly: true }, { force: true, reason: "test" });
+    await service.listStashes("/tmp/repo", { polyhiveOnly: true }, { force: true, reason: "test" });
     expect(runGitCommand).toHaveBeenCalledTimes(2);
 
     service.dispose();
@@ -968,28 +968,28 @@ describe("WorkspaceGitServiceImpl D2 read methods", () => {
     let nowMs = 0;
     const worktrees = [
       {
-        path: "/tmp/paseo-home/worktrees/repo/feature",
+        path: "/tmp/polyhive-home/worktrees/repo/feature",
         createdAt: "2026-04-12T00:00:00.000Z",
         branchName: "feature",
       },
     ];
-    const listPaseoWorktrees = vi.fn().mockResolvedValue(worktrees);
+    const listPolyHiveWorktrees = vi.fn().mockResolvedValue(worktrees);
     const service = createService({
-      listPaseoWorktrees,
+      listPolyHiveWorktrees,
       now: () => new Date(nowMs),
     });
 
     const first = service.listWorktrees("/tmp/repo");
     const second = service.listWorktrees("/tmp/repo/.");
     await expect(Promise.all([first, second])).resolves.toEqual([worktrees, worktrees]);
-    expect(listPaseoWorktrees).toHaveBeenCalledTimes(1);
+    expect(listPolyHiveWorktrees).toHaveBeenCalledTimes(1);
 
     nowMs = 1_000;
     await service.listWorktrees("/tmp/repo");
-    expect(listPaseoWorktrees).toHaveBeenCalledTimes(1);
+    expect(listPolyHiveWorktrees).toHaveBeenCalledTimes(1);
 
     await service.listWorktrees("/tmp/repo", { force: true, reason: "test" });
-    expect(listPaseoWorktrees).toHaveBeenCalledTimes(2);
+    expect(listPolyHiveWorktrees).toHaveBeenCalledTimes(2);
 
     service.dispose();
   });
@@ -1003,15 +1003,15 @@ describe("WorkspaceGitServiceImpl D2 read methods", () => {
 
     const worktrees = [
       {
-        path: join(tempDir, "paseo-home", "worktrees", "repo", "feature"),
+        path: join(tempDir, "polyhive-home", "worktrees", "repo", "feature"),
         createdAt: "2026-04-12T00:00:00.000Z",
         branchName: "feature",
       },
     ];
-    const listPaseoWorktrees = vi.fn(async () => worktrees);
+    const listPolyHiveWorktrees = vi.fn(async () => worktrees);
     const service = createService({
       getCheckoutStatus: getCheckoutStatusUncached as never,
-      listPaseoWorktrees,
+      listPolyHiveWorktrees,
     });
 
     try {
@@ -1020,10 +1020,10 @@ describe("WorkspaceGitServiceImpl D2 read methods", () => {
       ).resolves.toEqual([worktrees, worktrees]);
       await expect(service.listWorktrees(nestedWorkspaceDir)).resolves.toEqual(worktrees);
 
-      expect(listPaseoWorktrees).toHaveBeenCalledTimes(1);
-      expect(listPaseoWorktrees).toHaveBeenCalledWith({
+      expect(listPolyHiveWorktrees).toHaveBeenCalledTimes(1);
+      expect(listPolyHiveWorktrees).toHaveBeenCalledWith({
         cwd: repoDir,
-        paseoHome: "/tmp/paseo-test",
+        polyhiveHome: "/tmp/polyhive-test",
       });
     } finally {
       service.dispose();
@@ -1095,7 +1095,7 @@ describe("WorkspaceGitServiceImpl D2 read methods", () => {
     let nowMs = 0;
     const getCheckoutStatus = vi.fn(async (cwd: string) =>
       createCheckoutStatus(cwd, {
-        remoteUrl: "https://github.com/getpaseo/paseo.git",
+        remoteUrl: "https://github.com/polyhive/polyhive.git",
       }),
     );
     const service = createService({
@@ -1104,11 +1104,11 @@ describe("WorkspaceGitServiceImpl D2 read methods", () => {
     });
 
     await expect(service.resolveRepoRemoteUrl("/tmp/repo")).resolves.toBe(
-      "https://github.com/getpaseo/paseo.git",
+      "https://github.com/polyhive/polyhive.git",
     );
     nowMs = 1_000;
     await expect(service.resolveRepoRemoteUrl("/tmp/repo/.")).resolves.toBe(
-      "https://github.com/getpaseo/paseo.git",
+      "https://github.com/polyhive/polyhive.git",
     );
 
     expect(getCheckoutStatus).toHaveBeenCalledTimes(1);
@@ -1121,7 +1121,7 @@ describe("WorkspaceGitServiceImpl D2 read methods", () => {
     const getCheckoutStatus = vi.fn(async (cwd: string) =>
       createCheckoutStatus(cwd, {
         currentBranch: "feature/service-metadata",
-        remoteUrl: "https://github.com/getpaseo/paseo.git",
+        remoteUrl: "https://github.com/polyhive/polyhive.git",
         repoRoot: "/tmp/repo",
       }),
     );
@@ -1134,14 +1134,14 @@ describe("WorkspaceGitServiceImpl D2 read methods", () => {
       service.getWorkspaceGitMetadata("/tmp/repo", { directoryName: "Local Repo" }),
     ).resolves.toEqual({
       projectKind: "git",
-      projectDisplayName: "getpaseo/paseo",
+      projectDisplayName: "polyhive/polyhive",
       workspaceDisplayName: "feature/service-metadata",
-      gitRemote: "https://github.com/getpaseo/paseo.git",
+      gitRemote: "https://github.com/polyhive/polyhive.git",
       isWorktree: false,
-      projectSlug: "paseo",
+      projectSlug: "polyhive",
       repoRoot: "/tmp/repo",
       currentBranch: "feature/service-metadata",
-      remoteUrl: "https://github.com/getpaseo/paseo.git",
+      remoteUrl: "https://github.com/polyhive/polyhive.git",
     });
 
     nowMs = 1_000;

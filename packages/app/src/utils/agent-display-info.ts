@@ -24,12 +24,12 @@ export function deriveBranchLabel(checkout: CheckoutStatusPayload | null): strin
 
 /**
  * Derives the project path to display for an agent.
- * If inside a Paseo worktree, shows just the worktree-relative path.
+ * If inside a PolyHive worktree, shows just the worktree-relative path.
  * Otherwise uses the repo root or cwd.
  */
 export function deriveProjectPath(cwd: string, checkout: CheckoutStatusPayload | null): string {
   const basePath = checkout?.isGit ? (checkout.repoRoot ?? cwd) : cwd;
-  const worktreeMarker = ".paseo/worktrees/";
+  const worktreeMarker = ".polyhive/worktrees/";
   const idx = basePath.indexOf(worktreeMarker);
   if (idx !== -1) {
     const afterMarker = basePath.slice(idx + worktreeMarker.length);

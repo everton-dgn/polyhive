@@ -145,7 +145,7 @@ export function applyWindowControlsOverlayUpdate(input: {
 export function registerWindowManager(): void {
   const overlayStateByWindow = new WeakMap<BrowserWindow, WindowControlsOverlayState>();
 
-  ipcMain.handle("paseo:window:toggleMaximize", (event) => {
+  ipcMain.handle("polyhive:window:toggleMaximize", (event) => {
     const win = BrowserWindow.fromWebContents(event.sender);
     if (!win) return;
     if (win.isMaximized()) {
@@ -155,12 +155,12 @@ export function registerWindowManager(): void {
     }
   });
 
-  ipcMain.handle("paseo:window:isFullscreen", (event) => {
+  ipcMain.handle("polyhive:window:isFullscreen", (event) => {
     const win = BrowserWindow.fromWebContents(event.sender);
     return win?.isFullScreen() ?? false;
   });
 
-  ipcMain.handle("paseo:window:setBadgeCount", (_event, count?: unknown) => {
+  ipcMain.handle("polyhive:window:setBadgeCount", (_event, count?: unknown) => {
     const badgeCount = readBadgeCount(count);
     try {
       app.setBadgeCount(badgeCount);
@@ -173,7 +173,7 @@ export function registerWindowManager(): void {
     }
   });
 
-  ipcMain.handle("paseo:window:updateWindowControls", (event, update?: unknown) => {
+  ipcMain.handle("polyhive:window:updateWindowControls", (event, update?: unknown) => {
     const win = BrowserWindow.fromWebContents(event.sender);
     if (!win) {
       return;
@@ -205,15 +205,15 @@ export function registerWindowManager(): void {
 
 export function setupWindowResizeEvents(win: BrowserWindow): void {
   win.on("resize", () => {
-    win.webContents.send("paseo:window:resized", {});
+    win.webContents.send("polyhive:window:resized", {});
   });
 
   win.on("enter-full-screen", () => {
-    win.webContents.send("paseo:window:resized", {});
+    win.webContents.send("polyhive:window:resized", {});
   });
 
   win.on("leave-full-screen", () => {
-    win.webContents.send("paseo:window:resized", {});
+    win.webContents.send("polyhive:window:resized", {});
   });
 }
 

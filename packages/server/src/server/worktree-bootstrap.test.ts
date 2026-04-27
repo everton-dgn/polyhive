@@ -22,7 +22,7 @@ interface CreateAgentWorktreeTestOptions {
   branchName: string;
   baseBranch: string;
   worktreeSlug: string;
-  paseoHome?: string;
+  polyhiveHome?: string;
 }
 
 interface CreateAgentWorktreeTestResult {
@@ -42,7 +42,7 @@ async function createBootstrapWorktreeForTest(
       newBranchName: options.branchName,
     },
     runSetup: false,
-    paseoHome: options.paseoHome,
+    polyhiveHome: options.polyhiveHome,
   });
   return { worktree, shouldBootstrap: true };
 }
@@ -50,7 +50,7 @@ async function createBootstrapWorktreeForTest(
 describe("runAsyncWorktreeBootstrap", () => {
   let tempDir: string;
   let repoDir: string;
-  let paseoHome: string;
+  let polyhiveHome: string;
   let realTerminalManagers: TerminalManager[];
 
   async function waitForPathExists(targetPath: string, timeoutMs = 10000): Promise<void> {
@@ -68,7 +68,7 @@ describe("runAsyncWorktreeBootstrap", () => {
     realTerminalManagers = [];
     tempDir = realpathSync(mkdtempSync(join(tmpdir(), "worktree-bootstrap-test-")));
     repoDir = join(tempDir, "repo");
-    paseoHome = join(tempDir, "paseo-home");
+    polyhiveHome = join(tempDir, "polyhive-home");
 
     execSync(`mkdir -p ${repoDir}`);
     execSync("git init -b main", { cwd: repoDir, stdio: "pipe" });
@@ -97,14 +97,14 @@ describe("runAsyncWorktreeBootstrap", () => {
 
   it("streams running setup updates live and persists only a final setup timeline row", async () => {
     writeFileSync(
-      join(repoDir, "paseo.json"),
+      join(repoDir, "polyhive.json"),
       JSON.stringify({
         worktree: {
           setup: ['echo "line-one"; echo "line-two" 1>&2', 'echo "line-three"'],
         },
       }),
     );
-    execSync("git add paseo.json", { cwd: repoDir, stdio: "pipe" });
+    execSync("git add polyhive.json", { cwd: repoDir, stdio: "pipe" });
     execSync("git -c commit.gpgsign=false commit -m 'add setup'", {
       cwd: repoDir,
       stdio: "pipe",
@@ -115,7 +115,7 @@ describe("runAsyncWorktreeBootstrap", () => {
       branchName: "feature-streaming-setup",
       baseBranch: "main",
       worktreeSlug: "feature-streaming-setup",
-      paseoHome,
+      polyhiveHome,
     });
 
     const persisted: AgentTimelineItem[] = [];
@@ -139,13 +139,13 @@ describe("runAsyncWorktreeBootstrap", () => {
     const liveSetupItems = live.filter(
       (item) =>
         item.type === "tool_call" &&
-        item.name === "paseo_worktree_setup" &&
+        item.name === "polyhive_worktree_setup" &&
         item.status === "running",
     );
     expect(liveSetupItems.length).toBeGreaterThan(0);
 
     const persistedSetupItems = persisted.filter(
-      (item) => item.type === "tool_call" && item.name === "paseo_worktree_setup",
+      (item) => item.type === "tool_call" && item.name === "polyhive_worktree_setup",
     );
     expect(persistedSetupItems).toHaveLength(1);
     expect(persistedSetupItems[0]?.type).toBe("tool_call");
@@ -205,14 +205,14 @@ describe("runAsyncWorktreeBootstrap", () => {
 
   it("does not fail setup when live timeline emission throws", async () => {
     writeFileSync(
-      join(repoDir, "paseo.json"),
+      join(repoDir, "polyhive.json"),
       JSON.stringify({
         worktree: {
           setup: ['echo "ok"'],
         },
       }),
     );
-    execSync("git add paseo.json", { cwd: repoDir, stdio: "pipe" });
+    execSync("git add polyhive.json", { cwd: repoDir, stdio: "pipe" });
     execSync("git -c commit.gpgsign=false commit -m 'add setup'", {
       cwd: repoDir,
       stdio: "pipe",
@@ -223,7 +223,7 @@ describe("runAsyncWorktreeBootstrap", () => {
       branchName: "feature-live-failure",
       baseBranch: "main",
       worktreeSlug: "feature-live-failure",
-      paseoHome,
+      polyhiveHome,
     });
 
     const persisted: AgentTimelineItem[] = [];
@@ -244,7 +244,7 @@ describe("runAsyncWorktreeBootstrap", () => {
     ).resolves.toBeUndefined();
 
     const persistedSetupItems = persisted.filter(
-      (item) => item.type === "tool_call" && item.name === "paseo_worktree_setup",
+      (item) => item.type === "tool_call" && item.name === "polyhive_worktree_setup",
     );
     expect(persistedSetupItems).toHaveLength(1);
     if (persistedSetupItems[0]?.type === "tool_call") {
@@ -256,14 +256,14 @@ describe("runAsyncWorktreeBootstrap", () => {
     const largeOutputCommand =
       "node -e \"process.stdout.write('prefix-'); process.stdout.write('x'.repeat(70000)); process.stdout.write('-suffix')\"";
     writeFileSync(
-      join(repoDir, "paseo.json"),
+      join(repoDir, "polyhive.json"),
       JSON.stringify({
         worktree: {
           setup: [largeOutputCommand],
         },
       }),
     );
-    execSync("git add paseo.json", { cwd: repoDir, stdio: "pipe" });
+    execSync("git add polyhive.json", { cwd: repoDir, stdio: "pipe" });
     execSync("git -c commit.gpgsign=false commit -m 'add large output setup'", {
       cwd: repoDir,
       stdio: "pipe",
@@ -274,7 +274,7 @@ describe("runAsyncWorktreeBootstrap", () => {
       branchName: "feature-large-output",
       baseBranch: "main",
       worktreeSlug: "feature-large-output",
-      paseoHome,
+      polyhiveHome,
     });
 
     const persisted: AgentTimelineItem[] = [];
@@ -292,7 +292,7 @@ describe("runAsyncWorktreeBootstrap", () => {
 
     const persistedSetupItem = persisted.find(
       (item): item is Extract<AgentTimelineItem, { type: "tool_call" }> =>
-        item.type === "tool_call" && item.name === "paseo_worktree_setup",
+        item.type === "tool_call" && item.name === "polyhive_worktree_setup",
     );
     expect(persistedSetupItem).toBeDefined();
     expect(persistedSetupItem?.detail.type).toBe("worktree_setup");
@@ -313,7 +313,7 @@ describe("runAsyncWorktreeBootstrap", () => {
 
   it("keeps only the final carriage-return-updated content in command logs", async () => {
     writeFileSync(
-      join(repoDir, "paseo.json"),
+      join(repoDir, "polyhive.json"),
       JSON.stringify({
         worktree: {
           setup: [
@@ -322,7 +322,7 @@ describe("runAsyncWorktreeBootstrap", () => {
         },
       }),
     );
-    execSync("git add paseo.json", { cwd: repoDir, stdio: "pipe" });
+    execSync("git add polyhive.json", { cwd: repoDir, stdio: "pipe" });
     execSync("git -c commit.gpgsign=false commit -m 'add carriage return setup'", {
       cwd: repoDir,
       stdio: "pipe",
@@ -333,7 +333,7 @@ describe("runAsyncWorktreeBootstrap", () => {
       branchName: "feature-carriage-return",
       baseBranch: "main",
       worktreeSlug: "feature-carriage-return",
-      paseoHome,
+      polyhiveHome,
     });
 
     const persisted: AgentTimelineItem[] = [];
@@ -351,7 +351,7 @@ describe("runAsyncWorktreeBootstrap", () => {
 
     const persistedSetupItem = persisted.find(
       (item): item is Extract<AgentTimelineItem, { type: "tool_call" }> =>
-        item.type === "tool_call" && item.name === "paseo_worktree_setup",
+        item.type === "tool_call" && item.name === "polyhive_worktree_setup",
     );
     expect(persistedSetupItem?.detail.type).toBe("worktree_setup");
     if (!persistedSetupItem || persistedSetupItem.detail.type !== "worktree_setup") {
@@ -366,7 +366,7 @@ describe("runAsyncWorktreeBootstrap", () => {
 
   it("waits for terminal output before sending bootstrap commands", async () => {
     writeFileSync(
-      join(repoDir, "paseo.json"),
+      join(repoDir, "polyhive.json"),
       JSON.stringify({
         worktree: {
           terminals: [
@@ -378,7 +378,7 @@ describe("runAsyncWorktreeBootstrap", () => {
         },
       }),
     );
-    execSync("git add paseo.json", { cwd: repoDir, stdio: "pipe" });
+    execSync("git add polyhive.json", { cwd: repoDir, stdio: "pipe" });
     execSync("git -c commit.gpgsign=false commit -m 'add terminal bootstrap config'", {
       cwd: repoDir,
       stdio: "pipe",
@@ -389,7 +389,7 @@ describe("runAsyncWorktreeBootstrap", () => {
       branchName: "feature-terminal-readiness",
       baseBranch: "main",
       worktreeSlug: "feature-terminal-readiness",
-      paseoHome,
+      polyhiveHome,
     });
 
     let readyAt = 0;
@@ -464,10 +464,10 @@ describe("runAsyncWorktreeBootstrap", () => {
 
   it("shares the same worktree runtime port across setup and bootstrap terminals", async () => {
     writeFileSync(
-      join(repoDir, "paseo.json"),
+      join(repoDir, "polyhive.json"),
       JSON.stringify({
         worktree: {
-          setup: ['echo "$PASEO_WORKTREE_PORT" > setup-port.txt'],
+          setup: ['echo "$POLYHIVE_WORKTREE_PORT" > setup-port.txt'],
           terminals: [
             {
               name: "Port Terminal",
@@ -477,7 +477,7 @@ describe("runAsyncWorktreeBootstrap", () => {
         },
       }),
     );
-    execSync("git add paseo.json", { cwd: repoDir, stdio: "pipe" });
+    execSync("git add polyhive.json", { cwd: repoDir, stdio: "pipe" });
     execSync("git -c commit.gpgsign=false commit -m 'add port setup and terminals'", {
       cwd: repoDir,
       stdio: "pipe",
@@ -488,7 +488,7 @@ describe("runAsyncWorktreeBootstrap", () => {
       branchName: "feature-shared-runtime-port",
       baseBranch: "main",
       worktreeSlug: "feature-shared-runtime-port",
-      paseoHome,
+      polyhiveHome,
     });
 
     const registeredEnvs: Array<{ cwd: string; env: Record<string, string> }> = [];
@@ -557,14 +557,14 @@ describe("runAsyncWorktreeBootstrap", () => {
     expect(setupPort.length).toBeGreaterThan(0);
     expect(registeredEnvs).toHaveLength(1);
     expect(registeredEnvs[0]?.cwd).toBe(worktreeBootstrap.worktree.worktreePath);
-    expect(registeredEnvs[0]?.env.PASEO_WORKTREE_PORT).toBe(setupPort);
+    expect(registeredEnvs[0]?.env.POLYHIVE_WORKTREE_PORT).toBe(setupPort);
     expect(createTerminalEnvs.length).toBeGreaterThan(0);
-    expect(createTerminalEnvs[0]?.PASEO_WORKTREE_PORT).toBe(setupPort);
+    expect(createTerminalEnvs[0]?.POLYHIVE_WORKTREE_PORT).toBe(setupPort);
 
     const terminalToolCall = persisted.find(
       (item): item is Extract<AgentTimelineItem, { type: "tool_call" }> =>
         item.type === "tool_call" &&
-        item.name === "paseo_worktree_terminals" &&
+        item.name === "polyhive_worktree_terminals" &&
         item.status === "completed",
     );
     expect(terminalToolCall?.status).toBe("completed");
@@ -689,12 +689,12 @@ describe("runAsyncWorktreeBootstrap", () => {
     return env;
   }
 
-  function commitPaseoScripts(
+  function commitPolyHiveScripts(
     scripts: Record<string, { command: string; type?: "script" | "service" }>,
     message = "add script config",
   ): void {
-    writeFileSync(join(repoDir, "paseo.json"), JSON.stringify({ scripts }));
-    execSync("git add paseo.json", { cwd: repoDir, stdio: "pipe" });
+    writeFileSync(join(repoDir, "polyhive.json"), JSON.stringify({ scripts }));
+    execSync("git add polyhive.json", { cwd: repoDir, stdio: "pipe" });
     execSync(`git -c commit.gpgsign=false commit -m ${JSON.stringify(message)}`, {
       cwd: repoDir,
       stdio: "pipe",
@@ -702,7 +702,7 @@ describe("runAsyncWorktreeBootstrap", () => {
   }
 
   it("spawns plain scripts in persistent shell terminals without env injection or routes", async () => {
-    commitPaseoScripts({
+    commitPolyHiveScripts({
       web: {
         command: "npm run dev",
       },
@@ -742,7 +742,7 @@ describe("runAsyncWorktreeBootstrap", () => {
   });
 
   it("records plain script exit codes from shell command completion without terminal exit", async () => {
-    commitPaseoScripts(
+    commitPolyHiveScripts(
       {
         typecheck: {
           command: 'node -e "process.exit(7)"',
@@ -781,7 +781,7 @@ describe("runAsyncWorktreeBootstrap", () => {
   });
 
   it("reuses a live terminal when rerunning after plain script completion", async () => {
-    commitPaseoScripts(
+    commitPolyHiveScripts(
       {
         typecheck: {
           command: "npm run typecheck",
@@ -847,7 +847,7 @@ describe("runAsyncWorktreeBootstrap", () => {
   });
 
   it("tracks command completion when reusing a live terminal from a stopped plain script entry", async () => {
-    commitPaseoScripts(
+    commitPolyHiveScripts(
       {
         typecheck: {
           command: "npm run typecheck",
@@ -902,7 +902,7 @@ describe("runAsyncWorktreeBootstrap", () => {
   });
 
   it("uses terminal exit as a fallback before shell command completion", async () => {
-    commitPaseoScripts(
+    commitPolyHiveScripts(
       {
         typecheck: {
           command: "npm run typecheck",
@@ -940,7 +940,7 @@ describe("runAsyncWorktreeBootstrap", () => {
   });
 
   it("rejects duplicate plain script starts while running", async () => {
-    commitPaseoScripts(
+    commitPolyHiveScripts(
       {
         typecheck: {
           command: 'node -e "setTimeout(() => {}, 30000)"',
@@ -983,7 +983,7 @@ describe("runAsyncWorktreeBootstrap", () => {
   });
 
   it("spawns services with route registration and injected peer service env vars", async () => {
-    commitPaseoScripts(
+    commitPolyHiveScripts(
       {
         api: {
           type: "service",
@@ -1029,15 +1029,15 @@ describe("runAsyncWorktreeBootstrap", () => {
     expect(createTerminalCalls[0]?.name).toBe("api");
     expect(terminalRecords[0]?.sentInputs).toEqual(["npm run api\r"]);
     expect(createTerminalCalls[0]?.env).not.toHaveProperty("PORT");
-    expect(createTerminalCalls[0]?.env?.PASEO_PORT).toEqual(expect.any(String));
+    expect(createTerminalCalls[0]?.env?.POLYHIVE_PORT).toEqual(expect.any(String));
     expect(createTerminalCalls[0]?.env?.HOST).toBe("127.0.0.1");
-    expect(createTerminalCalls[0]?.env?.PASEO_URL).toBe(
+    expect(createTerminalCalls[0]?.env?.POLYHIVE_URL).toBe(
       "http://api.feature-socket-service.repo.localhost:6767",
     );
-    expect(createTerminalCalls[0]?.env?.PASEO_SERVICE_API_PORT).toBe(
-      createTerminalCalls[0]?.env?.PASEO_PORT,
+    expect(createTerminalCalls[0]?.env?.POLYHIVE_SERVICE_API_PORT).toBe(
+      createTerminalCalls[0]?.env?.POLYHIVE_PORT,
     );
-    expect(createTerminalCalls[0]?.env?.PASEO_SERVICE_API_URL).toBe(
+    expect(createTerminalCalls[0]?.env?.POLYHIVE_SERVICE_API_URL).toBe(
       "http://api.feature-socket-service.repo.localhost:6767",
     );
     const plannedPorts = await ensureWorkspaceServicePortPlan({
@@ -1051,10 +1051,10 @@ describe("runAsyncWorktreeBootstrap", () => {
     if (plannedAppServerPort === undefined) {
       throw new Error("Expected app-server to be present in the service port plan");
     }
-    expect(createTerminalCalls[0]?.env?.PASEO_SERVICE_APP_SERVER_PORT).toBe(
+    expect(createTerminalCalls[0]?.env?.POLYHIVE_SERVICE_APP_SERVER_PORT).toBe(
       String(plannedAppServerPort),
     );
-    expect(createTerminalCalls[0]?.env?.PASEO_SERVICE_APP_SERVER_URL).toBe(
+    expect(createTerminalCalls[0]?.env?.POLYHIVE_SERVICE_APP_SERVER_URL).toBe(
       "http://app-server.feature-socket-service.repo.localhost:6767",
     );
     expect(runtimeStore.get({ workspaceId: repoDir, scriptName: "api" })).toMatchObject({
@@ -1066,7 +1066,7 @@ describe("runAsyncWorktreeBootstrap", () => {
 
   it("refreshes a stopped service port on respawn and updates the route", async () => {
     writeFileSync(
-      join(repoDir, "paseo.json"),
+      join(repoDir, "polyhive.json"),
       JSON.stringify({
         scripts: {
           api: {
@@ -1080,7 +1080,7 @@ describe("runAsyncWorktreeBootstrap", () => {
         },
       }),
     );
-    execSync("git add paseo.json", { cwd: repoDir, stdio: "pipe" });
+    execSync("git add polyhive.json", { cwd: repoDir, stdio: "pipe" });
     execSync("git -c commit.gpgsign=false commit -m 'add respawn service script config'", {
       cwd: repoDir,
       stdio: "pipe",
@@ -1157,7 +1157,7 @@ describe("runAsyncWorktreeBootstrap", () => {
     }
     expect(secondPort).not.toBe(firstPort);
     expect(secondPort).toEqual(expect.any(Number));
-    expect(createTerminalCalls[2]?.env?.PASEO_SERVICE_WORKER_PORT).toBe(String(workerPort));
+    expect(createTerminalCalls[2]?.env?.POLYHIVE_SERVICE_WORKER_PORT).toBe(String(workerPort));
     expect(routeStore.getRouteEntry("api.feature-respawn-service.repo.localhost")).toMatchObject({
       hostname: "api.feature-respawn-service.repo.localhost",
       port: secondPort,
@@ -1169,7 +1169,7 @@ describe("runAsyncWorktreeBootstrap", () => {
 
   it("removes the current service route on exit after a branch rename", async () => {
     writeFileSync(
-      join(repoDir, "paseo.json"),
+      join(repoDir, "polyhive.json"),
       JSON.stringify({
         scripts: {
           api: {
@@ -1179,7 +1179,7 @@ describe("runAsyncWorktreeBootstrap", () => {
         },
       }),
     );
-    execSync("git add paseo.json", { cwd: repoDir, stdio: "pipe" });
+    execSync("git add polyhive.json", { cwd: repoDir, stdio: "pipe" });
     execSync("git -c commit.gpgsign=false commit -m 'add renamed service script config'", {
       cwd: repoDir,
       stdio: "pipe",
@@ -1227,7 +1227,7 @@ describe("runAsyncWorktreeBootstrap", () => {
 
   it("fails normalized service env name collisions before terminal creation", async () => {
     writeFileSync(
-      join(repoDir, "paseo.json"),
+      join(repoDir, "polyhive.json"),
       JSON.stringify({
         scripts: {
           "app-server": {
@@ -1241,7 +1241,7 @@ describe("runAsyncWorktreeBootstrap", () => {
         },
       }),
     );
-    execSync("git add paseo.json", { cwd: repoDir, stdio: "pipe" });
+    execSync("git add polyhive.json", { cwd: repoDir, stdio: "pipe" });
     execSync("git -c commit.gpgsign=false commit -m 'add colliding service config'", {
       cwd: repoDir,
       stdio: "pipe",
@@ -1272,7 +1272,7 @@ describe("runAsyncWorktreeBootstrap", () => {
     ).toBeNull();
 
     writeFileSync(
-      join(repoDir, "paseo.json"),
+      join(repoDir, "polyhive.json"),
       JSON.stringify({
         scripts: {
           "app-server": {
@@ -1309,13 +1309,13 @@ describe("runAsyncWorktreeBootstrap", () => {
 
     expect(Array.from(plan.keys())).toEqual(["app-server", "worker"]);
     expect(createTerminalCalls).toHaveLength(1);
-    expect(createTerminalCalls[0]?.env).toHaveProperty("PASEO_SERVICE_APP_SERVER_PORT");
-    expect(createTerminalCalls[0]?.env).toHaveProperty("PASEO_SERVICE_WORKER_PORT");
+    expect(createTerminalCalls[0]?.env).toHaveProperty("POLYHIVE_SERVICE_APP_SERVER_PORT");
+    expect(createTerminalCalls[0]?.env).toHaveProperty("POLYHIVE_SERVICE_WORKER_PORT");
   });
 
   it("injects real peer service env into terminal-backed services", async () => {
     writeFileSync(
-      join(repoDir, "paseo.json"),
+      join(repoDir, "polyhive.json"),
       JSON.stringify({
         scripts: {
           api: {
@@ -1331,7 +1331,7 @@ describe("runAsyncWorktreeBootstrap", () => {
         },
       }),
     );
-    execSync("git add paseo.json", { cwd: repoDir, stdio: "pipe" });
+    execSync("git add polyhive.json", { cwd: repoDir, stdio: "pipe" });
     execSync("git -c commit.gpgsign=false commit -m 'add real peer env services'", {
       cwd: repoDir,
       stdio: "pipe",
@@ -1364,24 +1364,24 @@ describe("runAsyncWorktreeBootstrap", () => {
     const apiEnv = readEnvFile(apiEnvPath);
     const webEnv = readEnvFile(webEnvPath);
 
-    expect(apiEnv.PASEO_SERVICE_API_URL).toBe("http://api.feature-peer-env.repo.localhost:6767");
-    expect(apiEnv.PASEO_SERVICE_WEB_URL).toBe("http://web.feature-peer-env.repo.localhost:6767");
-    expect(apiEnv.PASEO_SERVICE_API_PORT).toEqual(expect.stringMatching(/^\d+$/));
-    expect(apiEnv.PASEO_SERVICE_WEB_PORT).toEqual(expect.stringMatching(/^\d+$/));
-    expect(apiEnv.PASEO_URL).toBe(apiEnv.PASEO_SERVICE_API_URL);
-    expect(apiEnv.PASEO_PORT).toBe(apiEnv.PASEO_SERVICE_API_PORT);
+    expect(apiEnv.POLYHIVE_SERVICE_API_URL).toBe("http://api.feature-peer-env.repo.localhost:6767");
+    expect(apiEnv.POLYHIVE_SERVICE_WEB_URL).toBe("http://web.feature-peer-env.repo.localhost:6767");
+    expect(apiEnv.POLYHIVE_SERVICE_API_PORT).toEqual(expect.stringMatching(/^\d+$/));
+    expect(apiEnv.POLYHIVE_SERVICE_WEB_PORT).toEqual(expect.stringMatching(/^\d+$/));
+    expect(apiEnv.POLYHIVE_URL).toBe(apiEnv.POLYHIVE_SERVICE_API_URL);
+    expect(apiEnv.POLYHIVE_PORT).toBe(apiEnv.POLYHIVE_SERVICE_API_PORT);
     expect(apiEnv).not.toHaveProperty("PORT");
 
-    expect(webEnv.PASEO_SERVICE_API_URL).toBe("http://api.feature-peer-env.repo.localhost:6767");
-    expect(webEnv.PASEO_SERVICE_WEB_URL).toBe("http://web.feature-peer-env.repo.localhost:6767");
-    expect(webEnv.PASEO_SERVICE_API_PORT).toBe(apiEnv.PASEO_SERVICE_API_PORT);
-    expect(webEnv.PASEO_SERVICE_WEB_PORT).toBe(apiEnv.PASEO_SERVICE_WEB_PORT);
-    expect(webEnv.PASEO_URL).toBe(webEnv.PASEO_SERVICE_WEB_URL);
-    expect(webEnv.PASEO_PORT).toBe(webEnv.PASEO_SERVICE_WEB_PORT);
+    expect(webEnv.POLYHIVE_SERVICE_API_URL).toBe("http://api.feature-peer-env.repo.localhost:6767");
+    expect(webEnv.POLYHIVE_SERVICE_WEB_URL).toBe("http://web.feature-peer-env.repo.localhost:6767");
+    expect(webEnv.POLYHIVE_SERVICE_API_PORT).toBe(apiEnv.POLYHIVE_SERVICE_API_PORT);
+    expect(webEnv.POLYHIVE_SERVICE_WEB_PORT).toBe(apiEnv.POLYHIVE_SERVICE_WEB_PORT);
+    expect(webEnv.POLYHIVE_URL).toBe(webEnv.POLYHIVE_SERVICE_WEB_URL);
+    expect(webEnv.POLYHIVE_PORT).toBe(webEnv.POLYHIVE_SERVICE_WEB_PORT);
     expect(webEnv).not.toHaveProperty("PORT");
 
-    const apiPort = Number(apiEnv.PASEO_SERVICE_API_PORT);
-    const webPort = Number(apiEnv.PASEO_SERVICE_WEB_PORT);
+    const apiPort = Number(apiEnv.POLYHIVE_SERVICE_API_PORT);
+    const webPort = Number(apiEnv.POLYHIVE_SERVICE_WEB_PORT);
     expect(Number.isInteger(apiPort)).toBe(true);
     expect(Number.isInteger(webPort)).toBe(true);
     expect(routeStore.listRoutes()).toEqual([
@@ -1404,7 +1404,7 @@ describe("runAsyncWorktreeBootstrap", () => {
 
   it("binds services to the network when the daemon listens on a non-loopback host", async () => {
     writeFileSync(
-      join(repoDir, "paseo.json"),
+      join(repoDir, "polyhive.json"),
       JSON.stringify({
         scripts: {
           web: {
@@ -1414,7 +1414,7 @@ describe("runAsyncWorktreeBootstrap", () => {
         },
       }),
     );
-    execSync("git add paseo.json", { cwd: repoDir, stdio: "pipe" });
+    execSync("git add polyhive.json", { cwd: repoDir, stdio: "pipe" });
     execSync("git -c commit.gpgsign=false commit -m 'add remote service script config'", {
       cwd: repoDir,
       stdio: "pipe",
@@ -1439,7 +1439,7 @@ describe("runAsyncWorktreeBootstrap", () => {
 
     expect(createTerminalCalls).toHaveLength(1);
     expect(createTerminalCalls[0]?.env?.HOST).toBe("0.0.0.0");
-    expect(createTerminalCalls[0]?.env?.PASEO_URL).toBe(
+    expect(createTerminalCalls[0]?.env?.POLYHIVE_URL).toBe(
       "http://web.feature-remote-service.repo.localhost:6767",
     );
   });

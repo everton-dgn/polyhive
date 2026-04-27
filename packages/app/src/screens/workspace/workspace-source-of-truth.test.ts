@@ -15,8 +15,8 @@ describe("workspace source of truth consumption", () => {
   it("uses the same descriptor name in header and sidebar row", () => {
     const workspace: WorkspaceDescriptor = {
       id: "/repo/main",
-      projectId: "remote:github.com/getpaseo/paseo",
-      projectDisplayName: "getpaseo/paseo",
+      projectId: "remote:github.com/polyhive/polyhive",
+      projectDisplayName: "polyhive/polyhive",
       projectRootPath: "/repo/main",
       workspaceDirectory: "/repo/main",
       projectKind: "git",
@@ -34,7 +34,7 @@ describe("workspace source of truth consumption", () => {
     });
 
     expect(header.title).toBe("feat/workspace-sot");
-    expect(header.subtitle).toBe("getpaseo/paseo");
+    expect(header.subtitle).toBe("polyhive/polyhive");
     expect(sidebarWorkspace.name).toBe(header.title);
     expect(sidebarWorkspace.statusBucket).toBe("running");
   });

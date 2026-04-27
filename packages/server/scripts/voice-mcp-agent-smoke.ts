@@ -72,9 +72,9 @@ async function main(): Promise<void> {
   const logger = pino({ level: "info" });
   const scriptDir = path.dirname(fileURLToPath(import.meta.url));
   const serverDir = path.resolve(scriptDir, "..");
-  const tmpRoot = await mkdtemp(path.join(os.tmpdir(), "paseo-voice-mcp-smoke-"));
-  const paseoHome = path.join(tmpRoot, ".paseo");
-  const storageDir = path.join(paseoHome, "agents");
+  const tmpRoot = await mkdtemp(path.join(os.tmpdir(), "polyhive-voice-mcp-smoke-"));
+  const polyhiveHome = path.join(tmpRoot, ".polyhive");
+  const storageDir = path.join(polyhiveHome, "agents");
   const voiceBridgeRuntimeDir = path.join(tmpRoot, "voice-mcp");
   const voiceWorkspace = path.join(tmpRoot, "voice-agent-workspace");
   await mkdir(voiceWorkspace, { recursive: true });
@@ -109,7 +109,7 @@ async function main(): Promise<void> {
       return createAgentMcpServer({
         agentManager,
         agentStorage,
-        paseoHome,
+        polyhiveHome,
         callerAgentId,
         enableVoiceTools: false,
         resolveSpeakHandler,
@@ -132,12 +132,12 @@ async function main(): Promise<void> {
     modeId: "default",
     ...(opts.model ? { model: opts.model } : {}),
     mcpServers: {
-      paseo: buildVoiceAgentMcpServerConfig({
+      polyhive: buildVoiceAgentMcpServerConfig({
         command: process.execPath,
         baseArgs: [bridgeScriptPath],
         socketPath,
         env: {
-          PASEO_HOME: paseoHome,
+          POLYHIVE_HOME: polyhiveHome,
         },
       }),
     },

@@ -1,7 +1,7 @@
 const fs = require("fs");
 const path = require("path");
 
-const EXECUTABLE_NAME = "Paseo";
+const EXECUTABLE_NAME = "PolyHive";
 
 // electron-builder arch enum → Node.js arch string. This fork ships Apple Silicon only.
 const ARCH_MAP = { 3: "arm64" };

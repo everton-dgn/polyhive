@@ -18,12 +18,12 @@ interface InstallStatus {
 // ---------------------------------------------------------------------------
 
 const SKILL_NAMES = [
-  "paseo",
-  "paseo-loop",
-  "paseo-handoff",
-  "paseo-orchestrator",
-  "paseo-chat",
-  "paseo-committee",
+  "polyhive",
+  "polyhive-loop",
+  "polyhive-handoff",
+  "polyhive-orchestrator",
+  "polyhive-chat",
+  "polyhive-committee",
 ];
 
 // ---------------------------------------------------------------------------
@@ -48,13 +48,13 @@ function getLocalBinDir(): string {
 }
 
 function getCliTargetPath(): string {
-  return path.join(getLocalBinDir(), "paseo");
+  return path.join(getLocalBinDir(), "polyhive");
 }
 
 function getBundledCliShimPath(): string {
   const electronExePath = app.getPath("exe");
   const appBundle = electronExePath.replace(/\/Contents\/MacOS\/.+$/, "");
-  return path.join(appBundle, "Contents", "Resources", "bin", "paseo");
+  return path.join(appBundle, "Contents", "Resources", "bin", "polyhive");
 }
 
 function getBundledSkillsDir(): string {
@@ -149,7 +149,7 @@ async function ensurePathInShellRc(): Promise<{ shellUpdated: boolean }> {
     }
 
     await fs.mkdir(path.dirname(info.rcFile), { recursive: true });
-    await fs.appendFile(info.rcFile, `\n# Added by Paseo\n${info.exportLine}\n`);
+    await fs.appendFile(info.rcFile, `\n# Added by PolyHive\n${info.exportLine}\n`);
 
     return { shellUpdated: true };
   } catch (err) {

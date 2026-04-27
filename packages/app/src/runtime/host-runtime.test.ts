@@ -160,7 +160,7 @@ function makeFetchAgentsEntry(input: {
         currentBranch: null,
         remoteUrl: null,
         worktreeRoot: null,
-        isPaseoOwnedWorktree: false,
+        isPolyHiveOwnedWorktree: false,
         mainRepoRoot: null,
       },
     },
@@ -174,9 +174,9 @@ function makeHost(input?: Partial<HostProfile>): HostProfile {
     endpoint: "lan:6767",
   };
   const relay: HostConnection = {
-    id: "relay:relay.paseo.sh:443",
+    id: "relay:relay.polyhive.sh:443",
     type: "relay",
-    relayEndpoint: "relay.paseo.sh:443",
+    relayEndpoint: "relay.polyhive.sh:443",
     daemonPublicKeyB64: "pk_test",
   };
 
@@ -197,7 +197,7 @@ function makeOffer(input?: Partial<ConnectionOffer>): ConnectionOffer {
     serverId: input?.serverId ?? "srv_offer",
     daemonPublicKeyB64: input?.daemonPublicKeyB64 ?? "pk_test_offer",
     relay: {
-      endpoint: input?.relay?.endpoint ?? "relay.paseo.sh:443",
+      endpoint: input?.relay?.endpoint ?? "relay.polyhive.sh:443",
     },
   };
 }
@@ -367,7 +367,7 @@ describe("HostRuntimeController", () => {
     const clients: FakeDaemonClient[] = [];
     const latencies: Record<string, number | Error> = {
       "direct:lan:6767": 82,
-      "relay:relay.paseo.sh:443": 18,
+      "relay:relay.polyhive.sh:443": 18,
     };
     const controller = new HostRuntimeController({
       host,
@@ -398,7 +398,7 @@ describe("HostRuntimeController", () => {
         },
         connectToDaemon: async ({ host, connection }) => {
           const client = makeConnectedProbeClient(connection.id === "direct:lan:6767" ? 12 : 30);
-          if (connection.id === "relay:relay.paseo.sh:443") {
+          if (connection.id === "relay:relay.polyhive.sh:443") {
             client.ping = async () => ({ rttMs: await slowPing.promise });
           }
           clients.push(client);
@@ -438,7 +438,7 @@ describe("HostRuntimeController", () => {
     const clients: FakeDaemonClient[] = [];
     const latencies: Record<string, number | Error> = {
       "direct:lan:6767": 15,
-      "relay:relay.paseo.sh:443": 55,
+      "relay:relay.polyhive.sh:443": 55,
     };
     const controller = new HostRuntimeController({
       host,
@@ -451,12 +451,12 @@ describe("HostRuntimeController", () => {
     expect(initialClient).toBeTruthy();
 
     latencies["direct:lan:6767"] = new Error("direct unavailable");
-    latencies["relay:relay.paseo.sh:443"] = 42;
+    latencies["relay:relay.polyhive.sh:443"] = 42;
     clearProbeBackoff(controller);
     await controller.runProbeCycleNow();
 
     const snapshot = controller.getSnapshot();
-    expect(snapshot.activeConnectionId).toBe("relay:relay.paseo.sh:443");
+    expect(snapshot.activeConnectionId).toBe("relay:relay.polyhive.sh:443");
     expect(snapshot.connectionStatus).toBe("online");
     expect(snapshot.client).not.toBe(initialClient);
     expect((initialClient as unknown as FakeDaemonClient | null)?.closeCalls).toBe(1);
@@ -467,7 +467,7 @@ describe("HostRuntimeController", () => {
     const clients: FakeDaemonClient[] = [];
     const latencies: Record<string, number | Error> = {
       "direct:lan:6767": 15,
-      "relay:relay.paseo.sh:443": 60,
+      "relay:relay.polyhive.sh:443": 60,
     };
     const controller = new HostRuntimeController({
       host,
@@ -478,7 +478,7 @@ describe("HostRuntimeController", () => {
     expect(controller.getSnapshot().activeConnectionId).toBe("direct:lan:6767");
 
     latencies["direct:lan:6767"] = 95;
-    latencies["relay:relay.paseo.sh:443"] = 30;
+    latencies["relay:relay.polyhive.sh:443"] = 30;
     clearProbeBackoff(controller);
     await controller.runProbeCycleNow();
     expect(controller.getSnapshot().activeConnectionId).toBe("direct:lan:6767");
@@ -487,11 +487,11 @@ describe("HostRuntimeController", () => {
     await controller.runProbeCycleNow();
     expect(controller.getSnapshot().activeConnectionId).toBe("direct:lan:6767");
 
-    let switched = controller.getSnapshot().activeConnectionId === "relay:relay.paseo.sh:443";
+    let switched = controller.getSnapshot().activeConnectionId === "relay:relay.polyhive.sh:443";
     for (let index = 0; index < 6 && !switched; index += 1) {
       clearProbeBackoff(controller);
       await controller.runProbeCycleNow();
-      switched = controller.getSnapshot().activeConnectionId === "relay:relay.paseo.sh:443";
+      switched = controller.getSnapshot().activeConnectionId === "relay:relay.polyhive.sh:443";
     }
     expect(switched).toBe(true);
     expect(controller.getSnapshot().client).not.toBeNull();
@@ -502,7 +502,7 @@ describe("HostRuntimeController", () => {
     const clients: FakeDaemonClient[] = [];
     const latencies: Record<string, number | Error> = {
       "direct:lan:6767": 15,
-      "relay:relay.paseo.sh:443": 80,
+      "relay:relay.polyhive.sh:443": 80,
     };
     const controller = new HostRuntimeController({
       host,
@@ -513,19 +513,19 @@ describe("HostRuntimeController", () => {
     expect(controller.getSnapshot().activeConnectionId).toBe("direct:lan:6767");
 
     latencies["direct:lan:6767"] = 100;
-    latencies["relay:relay.paseo.sh:443"] = 20;
+    latencies["relay:relay.polyhive.sh:443"] = 20;
     clearProbeBackoff(controller);
     await controller.runProbeCycleNow();
     expect(controller.getSnapshot().activeConnectionId).toBe("direct:lan:6767");
 
     latencies["direct:lan:6767"] = 20;
-    latencies["relay:relay.paseo.sh:443"] = 90;
+    latencies["relay:relay.polyhive.sh:443"] = 90;
     clearProbeBackoff(controller);
     await controller.runProbeCycleNow();
     expect(controller.getSnapshot().activeConnectionId).toBe("direct:lan:6767");
 
     latencies["direct:lan:6767"] = 100;
-    latencies["relay:relay.paseo.sh:443"] = 20;
+    latencies["relay:relay.polyhive.sh:443"] = 20;
     clearProbeBackoff(controller);
     await controller.runProbeCycleNow();
     expect(controller.getSnapshot().activeConnectionId).toBe("direct:lan:6767");
@@ -534,11 +534,11 @@ describe("HostRuntimeController", () => {
     await controller.runProbeCycleNow();
     expect(controller.getSnapshot().activeConnectionId).toBe("direct:lan:6767");
 
-    let switched = controller.getSnapshot().activeConnectionId === "relay:relay.paseo.sh:443";
+    let switched = controller.getSnapshot().activeConnectionId === "relay:relay.polyhive.sh:443";
     for (let index = 0; index < 6 && !switched; index += 1) {
       clearProbeBackoff(controller);
       await controller.runProbeCycleNow();
-      switched = controller.getSnapshot().activeConnectionId === "relay:relay.paseo.sh:443";
+      switched = controller.getSnapshot().activeConnectionId === "relay:relay.polyhive.sh:443";
     }
     expect(switched).toBe(true);
   });
@@ -548,7 +548,7 @@ describe("HostRuntimeController", () => {
     const clients: FakeDaemonClient[] = [];
     const latencies: Record<string, number | Error> = {
       "direct:lan:6767": 12,
-      "relay:relay.paseo.sh:443": 65,
+      "relay:relay.polyhive.sh:443": 65,
     };
     const controller = new HostRuntimeController({
       host,
@@ -652,7 +652,7 @@ describe("HostRuntimeController", () => {
     const clients: FakeDaemonClient[] = [];
     const latencies: Record<string, number | Error> = {
       "direct:lan:6767": 12,
-      "relay:relay.paseo.sh:443": 65,
+      "relay:relay.polyhive.sh:443": 65,
     };
     const controller = new HostRuntimeController({
       host,
@@ -672,7 +672,7 @@ describe("HostRuntimeController", () => {
     const clients: FakeDaemonClient[] = [];
     const latencies: Record<string, number | Error> = {
       "direct:lan:6767": 12,
-      "relay:relay.paseo.sh:443": 65,
+      "relay:relay.polyhive.sh:443": 65,
     };
     const controller = new HostRuntimeController({
       host,
@@ -701,7 +701,7 @@ describe("HostRuntimeController", () => {
     const clients: FakeDaemonClient[] = [];
     const latencies: Record<string, number | Error> = {
       "direct:lan:6767": 12,
-      "relay:relay.paseo.sh:443": 65,
+      "relay:relay.polyhive.sh:443": 65,
     };
     const controller = new HostRuntimeController({
       host,
@@ -723,7 +723,7 @@ describe("HostRuntimeController", () => {
     const clients: FakeDaemonClient[] = [];
     const latencies: Record<string, number | Error> = {
       "direct:lan:6767": 12,
-      "relay:relay.paseo.sh:443": 65,
+      "relay:relay.polyhive.sh:443": 65,
     };
     const controller = new HostRuntimeController({
       host,
@@ -756,9 +756,9 @@ describe("HostRuntimeController", () => {
           endpoint: "lan:6767",
         },
         {
-          id: "relay:relay.paseo.sh:443",
+          id: "relay:relay.polyhive.sh:443",
           type: "relay",
-          relayEndpoint: "relay.paseo.sh:443",
+          relayEndpoint: "relay.polyhive.sh:443",
           daemonPublicKeyB64: "pk_test",
         },
       ],
@@ -818,11 +818,11 @@ describe("HostRuntimeController", () => {
       controller as unknown as {
         switchToConnection: (input: { connectionId: string }) => Promise<void>;
       }
-    ).switchToConnection({ connectionId: "relay:relay.paseo.sh:443" });
+    ).switchToConnection({ connectionId: "relay:relay.polyhive.sh:443" });
     await waitUntil(() => {
       const snapshot = controller.getSnapshot();
       return (
-        snapshot.activeConnectionId === "relay:relay.paseo.sh:443" &&
+        snapshot.activeConnectionId === "relay:relay.polyhive.sh:443" &&
         snapshot.connectionStatus === "online"
       );
     });
@@ -831,7 +831,7 @@ describe("HostRuntimeController", () => {
     await Promise.allSettled([switchDirect, switchRelay]);
 
     const snapshot = controller.getSnapshot();
-    expect(snapshot.activeConnectionId).toBe("relay:relay.paseo.sh:443");
+    expect(snapshot.activeConnectionId).toBe("relay:relay.polyhive.sh:443");
     expect(snapshot.connectionStatus).toBe("online");
     expect(snapshot.lastError).toBeNull();
     expect(createdClients).toHaveLength(2);
@@ -1055,7 +1055,7 @@ describe("HostRuntimeController", () => {
     ]);
     const changedProbeMap = makeProbeMap([
       ["direct:lan:6767", { status: "available", latencyMs: 12 }],
-      ["relay:relay.paseo.sh:443", { status: "unavailable", latencyMs: null }],
+      ["relay:relay.polyhive.sh:443", { status: "unavailable", latencyMs: null }],
     ]);
 
     updateControllerSnapshot(controller, { probeByConnectionId: firstProbeMap });
@@ -1187,7 +1187,7 @@ describe("HostRuntimeStore", () => {
         entries: [
           makeFetchAgentsEntry({
             id: "agent-recent",
-            cwd: "/Users/dev/dev/paseo",
+            cwd: "/Users/dev/dev/polyhive",
             updatedAt: "2026-03-04T12:00:00.000Z",
             title: "Recent agent",
           }),
@@ -1200,7 +1200,7 @@ describe("HostRuntimeStore", () => {
         entries: [
           makeFetchAgentsEntry({
             id: "agent-stale-attention",
-            cwd: "/Users/dev/dev/paseo-pr67-review",
+            cwd: "/Users/dev/dev/polyhive-pr67-review",
             updatedAt: "2026-02-20T08:00:00.000Z",
             title: "Needs triage",
             requiresAttention: true,
@@ -1349,7 +1349,7 @@ describe("HostRuntimeStore", () => {
         entries: [
           makeFetchAgentsEntry({
             id: "agent-archived",
-            cwd: "/Users/dev/dev/paseo",
+            cwd: "/Users/dev/dev/polyhive",
             updatedAt: "2026-03-30T15:30:00.000Z",
             archivedAt: "2026-03-30T15:31:00.000Z",
             title: "Archived remotely",
@@ -1376,7 +1376,7 @@ describe("HostRuntimeStore", () => {
     useSessionStore.getState().setAgents(host.serverId, () => {
       const stale = makeFetchAgentsEntry({
         id: "agent-archived",
-        cwd: "/Users/dev/dev/paseo",
+        cwd: "/Users/dev/dev/polyhive",
         updatedAt: "2026-03-30T15:29:00.000Z",
         archivedAt: null,
         title: "Stale active copy",
@@ -1522,7 +1522,7 @@ describe("HostRuntimeStore", () => {
 
     await store.upsertRelayConnection({
       serverId: "srv_offer",
-      relayEndpoint: "relay.paseo.sh:443",
+      relayEndpoint: "relay.polyhive.sh:443",
       daemonPublicKeyB64: "pk_test_offer",
       label: "Custom name",
     });

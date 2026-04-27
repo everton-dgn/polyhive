@@ -14,8 +14,8 @@ function getLogger(logger: LoggerLike | undefined): LoggerLike | undefined {
   return logger?.child({ module: "server-id" });
 }
 
-function getServerIdPath(paseoHome: string): string {
-  return path.join(paseoHome, SERVER_ID_FILENAME);
+function getServerIdPath(polyhiveHome: string): string {
+  return path.join(polyhiveHome, SERVER_ID_FILENAME);
 }
 
 function generateServerId(): string {
@@ -25,22 +25,22 @@ function generateServerId(): string {
 }
 
 /**
- * Stable daemon identifier scoped to a given $PASEO_HOME.
+ * Stable daemon identifier scoped to a given $POLYHIVE_HOME.
  *
- * - Persisted to `$PASEO_HOME/server-id`
- * - Can be overridden via `PASEO_SERVER_ID` (useful for tests)
+ * - Persisted to `$POLYHIVE_HOME/server-id`
+ * - Can be overridden via `POLYHIVE_SERVER_ID` (useful for tests)
  */
 export function getOrCreateServerId(
-  paseoHome: string,
+  polyhiveHome: string,
   options?: { env?: NodeJS.ProcessEnv; logger?: LoggerLike },
 ): string {
   const env = options?.env ?? process.env;
   const log = getLogger(options?.logger);
-  const serverIdPath = getServerIdPath(paseoHome);
+  const serverIdPath = getServerIdPath(polyhiveHome);
 
   const envOverride =
-    typeof env.PASEO_SERVER_ID === "string" && env.PASEO_SERVER_ID.trim().length > 0
-      ? env.PASEO_SERVER_ID.trim()
+    typeof env.POLYHIVE_SERVER_ID === "string" && env.POLYHIVE_SERVER_ID.trim().length > 0
+      ? env.POLYHIVE_SERVER_ID.trim()
       : null;
 
   if (envOverride) {
@@ -48,9 +48,9 @@ export function getOrCreateServerId(
     if (!existsSync(serverIdPath)) {
       try {
         writeFileSync(serverIdPath, `${envOverride}\n`, "utf8");
-        log?.info({ serverId: envOverride }, "Persisted PASEO_SERVER_ID override");
+        log?.info({ serverId: envOverride }, "Persisted POLYHIVE_SERVER_ID override");
       } catch (error) {
-        log?.warn({ error }, "Failed to persist PASEO_SERVER_ID override");
+        log?.warn({ error }, "Failed to persist POLYHIVE_SERVER_ID override");
       }
     }
     return envOverride;

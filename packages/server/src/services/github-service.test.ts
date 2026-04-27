@@ -172,8 +172,8 @@ function pullRequestCheckoutTargetJson(): string {
           isCrossRepository: true,
           headRepositoryOwner: { login: "therainisme" },
           headRepository: {
-            sshUrl: "git@github.com:therainisme/paseo.git",
-            url: "https://github.com/therainisme/paseo",
+            sshUrl: "git@github.com:therainisme/polyhive.git",
+            url: "https://github.com/therainisme/polyhive",
           },
         },
       },
@@ -183,8 +183,8 @@ function pullRequestCheckoutTargetJson(): string {
 
 function repoViewJson(): string {
   return JSON.stringify({
-    owner: { login: "getpaseo" },
-    name: "paseo",
+    owner: { login: "polyhive" },
+    name: "polyhive",
     parent: null,
   });
 }
@@ -318,8 +318,8 @@ describe("GitHubService", () => {
       baseRefName: "main",
       headRefName: "main",
       headOwnerLogin: "therainisme",
-      headRepositorySshUrl: "git@github.com:therainisme/paseo.git",
-      headRepositoryUrl: "https://github.com/therainisme/paseo",
+      headRepositorySshUrl: "git@github.com:therainisme/polyhive.git",
+      headRepositoryUrl: "https://github.com/therainisme/polyhive",
       isCrossRepository: true,
     });
 
@@ -330,8 +330,8 @@ describe("GitHubService", () => {
     });
     expect(runner.calls[1]?.cwd).toBe("/repo");
     expect(runner.calls[1]?.args.slice(0, 3)).toEqual(["api", "graphql", "-f"]);
-    expect(runner.calls[1]?.args).toContain("owner=getpaseo");
-    expect(runner.calls[1]?.args).toContain("name=paseo");
+    expect(runner.calls[1]?.args).toContain("owner=polyhive");
+    expect(runner.calls[1]?.args).toContain("name=polyhive");
     expect(runner.calls[1]?.args).toContain("number=526");
   });
 
@@ -1841,12 +1841,12 @@ describe("GitHubService", () => {
     const workspaceGitService = {
       resolveRepoRemoteUrl: async (cwd: string) => {
         expect(cwd).toBe("/repo");
-        return "git@github.com:getpaseo/paseo.git";
+        return "git@github.com:polyhive/polyhive.git";
       },
     };
 
     await expect(resolveGitHubRepo("/repo", { workspaceGitService })).resolves.toBe(
-      "getpaseo/paseo",
+      "polyhive/polyhive",
     );
   });
 });

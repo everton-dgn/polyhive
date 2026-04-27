@@ -1,46 +1,46 @@
 import { describe, expect, it } from "vitest";
 
-import { getPaseoToolLeafName, isPaseoToolName } from "./tool-name-normalization.js";
+import { getPolyHiveToolLeafName, isPolyHiveToolName } from "./tool-name-normalization.js";
 
-describe("isPaseoToolName", () => {
+describe("isPolyHiveToolName", () => {
   it("detects Claude Code format", () => {
-    expect(isPaseoToolName("mcp__paseo__create_agent")).toBe(true);
-    expect(isPaseoToolName("mcp__paseo__list_agents")).toBe(true);
+    expect(isPolyHiveToolName("mcp__polyhive__create_agent")).toBe(true);
+    expect(isPolyHiveToolName("mcp__polyhive__list_agents")).toBe(true);
   });
 
-  it("detects paseo_voice variant", () => {
-    expect(isPaseoToolName("mcp__paseo_voice__create_agent")).toBe(true);
-    expect(isPaseoToolName("paseo_voice.create_agent")).toBe(true);
+  it("detects polyhive_voice variant", () => {
+    expect(isPolyHiveToolName("mcp__polyhive_voice__create_agent")).toBe(true);
+    expect(isPolyHiveToolName("polyhive_voice.create_agent")).toBe(true);
   });
 
   it("excludes speak tools", () => {
-    expect(isPaseoToolName("mcp__paseo_voice__speak")).toBe(false);
-    expect(isPaseoToolName("mcp__paseo__speak")).toBe(false);
-    expect(isPaseoToolName("paseo.speak")).toBe(false);
+    expect(isPolyHiveToolName("mcp__polyhive_voice__speak")).toBe(false);
+    expect(isPolyHiveToolName("mcp__polyhive__speak")).toBe(false);
+    expect(isPolyHiveToolName("polyhive.speak")).toBe(false);
   });
 
   it("detects Codex dot format", () => {
-    expect(isPaseoToolName("paseo.create_agent")).toBe(true);
+    expect(isPolyHiveToolName("polyhive.create_agent")).toBe(true);
   });
 
-  it("rejects non-paseo tools", () => {
-    expect(isPaseoToolName("Bash")).toBe(false);
-    expect(isPaseoToolName("Read")).toBe(false);
-    expect(isPaseoToolName("mcp__other_server__some_tool")).toBe(false);
+  it("rejects non-polyhive tools", () => {
+    expect(isPolyHiveToolName("Bash")).toBe(false);
+    expect(isPolyHiveToolName("Read")).toBe(false);
+    expect(isPolyHiveToolName("mcp__other_server__some_tool")).toBe(false);
   });
 });
 
-describe("getPaseoToolLeafName", () => {
+describe("getPolyHiveToolLeafName", () => {
   it("extracts leaf from Claude Code format", () => {
-    expect(getPaseoToolLeafName("mcp__paseo__create_agent")).toBe("create_agent");
+    expect(getPolyHiveToolLeafName("mcp__polyhive__create_agent")).toBe("create_agent");
   });
 
   it("extracts leaf from Codex format", () => {
-    expect(getPaseoToolLeafName("paseo.create_agent")).toBe("create_agent");
-    expect(getPaseoToolLeafName("paseo.list_agents")).toBe("list_agents");
+    expect(getPolyHiveToolLeafName("polyhive.create_agent")).toBe("create_agent");
+    expect(getPolyHiveToolLeafName("polyhive.list_agents")).toBe("list_agents");
   });
 
-  it("returns null for non-paseo tools", () => {
-    expect(getPaseoToolLeafName("Bash")).toBeNull();
+  it("returns null for non-polyhive tools", () => {
+    expect(getPolyHiveToolLeafName("Bash")).toBeNull();
   });
 });

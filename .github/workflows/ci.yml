@@ -38,13 +38,13 @@ jobs:
         run: npm install
 
       - name: Build highlight dependency
-        run: npm run build --workspace=@getpaseo/highlight
+        run: npm run build --workspace=polyhive-highlight
 
       - name: Build relay dependency
-        run: npm run build --workspace=@getpaseo/relay
+        run: npm run build --workspace=polyhive-relay
 
       - name: Build server dependency
-        run: npm run build --workspace=@getpaseo/server
+        run: npm run build --workspace=polyhive-server
 
       - name: Typecheck all packages
         run: npm run typecheck
@@ -63,10 +63,10 @@ jobs:
         run: npm install
 
       - name: Build highlight dependency
-        run: npm run build --workspace=@getpaseo/highlight
+        run: npm run build --workspace=polyhive-highlight
 
       - name: Run app unit tests
-        run: npm run test --workspace=@getpaseo/app
+        run: npm run test --workspace=polyhive-app
 
   relay-tests:
     runs-on: macos-15
@@ -82,10 +82,10 @@ jobs:
         run: npm install
 
       - name: Build relay
-        run: npm run build --workspace=@getpaseo/relay
+        run: npm run build --workspace=polyhive-relay
 
       - name: Run relay tests
-        run: npm run test --workspace=@getpaseo/relay
+        run: npm run test --workspace=polyhive-relay
 
   cli-tests:
     runs-on: macos-15
@@ -104,11 +104,11 @@ jobs:
         run: npm install -g @openai/codex@0.105.0 opencode-ai
 
       - name: Build highlight dependency
-        run: npm run build --workspace=@getpaseo/highlight
+        run: npm run build --workspace=polyhive-highlight
 
       - name: Run CLI tests
-        run: npm run test --workspace=@getpaseo/cli
+        run: npm run test --workspace=polyhive
         env:
-          PASEO_LOCAL_SPEECH_AUTO_DOWNLOAD: '0'
-          PASEO_DICTATION_ENABLED: '0'
-          PASEO_VOICE_MODE_ENABLED: '0'
+          POLYHIVE_LOCAL_SPEECH_AUTO_DOWNLOAD: '0'
+          POLYHIVE_DICTATION_ENABLED: '0'
+          POLYHIVE_VOICE_MODE_ENABLED: '0'

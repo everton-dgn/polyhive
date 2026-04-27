@@ -280,7 +280,7 @@ export function LocalDaemonSection() {
                 <Text style={settingsStyles.rowHint}>
                   {isDaemonManagementPaused
                     ? "Paused. The built-in daemon stays stopped until you start it again."
-                    : "Enabled. Paseo can manage the built-in daemon from the desktop app."}
+                    : "Enabled. PolyHive can manage the built-in daemon from the desktop app."}
                 </Text>
               </View>
               <Button
@@ -358,7 +358,7 @@ export function LocalDaemonSection() {
               <View style={settingsStyles.rowContent}>
                 <Text style={settingsStyles.rowTitle}>Full status</Text>
                 <Text style={settingsStyles.rowHint}>
-                  Runs `paseo daemon status` and shows the output.
+                  Runs `polyhive daemon status` and shows the output.
                 </Text>
               </View>
               <Button

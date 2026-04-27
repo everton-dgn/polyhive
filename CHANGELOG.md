@@ -1,6 +1,6 @@
 # Changelog
 
-> **Fork notice -- `everton-dgn/paseo-contrib`**: this fork supports only macOS Apple Silicon for local runtime components and web clients in desktop or compact browsers.
+> **Fork notice -- `everton-dgn/polyhive`**: this fork supports only macOS Apple Silicon for local runtime components and web clients in desktop or compact browsers.
 
 ## 0.1.60-beta.1 - 2026-04-20
 

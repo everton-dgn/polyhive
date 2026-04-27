@@ -1,6 +1,6 @@
-import { createPaseoDaemon } from "./bootstrap.js";
+import { createPolyHiveDaemon } from "./bootstrap.js";
 import { loadConfig } from "./config.js";
-import { resolvePaseoHome } from "./paseo-home.js";
+import { resolvePolyHiveHome } from "./polyhive-home.js";
 import { createRootLogger } from "./logger.js";
 import { loadPersistedConfig } from "./persisted-config.js";
 import { acquirePidLock, PidLockError, releasePidLock, updatePidLock } from "./pid-lock.js";
@@ -8,28 +8,28 @@ import type { DaemonLifecycleIntent } from "./bootstrap.js";
 
 type SupervisorLifecycleMessage =
   | {
-      type: "paseo:shutdown";
+      type: "polyhive:shutdown";
     }
   | {
-      type: "paseo:restart";
+      type: "polyhive:restart";
       reason?: string;
     };
 
 async function main() {
-  let paseoHome: string;
+  let polyhiveHome: string;
   let logger: ReturnType<typeof createRootLogger>;
   let config: ReturnType<typeof loadConfig>;
-  let daemon: Awaited<ReturnType<typeof createPaseoDaemon>> | null = null;
+  let daemon: Awaited<ReturnType<typeof createPolyHiveDaemon>> | null = null;
   let shutdownPromise: Promise<number> | null = null;
   let exitHookInstalled = false;
-  const supervised = process.env.PASEO_SUPERVISED === "1" && typeof process.send === "function";
+  const supervised = process.env.POLYHIVE_SUPERVISED === "1" && typeof process.send === "function";
   let pidLockAcquired = false;
 
   try {
-    paseoHome = resolvePaseoHome();
-    const persistedConfig = loadPersistedConfig(paseoHome);
-    logger = createRootLogger(persistedConfig, { paseoHome });
-    config = loadConfig(paseoHome);
+    polyhiveHome = resolvePolyHiveHome();
+    const persistedConfig = loadPersistedConfig(polyhiveHome);
+    logger = createRootLogger(persistedConfig, { polyhiveHome });
+    config = loadConfig(polyhiveHome);
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);
     process.stderr.write(`${message}\n`);
@@ -79,7 +79,7 @@ async function main() {
           }
           await daemon.stop();
           if (pidLockAcquired) {
-            await releasePidLock(paseoHome);
+            await releasePidLock(polyhiveHome);
             pidLockAcquired = false;
           }
           clearTimeout(forceExit);
@@ -117,7 +117,7 @@ async function main() {
         { clientId: intent.clientId, requestId: intent.requestId },
         "Shutdown requested via websocket",
       );
-      if (sendSupervisorLifecycleMessage({ type: "paseo:shutdown" })) {
+      if (sendSupervisorLifecycleMessage({ type: "polyhive:shutdown" })) {
         return;
       }
       beginShutdown("shutdown lifecycle intent");
@@ -130,7 +130,7 @@ async function main() {
     );
     if (
       sendSupervisorLifecycleMessage({
-        type: "paseo:restart",
+        type: "polyhive:restart",
         ...(intent.reason ? { reason: intent.reason } : {}),
       })
     ) {
@@ -141,11 +141,11 @@ async function main() {
 
   try {
     if (!supervised) {
-      await acquirePidLock(paseoHome, null);
+      await acquirePidLock(polyhiveHome, null);
       pidLockAcquired = true;
     }
 
-    daemon = await createPaseoDaemon(
+    daemon = await createPolyHiveDaemon(
       {
         ...config,
         onLifecycleIntent: handleLifecycleIntent,
@@ -154,7 +154,7 @@ async function main() {
     );
   } catch (err) {
     if (pidLockAcquired) {
-      await releasePidLock(paseoHome);
+      await releasePidLock(polyhiveHome);
       pidLockAcquired = false;
     }
     if (err instanceof PidLockError) {
@@ -176,11 +176,11 @@ async function main() {
       if (!listen) {
         throw new Error("Daemon did not expose a listen target after startup");
       }
-      await updatePidLock(paseoHome, { listen });
+      await updatePidLock(polyhiveHome, { listen });
     }
   } catch (err) {
     if (pidLockAcquired) {
-      await releasePidLock(paseoHome);
+      await releasePidLock(polyhiveHome);
       pidLockAcquired = false;
     }
     if (err instanceof PidLockError) {

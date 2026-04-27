@@ -3,7 +3,7 @@ import { tmpdir } from "node:os";
 import path from "node:path";
 import pino from "pino";
 
-import { createTestPaseoDaemon } from "../src/server/test-utils/paseo-daemon.js";
+import { createTestPolyHiveDaemon } from "../src/server/test-utils/polyhive-daemon.js";
 import { DaemonClient } from "../src/server/test-utils/daemon-client.js";
 import { OpenAITTS } from "../src/server/speech/providers/openai/tts.js";
 
@@ -21,8 +21,8 @@ async function main(): Promise<void> {
     throw new Error("OPENAI_API_KEY is required");
   }
 
-  const logger = pino({ level: process.env.PASEO_LOG_LEVEL ?? "info" });
-  const daemon = await createTestPaseoDaemon({
+  const logger = pino({ level: process.env.POLYHIVE_LOG_LEVEL ?? "info" });
+  const daemon = await createTestPolyHiveDaemon({
     logger,
     agentClients: {},
     openai: { apiKey },

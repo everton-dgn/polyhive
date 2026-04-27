@@ -16,8 +16,8 @@ import {
 } from "../services/github-service.js";
 import { parseGitRevParsePath, resolveGitRevParsePath } from "./git-rev-parse-path.js";
 import { runGitCommand } from "./run-git-command.js";
-import { isPaseoOwnedWorktreeCwd } from "./worktree.js";
-import { requirePaseoWorktreeBaseRefName } from "./worktree-metadata.js";
+import { isPolyHiveOwnedWorktreeCwd } from "./worktree.js";
+import { requirePolyHiveWorktreeBaseRefName } from "./worktree-metadata.js";
 const READ_ONLY_GIT_ENV: NodeJS.ProcessEnv = {
   ...process.env,
   GIT_OPTIONAL_LOCKS: "0",
@@ -628,7 +628,7 @@ export interface CheckoutStatus {
   isGit: false;
 }
 
-export type CheckoutStatusGitNonPaseo = {
+export type CheckoutStatusGitNonPolyHive = {
   isGit: true;
   repoRoot: string;
   currentBranch: string | null;
@@ -639,10 +639,10 @@ export type CheckoutStatusGitNonPaseo = {
   behindOfOrigin: number | null;
   hasRemote: boolean;
   remoteUrl: string | null;
-  isPaseoOwnedWorktree: false;
+  isPolyHiveOwnedWorktree: false;
 };
 
-export type CheckoutStatusGitPaseo = {
+export type CheckoutStatusGitPolyHive = {
   isGit: true;
   repoRoot: string;
   mainRepoRoot: string;
@@ -654,10 +654,10 @@ export type CheckoutStatusGitPaseo = {
   behindOfOrigin: number | null;
   hasRemote: boolean;
   remoteUrl: string | null;
-  isPaseoOwnedWorktree: true;
+  isPolyHiveOwnedWorktree: true;
 };
 
-export type CheckoutStatusGit = CheckoutStatusGitNonPaseo | CheckoutStatusGitPaseo;
+export type CheckoutStatusGit = CheckoutStatusGitNonPolyHive | CheckoutStatusGitPolyHive;
 
 export type CheckoutStatusResult = CheckoutStatus | CheckoutStatusGit;
 
@@ -685,7 +685,7 @@ export interface MergeFromBaseOptions {
 }
 
 export type CheckoutContext = {
-  paseoHome?: string;
+  polyhiveHome?: string;
 };
 
 function isGitError(error: unknown): boolean {
@@ -770,10 +770,16 @@ export async function getMainRepoRoot(cwd: string): Promise<string> {
     env: READ_ONLY_GIT_ENV,
   });
   const worktrees = parseWorktreeList(worktreeOut);
-  const nonBareNonPaseo = worktrees.filter((wt) => !wt.isBare && !isPaseoWorktreePath(wt.path));
-  const childrenOfBareRepo = nonBareNonPaseo.filter((wt) => isDescendantPath(wt.path, normalized));
+  const nonBareNonPolyHive = worktrees.filter(
+    (wt) => !wt.isBare && !isPolyHiveWorktreePath(wt.path),
+  );
+  const childrenOfBareRepo = nonBareNonPolyHive.filter((wt) =>
+    isDescendantPath(wt.path, normalized),
+  );
   const mainChild = childrenOfBareRepo.find((wt) => basename(wt.path) === "main");
-  return mainChild?.path ?? childrenOfBareRepo[0]?.path ?? nonBareNonPaseo[0]?.path ?? normalized;
+  return (
+    mainChild?.path ?? childrenOfBareRepo[0]?.path ?? nonBareNonPolyHive[0]?.path ?? normalized
+  );
 }
 
 export type GitWorktreeEntry = {
@@ -782,9 +788,9 @@ export type GitWorktreeEntry = {
   isBare?: boolean;
 };
 
-/** Check whether a path contains a `.paseo/worktrees/` segment (both `/` and `\`). */
-export function isPaseoWorktreePath(p: string): boolean {
-  return /[/\\]\.paseo[/\\]worktrees[/\\]/.test(p);
+/** Check whether a path contains a `.polyhive/worktrees/` segment (both `/` and `\`). */
+export function isPolyHiveWorktreePath(p: string): boolean {
+  return /[/\\]\.polyhive[/\\]worktrees[/\\]/.test(p);
 }
 
 /** True when `child` is strictly inside `parent` (handles both `/` and `\`). */
@@ -859,8 +865,8 @@ export async function renameCurrentBranch(
 }
 
 type ConfiguredBaseRefForCwd =
-  | { baseRef: null; isPaseoOwnedWorktree: false }
-  | { baseRef: string; isPaseoOwnedWorktree: true };
+  | { baseRef: null; isPolyHiveOwnedWorktree: false }
+  | { baseRef: string; isPolyHiveOwnedWorktree: true };
 
 async function getConfiguredBaseRefForCwd(
   cwd: string,
@@ -868,18 +874,18 @@ async function getConfiguredBaseRefForCwd(
 ): Promise<ConfiguredBaseRefForCwd> {
   // Fast-path reject: non-worktree paths do not need expensive ownership checks.
   if (!/[\\/]worktrees[\\/]/.test(cwd)) {
-    return { baseRef: null, isPaseoOwnedWorktree: false };
+    return { baseRef: null, isPolyHiveOwnedWorktree: false };
   }
 
-  const ownership = await isPaseoOwnedWorktreeCwd(cwd, { paseoHome: context?.paseoHome });
+  const ownership = await isPolyHiveOwnedWorktreeCwd(cwd, { polyhiveHome: context?.polyhiveHome });
   if (!ownership.allowed) {
-    return { baseRef: null, isPaseoOwnedWorktree: false };
+    return { baseRef: null, isPolyHiveOwnedWorktree: false };
   }
 
   const worktreeRoot = (await getWorktreeRoot(cwd)) ?? cwd;
   return {
-    baseRef: requirePaseoWorktreeBaseRefName(worktreeRoot),
-    isPaseoOwnedWorktree: true,
+    baseRef: requirePolyHiveWorktreeBaseRefName(worktreeRoot),
+    isPolyHiveOwnedWorktree: true,
   };
 }
 
@@ -936,7 +942,7 @@ async function resolvePullRequestStatusLookupTarget(
   currentBranch: string,
 ): Promise<PullRequestStatusLookupTarget> {
   const remoteName = await getGitConfigValue(cwd, `branch.${currentBranch}.remote`);
-  if (!remoteName?.startsWith("paseo-pr-")) {
+  if (!remoteName?.startsWith("polyhive-pr-")) {
     return { headRef: currentBranch };
   }
 
@@ -1368,7 +1374,7 @@ export async function getCheckoutStatus(
     hasRemote && currentBranch ? getBehindOfOrigin(cwd, currentBranch) : Promise.resolve(null),
   ]);
 
-  if (configured.isPaseoOwnedWorktree) {
+  if (configured.isPolyHiveOwnedWorktree) {
     const mainRepoRoot = await getMainRepoRoot(cwd);
     return {
       isGit: true,
@@ -1382,7 +1388,7 @@ export async function getCheckoutStatus(
       behindOfOrigin,
       hasRemote,
       remoteUrl,
-      isPaseoOwnedWorktree: true,
+      isPolyHiveOwnedWorktree: true,
     };
   }
 
@@ -1397,7 +1403,7 @@ export async function getCheckoutStatus(
     behindOfOrigin,
     hasRemote,
     remoteUrl,
-    isPaseoOwnedWorktree: false,
+    isPolyHiveOwnedWorktree: false,
   };
 }
 
@@ -1601,7 +1607,7 @@ export async function getCheckoutDiff(
     if (!baseRef) {
       return { diff: "" };
     }
-    if (configured.isPaseoOwnedWorktree && compare.baseRef && compare.baseRef !== baseRef) {
+    if (configured.isPolyHiveOwnedWorktree && compare.baseRef && compare.baseRef !== baseRef) {
       throw new Error(`Base ref mismatch: expected ${baseRef}, got ${compare.baseRef}`);
     }
 
@@ -1855,7 +1861,7 @@ export async function mergeToBase(
   if (!baseRef) {
     throw new Error("Unable to determine base branch for merge");
   }
-  if (configured.isPaseoOwnedWorktree && options.baseRef && options.baseRef !== baseRef) {
+  if (configured.isPolyHiveOwnedWorktree && options.baseRef && options.baseRef !== baseRef) {
     throw new Error(`Base ref mismatch: expected ${baseRef}, got ${options.baseRef}`);
   }
   if (!currentBranch) {
@@ -1974,7 +1980,7 @@ export async function mergeFromBase(
   if (!baseRef) {
     throw new Error("Unable to determine base branch for merge");
   }
-  if (configured.isPaseoOwnedWorktree && options.baseRef && options.baseRef !== baseRef) {
+  if (configured.isPolyHiveOwnedWorktree && options.baseRef && options.baseRef !== baseRef) {
     throw new Error(`Base ref mismatch: expected ${baseRef}, got ${options.baseRef}`);
   }
 
@@ -2147,7 +2153,7 @@ export async function createPullRequest(
     throw new Error("Unable to determine base branch for PR");
   }
   const normalizedBase = normalizeLocalBranchRefName(base);
-  if (configured.isPaseoOwnedWorktree && options.base && options.base !== base) {
+  if (configured.isPolyHiveOwnedWorktree && options.base && options.base !== base) {
     throw new Error(`Base ref mismatch: expected ${base}, got ${options.base}`);
   }
 

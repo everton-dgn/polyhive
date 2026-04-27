@@ -4,7 +4,7 @@ import * as Clipboard from "expo-clipboard";
 import { openExternalUrl } from "@/utils/open-external-url";
 import { BookOpen, Check, Copy, RotateCw, TriangleAlert } from "lucide-react";
 import { StyleSheet, useUnistyles } from "react-native-unistyles";
-import { PaseoLogo } from "@/components/icons/paseo-logo";
+import { PolyHiveLogo } from "@/components/icons/polyhive-logo";
 import { Button } from "@/components/ui/button";
 import { Fonts } from "@/constants/theme";
 import { getDesktopDaemonLogs, type DesktopDaemonLogs } from "@/desktop/daemon/desktop-daemon";
@@ -243,7 +243,7 @@ export function StartupSplashScreen({ bootstrapState }: StartupSplashScreenProps
     return (
       <View style={styles.container}>
         <TitlebarDragRegion />
-        <PaseoLogo size={96} />
+        <PolyHiveLogo size={96} />
         <Text style={styles.subtitle}>Starting up…</Text>
       </View>
     );
@@ -254,8 +254,8 @@ export function StartupSplashScreen({ bootstrapState }: StartupSplashScreenProps
       <View style={styles.container}>
         <TitlebarDragRegion />
         <View style={styles.centeredContent}>
-          <PaseoLogo size={96} />
-          <Text style={styles.title}>Welcome to Paseo</Text>
+          <PolyHiveLogo size={96} />
+          <Text style={styles.title}>Welcome to PolyHive</Text>
           <View style={styles.progressSteps}>
             {progressSteps.map((step) => (
               <View key={step.key} style={styles.progressStepRow}>
@@ -283,7 +283,7 @@ export function StartupSplashScreen({ bootstrapState }: StartupSplashScreenProps
       >
         <View style={styles.errorContent}>
           <View style={styles.errorHeader}>
-            <PaseoLogo size={64} />
+            <PolyHiveLogo size={64} />
             <Text style={[styles.title, styles.titleError]}>Something went wrong</Text>
           </View>
 

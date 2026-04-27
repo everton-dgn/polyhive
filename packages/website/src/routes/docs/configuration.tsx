@@ -2,13 +2,13 @@ import { createFileRoute } from "@tanstack/react-router";
 import { SITE_HOST } from "~/fork-identity";
 import { pageMeta } from "~/meta";
 
-const SCHEMA_URL = `${SITE_HOST}/schemas/paseo.config.v1.json`;
+const SCHEMA_URL = `${SITE_HOST}/schemas/polyhive.config.v1.json`;
 
 export const Route = createFileRoute("/docs/configuration")({
   head: () => ({
     meta: pageMeta(
-      "Configuration - Paseo Docs",
-      "Configure Paseo via config.json, environment variables, and CLI overrides.",
+      "Configuration - PolyHive Docs",
+      "Configure PolyHive via config.json, environment variables, and CLI overrides.",
     ),
   }),
   component: Configuration,
@@ -23,7 +23,7 @@ function Configuration() {
       <div>
         <h1 className="text-3xl font-medium font-title mb-4">Configuration</h1>
         <p className="text-white/60 leading-relaxed">
-          Paseo loads configuration from a single JSON file in your Paseo home directory, with
+          PolyHive loads configuration from a single JSON file in your PolyHive home directory, with
           optional environment variable and CLI overrides.
         </p>
       </div>
@@ -31,23 +31,26 @@ function Configuration() {
       <section className="space-y-4">
         <h2 className="text-xl font-medium">Where config lives</h2>
         <p className="text-white/60 leading-relaxed">
-          By default, Paseo uses <code className="font-mono">~/.paseo</code> as its home directory.
-          The configuration file is:
+          By default, PolyHive uses <code className="font-mono">~/.polyhive</code> as its home
+          directory. The configuration file is:
         </p>
         <div className="bg-card border border-border rounded-lg p-4 font-mono text-sm">
           <span className="text-muted-foreground select-none">$ </span>
-          <span>~/.paseo/config.json</span>
+          <span>~/.polyhive/config.json</span>
         </div>
         <p className="text-white/60 leading-relaxed">
-          You can change the home directory by setting <code className="font-mono">PASEO_HOME</code>{" "}
-          or passing <code className="font-mono">--home</code> to{" "}
-          <code className="font-mono">paseo daemon start</code>.
+          You can change the home directory by setting{" "}
+          <code className="font-mono">POLYHIVE_HOME</code> or passing{" "}
+          <code className="font-mono">--home</code> to{" "}
+          <code className="font-mono">polyhive daemon start</code>.
         </p>
       </section>
 
       <section className="space-y-4">
         <h2 className="text-xl font-medium">Precedence</h2>
-        <p className="text-white/60 leading-relaxed">Paseo merges configuration in this order:</p>
+        <p className="text-white/60 leading-relaxed">
+          PolyHive merges configuration in this order:
+        </p>
         <ol className="text-white/60 space-y-2 list-decimal list-inside">
           <li>Defaults</li>
           <li>
@@ -88,7 +91,7 @@ function Configuration() {
       <section className="space-y-4">
         <h2 className="text-xl font-medium">Agent providers</h2>
         <p className="text-white/60 leading-relaxed">
-          Agent providers — both the first-class ones Paseo ships with and custom entries you add
+          Agent providers — both the first-class ones PolyHive ships with and custom entries you add
           under <code className="font-mono">agents.providers</code> — are documented on their own
           page.
         </p>
@@ -139,7 +142,7 @@ function Configuration() {
             Console: <code className="font-mono">info</code> and above
           </li>
           <li>
-            File (<code className="font-mono">$PASEO_HOME/daemon.log</code>):{" "}
+            File (<code className="font-mono">$POLYHIVE_HOME/daemon.log</code>):{" "}
             <code className="font-mono">trace</code> and above
           </li>
           <li>
@@ -176,76 +179,76 @@ function Configuration() {
         <h2 className="text-xl font-medium">Common env vars</h2>
         <ul className="text-white/60 space-y-2 list-disc list-inside">
           <li>
-            <code className="font-mono">PASEO_HOME</code> — set Paseo home directory
+            <code className="font-mono">POLYHIVE_HOME</code> — set PolyHive home directory
           </li>
           <li>
-            <code className="font-mono">PASEO_LISTEN</code> — override{" "}
+            <code className="font-mono">POLYHIVE_LISTEN</code> — override{" "}
             <code className="font-mono">daemon.listen</code>
           </li>
           <li>
-            <code className="font-mono">PASEO_HOSTNAMES</code> — override/extend{" "}
+            <code className="font-mono">POLYHIVE_HOSTNAMES</code> — override/extend{" "}
             <code className="font-mono">daemon.hostnames</code>
           </li>
           <li>
-            <code className="font-mono">PASEO_ALLOWED_HOSTS</code> — deprecated alias for{" "}
-            <code className="font-mono">PASEO_HOSTNAMES</code>
+            <code className="font-mono">POLYHIVE_ALLOWED_HOSTS</code> — deprecated alias for{" "}
+            <code className="font-mono">POLYHIVE_HOSTNAMES</code>
           </li>
           <li>
-            <code className="font-mono">PASEO_LOG_CONSOLE_LEVEL</code> — override{" "}
+            <code className="font-mono">POLYHIVE_LOG_CONSOLE_LEVEL</code> — override{" "}
             <code className="font-mono">log.console.level</code>
           </li>
           <li>
-            <code className="font-mono">PASEO_LOG_FILE_LEVEL</code> — override{" "}
+            <code className="font-mono">POLYHIVE_LOG_FILE_LEVEL</code> — override{" "}
             <code className="font-mono">log.file.level</code>
           </li>
           <li>
-            <code className="font-mono">PASEO_LOG_FILE_PATH</code> — override{" "}
+            <code className="font-mono">POLYHIVE_LOG_FILE_PATH</code> — override{" "}
             <code className="font-mono">log.file.path</code>
           </li>
           <li>
-            <code className="font-mono">PASEO_LOG_FILE_ROTATE_SIZE</code> — override{" "}
+            <code className="font-mono">POLYHIVE_LOG_FILE_ROTATE_SIZE</code> — override{" "}
             <code className="font-mono">log.file.rotate.maxSize</code>
           </li>
           <li>
-            <code className="font-mono">PASEO_LOG_FILE_ROTATE_COUNT</code> — override{" "}
+            <code className="font-mono">POLYHIVE_LOG_FILE_ROTATE_COUNT</code> — override{" "}
             <code className="font-mono">log.file.rotate.maxFiles</code>
           </li>
           <li>
-            <code className="font-mono">PASEO_LOG</code>,{" "}
-            <code className="font-mono">PASEO_LOG_FORMAT</code> — legacy log overrides (still
+            <code className="font-mono">POLYHIVE_LOG</code>,{" "}
+            <code className="font-mono">POLYHIVE_LOG_FORMAT</code> — legacy log overrides (still
             supported)
           </li>
           <li>
             <code className="font-mono">OPENAI_API_KEY</code> — override OpenAI provider key
           </li>
           <li>
-            <code className="font-mono">PASEO_VOICE_LLM_PROVIDER</code> — override voice LLM
+            <code className="font-mono">POLYHIVE_VOICE_LLM_PROVIDER</code> — override voice LLM
             provider (<code className="font-mono">claude</code>,{" "}
             <code className="font-mono">codex</code>, <code className="font-mono">opencode</code>)
           </li>
           <li>
-            <code className="font-mono">PASEO_DICTATION_STT_PROVIDER</code>,{" "}
-            <code className="font-mono">PASEO_VOICE_STT_PROVIDER</code>,{" "}
-            <code className="font-mono">PASEO_VOICE_TTS_PROVIDER</code> — override voice provider
+            <code className="font-mono">POLYHIVE_DICTATION_STT_PROVIDER</code>,{" "}
+            <code className="font-mono">POLYHIVE_VOICE_STT_PROVIDER</code>,{" "}
+            <code className="font-mono">POLYHIVE_VOICE_TTS_PROVIDER</code> — override voice provider
             selection (<code className="font-mono">local</code> or{" "}
             <code className="font-mono">openai</code>)
           </li>
           <li>
-            <code className="font-mono">PASEO_LOCAL_MODELS_DIR</code> — control local model
+            <code className="font-mono">POLYHIVE_LOCAL_MODELS_DIR</code> — control local model
             directory
           </li>
           <li>
-            <code className="font-mono">PASEO_DICTATION_LOCAL_STT_MODEL</code> — override local
+            <code className="font-mono">POLYHIVE_DICTATION_LOCAL_STT_MODEL</code> — override local
             dictation STT model
           </li>
           <li>
-            <code className="font-mono">PASEO_VOICE_LOCAL_STT_MODEL</code>,{" "}
-            <code className="font-mono">PASEO_VOICE_LOCAL_TTS_MODEL</code> — override local voice
+            <code className="font-mono">POLYHIVE_VOICE_LOCAL_STT_MODEL</code>,{" "}
+            <code className="font-mono">POLYHIVE_VOICE_LOCAL_TTS_MODEL</code> — override local voice
             STT/TTS models
           </li>
           <li>
-            <code className="font-mono">PASEO_VOICE_LOCAL_TTS_SPEAKER_ID</code>,{" "}
-            <code className="font-mono">PASEO_VOICE_LOCAL_TTS_SPEED</code> — optional local voice
+            <code className="font-mono">POLYHIVE_VOICE_LOCAL_TTS_SPEAKER_ID</code>,{" "}
+            <code className="font-mono">POLYHIVE_VOICE_LOCAL_TTS_SPEED</code> — optional local voice
             TTS tuning
           </li>
         </ul>

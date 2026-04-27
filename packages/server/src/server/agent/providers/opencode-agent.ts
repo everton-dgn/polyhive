@@ -46,13 +46,13 @@ import {
 } from "../provider-launch-config.js";
 import { findExecutable, isCommandAvailable } from "../../../utils/executable.js";
 import { spawnProcess } from "../../../utils/spawn.js";
-import { resolvePaseoHome } from "../../paseo-home.js";
+import { resolvePolyHiveHome } from "../../polyhive-home.js";
 import { mapOpencodeToolCall } from "./opencode/tool-call-mapper.js";
 import {
   buildOpenCodeServerConfig,
   installIdentityPlugin,
-  PASEO_SESSION_MAP_ENV_VAR,
-} from "./opencode/paseo-identity-plugin.js";
+  POLYHIVE_SESSION_MAP_ENV_VAR,
+} from "./opencode/polyhive-identity-plugin.js";
 import { SessionAgentMap } from "./opencode/session-agent-map.js";
 import {
   formatDiagnosticStatus,
@@ -819,14 +819,14 @@ export class OpenCodeServerManager {
     // OpenCode server is freshly spawned, so old sessionIDs are invalid.
     this.sessionAgentMap.clear();
 
-    const paseoHome = resolvePaseoHome();
-    const installedPlugin = installIdentityPlugin(paseoHome);
+    const polyhiveHome = resolvePolyHiveHome();
+    const installedPlugin = installIdentityPlugin(polyhiveHome);
     const serverConfig = buildOpenCodeServerConfig(installedPlugin.fileUrl);
     const baseEnv = applyProviderEnv(process.env, this.runtimeSettings);
     const spawnEnv: Record<string, string | undefined> = {
       ...baseEnv,
       OPENCODE_CONFIG_CONTENT: JSON.stringify(serverConfig),
-      [PASEO_SESSION_MAP_ENV_VAR]: this.sessionAgentMap.path,
+      [POLYHIVE_SESSION_MAP_ENV_VAR]: this.sessionAgentMap.path,
     };
 
     return new Promise((resolve, reject) => {
@@ -942,7 +942,7 @@ export class OpenCodeAgentClient implements AgentClient {
 
     await this.populateModelContextWindowCache(client, openCodeConfig.cwd);
 
-    const agentId = launchContext?.env?.PASEO_AGENT_ID;
+    const agentId = launchContext?.env?.POLYHIVE_AGENT_ID;
     if (agentId) {
       this.serverManager.registerSession(session.id, agentId);
     }
@@ -981,7 +981,7 @@ export class OpenCodeAgentClient implements AgentClient {
 
     await this.populateModelContextWindowCache(client, openCodeConfig.cwd);
 
-    const agentId = launchContext?.env?.PASEO_AGENT_ID;
+    const agentId = launchContext?.env?.POLYHIVE_AGENT_ID;
     if (agentId) {
       this.serverManager.registerSession(handle.sessionId, agentId);
     }

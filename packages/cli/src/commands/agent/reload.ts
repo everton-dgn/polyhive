@@ -45,7 +45,7 @@ export async function runReloadCommand(
     const error: CommandError = {
       code: "MISSING_AGENT_ID",
       message: "Agent ID is required",
-      details: "Usage: paseo agent reload <id-or-name>",
+      details: "Usage: polyhive agent reload <id-or-name>",
     };
     throw error;
   }
@@ -58,7 +58,7 @@ export async function runReloadCommand(
     const error: CommandError = {
       code: "DAEMON_NOT_RUNNING",
       message: `Cannot connect to daemon at ${host}: ${message}`,
-      details: "Start the daemon with: paseo daemon start",
+      details: "Start the daemon with: polyhive daemon start",
     };
     throw error;
   }
@@ -71,7 +71,7 @@ export async function runReloadCommand(
       const error: CommandError = {
         code: "AGENT_NOT_FOUND",
         message: `Agent not found: ${agentIdArg}`,
-        details: 'Use "paseo ls" to list available agents',
+        details: 'Use "polyhive ls" to list available agents',
       };
       throw error;
     }

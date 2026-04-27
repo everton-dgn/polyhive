@@ -1,7 +1,7 @@
 #!/usr/bin/env npx tsx
 
 /**
- * Regression: `paseo daemon stop` must only act on daemon ownership state and
+ * Regression: `polyhive daemon stop` must only act on daemon ownership state and
  * must not discover/kill processes via home-scoped `ps` command heuristics.
  */
 
@@ -15,9 +15,9 @@ import { $ } from "zx";
 $.verbose = false;
 
 const testEnv = {
-  PASEO_LOCAL_SPEECH_AUTO_DOWNLOAD: process.env.PASEO_LOCAL_SPEECH_AUTO_DOWNLOAD ?? "0",
-  PASEO_DICTATION_ENABLED: process.env.PASEO_DICTATION_ENABLED ?? "0",
-  PASEO_VOICE_MODE_ENABLED: process.env.PASEO_VOICE_MODE_ENABLED ?? "0",
+  POLYHIVE_LOCAL_SPEECH_AUTO_DOWNLOAD: process.env.POLYHIVE_LOCAL_SPEECH_AUTO_DOWNLOAD ?? "0",
+  POLYHIVE_DICTATION_ENABLED: process.env.POLYHIVE_DICTATION_ENABLED ?? "0",
+  POLYHIVE_VOICE_MODE_ENABLED: process.env.POLYHIVE_VOICE_MODE_ENABLED ?? "0",
 };
 
 function sleep(ms: number): Promise<void> {
@@ -50,7 +50,7 @@ async function waitForRunning(pid: number, timeoutMs: number): Promise<void> {
 
 console.log("=== Daemon Stop Ownership Regression ===\n");
 
-const paseoHome = await mkdtemp(join(tmpdir(), "paseo-stop-ownership-"));
+const polyhiveHome = await mkdtemp(join(tmpdir(), "polyhive-stop-ownership-"));
 let decoyProcess: ChildProcess | null = null;
 
 try {
@@ -67,7 +67,7 @@ try {
     {
       env: {
         ...process.env,
-        PASEO_HOME: paseoHome,
+        POLYHIVE_HOME: polyhiveHome,
       },
       stdio: "ignore",
       detached: true,
@@ -83,7 +83,7 @@ try {
   console.log("Test 2: daemon stop should report not_running and leave decoy untouched");
 
   const stopResult =
-    await $`PASEO_HOME=${paseoHome} PASEO_LOCAL_SPEECH_AUTO_DOWNLOAD=${testEnv.PASEO_LOCAL_SPEECH_AUTO_DOWNLOAD} PASEO_DICTATION_ENABLED=${testEnv.PASEO_DICTATION_ENABLED} PASEO_VOICE_MODE_ENABLED=${testEnv.PASEO_VOICE_MODE_ENABLED} npx paseo daemon stop --home ${paseoHome} --json`.nothrow();
+    await $`POLYHIVE_HOME=${polyhiveHome} POLYHIVE_LOCAL_SPEECH_AUTO_DOWNLOAD=${testEnv.POLYHIVE_LOCAL_SPEECH_AUTO_DOWNLOAD} POLYHIVE_DICTATION_ENABLED=${testEnv.POLYHIVE_DICTATION_ENABLED} POLYHIVE_VOICE_MODE_ENABLED=${testEnv.POLYHIVE_VOICE_MODE_ENABLED} npx polyhive daemon stop --home ${polyhiveHome} --json`.nothrow();
   assert.strictEqual(stopResult.exitCode, 0, `stop should succeed: ${stopResult.stderr}`);
 
   const parsed = JSON.parse(stopResult.stdout) as { action?: unknown };
@@ -112,8 +112,8 @@ try {
     }
   }
 
-  await $`PASEO_HOME=${paseoHome} npx paseo daemon stop --home ${paseoHome} --force`.nothrow();
-  await rm(paseoHome, { recursive: true, force: true });
+  await $`POLYHIVE_HOME=${polyhiveHome} npx polyhive daemon stop --home ${polyhiveHome} --force`.nothrow();
+  await rm(polyhiveHome, { recursive: true, force: true });
 }
 
 console.log("=== Daemon stop ownership regression test passed ===");

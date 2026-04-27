@@ -6,19 +6,19 @@ describe("cli-install-path", () => {
     expect(
       resolveCliInstallSourcePath({
         isPackaged: true,
-        executablePath: "/Applications/Paseo.app/Contents/MacOS/Paseo",
-        shimPath: "/Applications/Paseo.app/Contents/Resources/bin/paseo",
+        executablePath: "/Applications/PolyHive.app/Contents/MacOS/PolyHive",
+        shimPath: "/Applications/PolyHive.app/Contents/Resources/bin/polyhive",
       }),
-    ).toBe("/Applications/Paseo.app/Contents/MacOS/Paseo");
+    ).toBe("/Applications/PolyHive.app/Contents/MacOS/PolyHive");
   });
 
   it("falls back to the shim in development", () => {
     expect(
       resolveCliInstallSourcePath({
         isPackaged: false,
-        executablePath: "/opt/Paseo/paseo",
-        shimPath: "/opt/Paseo/resources/bin/paseo",
+        executablePath: "/opt/PolyHive/polyhive",
+        shimPath: "/opt/PolyHive/resources/bin/polyhive",
       }),
-    ).toBe("/opt/Paseo/resources/bin/paseo");
+    ).toBe("/opt/PolyHive/resources/bin/polyhive");
   });
 });

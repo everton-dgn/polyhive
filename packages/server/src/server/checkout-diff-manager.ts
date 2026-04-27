@@ -40,7 +40,7 @@ export class CheckoutDiffManager {
 
   constructor(options: {
     logger: pino.Logger;
-    paseoHome: string;
+    polyhiveHome: string;
     workspaceGitService: WorkspaceGitService;
   }) {
     this.workspaceGitService = options.workspaceGitService;

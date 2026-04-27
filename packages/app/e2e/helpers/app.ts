@@ -28,7 +28,7 @@ async function ensureE2EStorageSeeded(page: Page): Promise<void> {
 
   const needsReset = await page.evaluate(
     ({ expectedEndpoint, expectedServerId }) => {
-      const raw = localStorage.getItem("@paseo:daemon-registry");
+      const raw = localStorage.getItem("@polyhive:daemon-registry");
       if (!raw) return true;
       try {
         const parsed = JSON.parse(raw);
@@ -69,10 +69,10 @@ async function ensureE2EStorageSeeded(page: Page): Promise<void> {
   const preferences = buildCreateAgentPreferences(expectedServerId);
   await page.evaluate(
     ({ daemon, preferences }) => {
-      localStorage.setItem("@paseo:e2e", "1");
-      localStorage.setItem("@paseo:daemon-registry", JSON.stringify([daemon]));
-      localStorage.setItem("@paseo:create-agent-preferences", JSON.stringify(preferences));
-      localStorage.removeItem("@paseo:settings");
+      localStorage.setItem("@polyhive:e2e", "1");
+      localStorage.setItem("@polyhive:daemon-registry", JSON.stringify([daemon]));
+      localStorage.setItem("@polyhive:create-agent-preferences", JSON.stringify(preferences));
+      localStorage.removeItem("@polyhive:settings");
     },
     { daemon, preferences },
   );
@@ -89,25 +89,25 @@ async function assertE2EUsesSeededTestDaemon(page: Page): Promise<void> {
   }
 
   const snapshot = await page.evaluate(() => {
-    const registryRaw = localStorage.getItem("@paseo:daemon-registry");
-    const prefsRaw = localStorage.getItem("@paseo:create-agent-preferences");
+    const registryRaw = localStorage.getItem("@polyhive:daemon-registry");
+    const prefsRaw = localStorage.getItem("@polyhive:create-agent-preferences");
     return { registryRaw, prefsRaw };
   });
 
   if (!snapshot.registryRaw) {
-    throw new Error("E2E expected @paseo:daemon-registry to be set before app load.");
+    throw new Error("E2E expected @polyhive:daemon-registry to be set before app load.");
   }
 
   let registry: any;
   try {
     registry = JSON.parse(snapshot.registryRaw);
   } catch {
-    throw new Error("E2E expected @paseo:daemon-registry to be valid JSON.");
+    throw new Error("E2E expected @polyhive:daemon-registry to be valid JSON.");
   }
 
   if (!Array.isArray(registry) || registry.length !== 1) {
     throw new Error(
-      `E2E expected @paseo:daemon-registry to contain exactly 1 daemon (got ${Array.isArray(registry) ? registry.length : "non-array"}).`,
+      `E2E expected @polyhive:daemon-registry to contain exactly 1 daemon (got ${Array.isArray(registry) ? registry.length : "non-array"}).`,
     );
   }
 
@@ -145,7 +145,7 @@ async function assertE2EUsesSeededTestDaemon(page: Page): Promise<void> {
   }
 
   if (!snapshot.prefsRaw) {
-    throw new Error("E2E expected @paseo:create-agent-preferences to be set before app load.");
+    throw new Error("E2E expected @polyhive:create-agent-preferences to be set before app load.");
   }
   try {
     const prefs = JSON.parse(snapshot.prefsRaw) as any;
@@ -156,7 +156,7 @@ async function assertE2EUsesSeededTestDaemon(page: Page): Promise<void> {
     }
   } catch (error) {
     if (error instanceof Error) throw error;
-    throw new Error("E2E expected @paseo:create-agent-preferences to be valid JSON.");
+    throw new Error("E2E expected @polyhive:create-agent-preferences to be valid JSON.");
   }
 }
 
@@ -340,8 +340,8 @@ export const ensureHostSelected = async (page: Page) => {
     }
 
     const fix = await page.evaluate(() => {
-      const registryRaw = localStorage.getItem("@paseo:daemon-registry");
-      const prefsRaw = localStorage.getItem("@paseo:create-agent-preferences");
+      const registryRaw = localStorage.getItem("@polyhive:daemon-registry");
+      const prefsRaw = localStorage.getItem("@polyhive:create-agent-preferences");
       if (!registryRaw || !prefsRaw) return { ok: false, reason: "missing storage" } as const;
       const registry = JSON.parse(registryRaw) as any[];
       const prefs = JSON.parse(prefsRaw) as any;
@@ -351,10 +351,10 @@ export const ensureHostSelected = async (page: Page) => {
       if (typeof serverId !== "string" || serverId.length === 0)
         return { ok: false, reason: "missing serverId" } as const;
       prefs.serverId = serverId;
-      localStorage.setItem("@paseo:create-agent-preferences", JSON.stringify(prefs));
+      localStorage.setItem("@polyhive:create-agent-preferences", JSON.stringify(prefs));
       // Prevent the fixture's init-script from overwriting the corrected prefs on reload.
-      const nonce = localStorage.getItem("@paseo:e2e-seed-nonce") ?? "1";
-      localStorage.setItem("@paseo:e2e-disable-default-seed-once", nonce);
+      const nonce = localStorage.getItem("@polyhive:e2e-seed-nonce") ?? "1";
+      localStorage.setItem("@polyhive:e2e-disable-default-seed-once", nonce);
       return { ok: true } as const;
     });
 

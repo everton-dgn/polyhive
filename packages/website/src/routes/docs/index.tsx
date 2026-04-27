@@ -14,8 +14,8 @@ const RELEASES_URL = `${GITHUB_WEB_BASE}/releases`;
 export const Route = createFileRoute("/docs/")({
   head: () => ({
     meta: pageMeta(
-      "Getting Started - Paseo Docs",
-      "Learn how to set up and use Paseo to manage your coding agents from anywhere.",
+      "Getting Started - PolyHive Docs",
+      "Learn how to set up and use PolyHive to manage your coding agents from anywhere.",
     ),
   }),
   component: GettingStarted,
@@ -28,16 +28,16 @@ function GettingStarted() {
         <h1 className="text-3xl font-medium font-title mb-4">Getting Started</h1>
         <p className="text-white/60 leading-relaxed">
           {CLI_INSTALL_COMMAND
-            ? "Paseo has three main pieces: the daemon is the local macOS server that manages your agents, the web client runs in desktop and mobile browsers, and the CLI is the terminal interface that can also launch the daemon."
-            : "Paseo has two main packaged pieces in this fork: the macOS app bundles the local daemon that manages your agents, and the web client runs in desktop and mobile browsers."}
+            ? "PolyHive has three main pieces: the daemon is the local macOS server that manages your agents, the web client runs in desktop and mobile browsers, and the CLI is the terminal interface that can also launch the daemon."
+            : "PolyHive has two main packaged pieces in this fork: the macOS app bundles the local daemon that manages your agents, and the web client runs in desktop and mobile browsers."}
         </p>
       </div>
 
       <section className="space-y-4">
         <h2 className="text-xl font-medium">Prerequisites</h2>
         <p className="text-white/60">
-          Paseo manages existing agent CLIs. Install at least one agent and make sure it already
-          works with your credentials before you set up Paseo.
+          PolyHive manages existing agent CLIs. Install at least one agent and make sure it already
+          works with your credentials before you set up PolyHive.
         </p>
         <ul className="text-white/60 space-y-2 list-disc list-inside">
           <li>
@@ -129,11 +129,11 @@ function GettingStarted() {
             <span>{CLI_START_COMMAND}</span>
           </div>
           <p className="text-white/60">
-            Paseo prints a QR code in the terminal. Open it in a browser, including a phone browser,
-            or enter the daemon address manually from another web client.
+            PolyHive prints a QR code in the terminal. Open it in a browser, including a phone
+            browser, or enter the daemon address manually from another web client.
           </p>
           <p className="text-white/60">
-            Configuration and local state live under <code>PASEO_HOME</code>.
+            Configuration and local state live under <code>POLYHIVE_HOME</code>.
           </p>
         </section>
       )}
@@ -141,8 +141,8 @@ function GettingStarted() {
       <section className="space-y-4">
         <h2 className="text-xl font-medium">Voice Setup</h2>
         <p className="text-white/60">
-          Paseo includes first-class voice support with a local-first architecture and configurable
-          speech providers.
+          PolyHive includes first-class voice support with a local-first architecture and
+          configurable speech providers.
         </p>
         <p className="text-white/60">
           For architecture, local model behavior, and provider configuration, see the Voice docs

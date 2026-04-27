@@ -1,14 +1,14 @@
-# @everton-dgn/polyhive-cli
+# @evertondgn/polyhive-cli
 
 The PolyHive command-line client. Control your local AI coding agents from any terminal.
 
 ## Install
 
 ```bash
-npm install -g @everton-dgn/polyhive-cli
+npm install -g @evertondgn/polyhive-cli
 ```
 
-This puts the `polyhive` binary on your `$PATH` and pulls the daemon (`@everton-dgn/polyhive-server`) and relay (`@everton-dgn/polyhive-relay`) automatically.
+This puts the `polyhive` binary on your `$PATH` and pulls the daemon (`@evertondgn/polyhive-server`) and relay (`@evertondgn/polyhive-relay`) automatically.
 
 ## Quick start
 

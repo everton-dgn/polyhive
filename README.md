@@ -52,7 +52,7 @@ and the `polyhive` binary on your `$PATH`. Useful for Linux, servers, CI, and
 remote machines.
 
 ```bash
-npm install -g @everton-dgn/polyhive-cli
+npm install -g @evertondgn/polyhive-cli
 polyhive daemon start
 ```
 

@@ -1,4 +1,4 @@
-import { execCommand } from "@everton-dgn/polyhive-server";
+import { execCommand } from "@evertondgn/polyhive-server";
 
 export interface NodePathFromPidResult {
   nodePath: string | null;

@@ -12,7 +12,7 @@ import {
 
 const createClientChannelMock = vi.hoisted(() => vi.fn());
 
-vi.mock("@everton-dgn/polyhive-relay/e2ee", () => ({
+vi.mock("@evertondgn/polyhive-relay/e2ee", () => ({
   createClientChannel: createClientChannelMock,
 }));
 

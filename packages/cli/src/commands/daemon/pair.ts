@@ -4,7 +4,7 @@ import {
   generateLocalPairingOffer,
   loadConfig,
   resolvePolyHiveHome,
-} from "@everton-dgn/polyhive-server";
+} from "@evertondgn/polyhive-server";
 import { addJsonOption } from "../../utils/command-options.js";
 
 interface PairOptions {

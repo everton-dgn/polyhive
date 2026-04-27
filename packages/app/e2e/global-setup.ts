@@ -243,8 +243,8 @@ function ensureRelayBuildArtifact(repoRoot: string): void {
     return;
   }
 
-  console.log("[e2e] Building @everton-dgn/polyhive-relay for daemon startup");
-  execSync("npm run build --workspace=@everton-dgn/@everton-dgn/polyhive-relay", {
+  console.log("[e2e] Building @evertondgn/polyhive-relay for daemon startup");
+  execSync("npm run build --workspace=@evertondgn/@evertondgn/polyhive-relay", {
     cwd: repoRoot,
     stdio: "inherit",
   });

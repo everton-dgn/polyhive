@@ -46,7 +46,7 @@ import {
   darkHighlightColors,
   lightHighlightColors,
   type HighlightStyle as HighlightStyleKey,
-} from "@everton-dgn/polyhive-highlight";
+} from "@evertondgn/polyhive-highlight";
 import { WORKSPACE_SECONDARY_HEADER_HEIGHT } from "@/constants/layout";
 import { Fonts } from "@/constants/theme";
 import { shouldAnchorHeaderBeforeCollapse } from "@/utils/git-diff-scroll";

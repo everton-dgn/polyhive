@@ -1,6 +1,6 @@
 {
-  "name": "@everton-dgn/polyhive-server",
-  "version": "0.1.61",
+  "name": "@evertondgn/polyhive-server",
+  "version": "0.1.62",
   "description": "PolyHive backend server",
   "license": "AGPL-3.0-or-later",
   "repository": {
@@ -70,8 +70,8 @@
     "@ai-sdk/openai": "2.0.52",
     "@anthropic-ai/claude-agent-sdk": "0.2.71",
     "@deepgram/sdk": "3.13.0",
-    "@everton-dgn/polyhive-highlight": "0.1.61",
-    "@everton-dgn/polyhive-relay": "0.1.61",
+    "@evertondgn/polyhive-highlight": "0.1.62",
+    "@evertondgn/polyhive-relay": "0.1.62",
     "@isaacs/ttlcache": "2.1.4",
     "@modelcontextprotocol/sdk": "1.20.1",
     "@mariozechner/pi-coding-agent": "0.67.68",

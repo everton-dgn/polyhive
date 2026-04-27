@@ -1,6 +1,6 @@
 {
-  "name": "@everton-dgn/polyhive-highlight",
-  "version": "0.1.61",
+  "name": "@evertondgn/polyhive-highlight",
+  "version": "0.1.62",
   "description": "Lezer-based syntax highlighter used by PolyHive's app and server",
   "license": "AGPL-3.0-or-later",
   "repository": {

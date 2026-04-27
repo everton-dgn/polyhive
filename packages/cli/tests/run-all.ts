@@ -70,7 +70,7 @@ async function writeJsonSummary({
     JSON.stringify(
       {
         suite: "cli-local",
-        command: "npm run test:local --workspace=@everton-dgn/polyhive-cli",
+        command: "npm run test:local --workspace=@evertondgn/polyhive-cli",
         counts: {
           passed,
           failed,
@@ -111,9 +111,9 @@ let passed = 0;
 let failed = 0;
 const failures: Failure[] = [];
 
-await runCommand("Building relay", "npm run build --workspace=@everton-dgn/polyhive-relay");
-await runCommand("Building server", "npm run build --workspace=@everton-dgn/polyhive-server");
-await runCommand("Building CLI", "npm run build --workspace=@everton-dgn/polyhive-cli");
+await runCommand("Building relay", "npm run build --workspace=@evertondgn/polyhive-relay");
+await runCommand("Building server", "npm run build --workspace=@evertondgn/polyhive-server");
+await runCommand("Building CLI", "npm run build --workspace=@evertondgn/polyhive-cli");
 
 for (const testFile of testFiles) {
   const testPath = join(__dirname, testFile);

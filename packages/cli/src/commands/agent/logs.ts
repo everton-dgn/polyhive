@@ -6,8 +6,8 @@ import type {
   DaemonClient,
   AgentStreamMessage,
   AgentTimelineItem,
-} from "@everton-dgn/polyhive-server";
-import { curateAgentActivity } from "@everton-dgn/polyhive-server";
+} from "@evertondgn/polyhive-server";
+import { curateAgentActivity } from "@evertondgn/polyhive-server";
 
 export function addLogsOptions(cmd: Command): Command {
   return cmd

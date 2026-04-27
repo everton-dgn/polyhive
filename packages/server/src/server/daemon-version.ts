@@ -1,6 +1,6 @@
 import { PackageVersionResolutionError, resolvePackageVersion } from "./package-version.js";
 
-const SERVER_PACKAGE_NAME = "@everton-dgn/polyhive-server";
+const SERVER_PACKAGE_NAME = "@evertondgn/polyhive-server";
 
 export class DaemonVersionResolutionError extends PackageVersionResolutionError {}
 

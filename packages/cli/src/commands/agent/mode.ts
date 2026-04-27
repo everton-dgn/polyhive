@@ -6,7 +6,7 @@ import type {
   CommandError,
   AnyCommandResult,
 } from "../../output/index.js";
-import type { AgentMode } from "@everton-dgn/polyhive-server";
+import type { AgentMode } from "@evertondgn/polyhive-server";
 
 /** Result for setting mode */
 export interface SetModeResult {

@@ -2,7 +2,7 @@ import {
   highlightCode,
   isLanguageSupported,
   type HighlightToken,
-} from "@everton-dgn/polyhive-highlight";
+} from "@evertondgn/polyhive-highlight";
 
 export interface DiffLine {
   type: "add" | "remove" | "context" | "header";

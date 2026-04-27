@@ -107,7 +107,7 @@ jobs:
         run: npm run build --workspace=@everton-dgn/polyhive-highlight
 
       - name: Run CLI tests
-        run: npm run test --workspace=polyhive
+        run: npm run test --workspace=@everton-dgn/polyhive-cli
         env:
           POLYHIVE_LOCAL_SPEECH_AUTO_DOWNLOAD: '0'
           POLYHIVE_DICTATION_ENABLED: '0'

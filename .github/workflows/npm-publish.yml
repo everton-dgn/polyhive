@@ -64,14 +64,14 @@ jobs:
           npm run build --workspace=@everton-dgn/polyhive-highlight
           npm run build --workspace=@everton-dgn/polyhive-relay
           npm run build --workspace=@everton-dgn/polyhive-server
-          npm run build --workspace=polyhive
+          npm run build --workspace=@everton-dgn/polyhive-cli
 
       - name: Pack dry-run (sanity check)
         run: |
           npm pack --dry-run --workspace=@everton-dgn/polyhive-highlight
           npm pack --dry-run --workspace=@everton-dgn/polyhive-relay
           npm pack --dry-run --workspace=@everton-dgn/polyhive-server
-          npm pack --dry-run --workspace=polyhive
+          npm pack --dry-run --workspace=@everton-dgn/polyhive-cli
 
       - name: Publish to npm (idempotent)
         env:

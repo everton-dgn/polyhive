@@ -61,17 +61,17 @@ jobs:
 
       - name: Build publishable packages
         run: |
-          npm run build --workspace=@everton-dgn/polyhive-highlight
-          npm run build --workspace=@everton-dgn/polyhive-relay
-          npm run build --workspace=@everton-dgn/polyhive-server
-          npm run build --workspace=@everton-dgn/polyhive-cli
+          npm run build --workspace=@evertondgn/polyhive-highlight
+          npm run build --workspace=@evertondgn/polyhive-relay
+          npm run build --workspace=@evertondgn/polyhive-server
+          npm run build --workspace=@evertondgn/polyhive-cli
 
       - name: Pack dry-run (sanity check)
         run: |
-          npm pack --dry-run --workspace=@everton-dgn/polyhive-highlight
-          npm pack --dry-run --workspace=@everton-dgn/polyhive-relay
-          npm pack --dry-run --workspace=@everton-dgn/polyhive-server
-          npm pack --dry-run --workspace=@everton-dgn/polyhive-cli
+          npm pack --dry-run --workspace=@evertondgn/polyhive-highlight
+          npm pack --dry-run --workspace=@evertondgn/polyhive-relay
+          npm pack --dry-run --workspace=@evertondgn/polyhive-server
+          npm pack --dry-run --workspace=@evertondgn/polyhive-cli
 
       - name: Publish to npm (idempotent)
         env:
@@ -102,7 +102,7 @@ jobs:
             echo "$out"
           }
 
-          publish_workspace @everton-dgn/polyhive-highlight
-          publish_workspace @everton-dgn/polyhive-relay
-          publish_workspace @everton-dgn/polyhive-server
-          publish_workspace @everton-dgn/polyhive-cli
+          publish_workspace @evertondgn/polyhive-highlight
+          publish_workspace @evertondgn/polyhive-relay
+          publish_workspace @evertondgn/polyhive-server
+          publish_workspace @evertondgn/polyhive-cli

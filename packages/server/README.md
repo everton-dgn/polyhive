@@ -1,11 +1,11 @@
-# @everton-dgn/polyhive-server
+# @evertondgn/polyhive-server
 
-The PolyHive daemon: agent process orchestration, WebSocket API, and an MCP server. Internal package — installed automatically as a transitive dependency of `@everton-dgn/polyhive-cli` and the desktop app.
+The PolyHive daemon: agent process orchestration, WebSocket API, and an MCP server. Internal package — installed automatically as a transitive dependency of `@evertondgn/polyhive-cli` and the desktop app.
 
 You normally do not depend on this package directly. To use PolyHive:
 
 ```bash
-npm install -g @everton-dgn/polyhive-cli
+npm install -g @evertondgn/polyhive-cli
 polyhive daemon start
 ```
 

@@ -8,7 +8,7 @@ import {
   loadPersistedConfig,
   type CliConfigOverrides,
   type PersistedConfig,
-} from "@everton-dgn/polyhive-server";
+} from "@evertondgn/polyhive-server";
 import {
   resolveLocalPolyHiveHome,
   resolveLocalDaemonState,

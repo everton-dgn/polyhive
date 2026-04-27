@@ -31,11 +31,11 @@ export default defineConfig({
     ],
     alias: [
       {
-        find: /^@everton-dgn\/polyhive-relay\/e2ee$/,
+        find: /^@evertondgn\/polyhive-relay\/e2ee$/,
         replacement: path.resolve(__dirname, "packages/relay/src/e2ee.ts"),
       },
       {
-        find: /^@everton-dgn\/polyhive-relay$/,
+        find: /^@evertondgn\/polyhive-relay$/,
         replacement: path.resolve(__dirname, "packages/relay/src/index.ts"),
       },
       { find: "@", replacement: path.resolve(appDir, "src") },

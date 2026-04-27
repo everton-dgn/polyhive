@@ -2,7 +2,7 @@ import {
   createClientChannel,
   type EncryptedChannel,
   type Transport as RelayTransport,
-} from "@everton-dgn/polyhive-relay/e2ee";
+} from "@evertondgn/polyhive-relay/e2ee";
 import type {
   DaemonTransport,
   DaemonTransportFactory,

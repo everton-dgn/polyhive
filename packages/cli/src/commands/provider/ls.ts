@@ -1,6 +1,6 @@
 import type { Command } from "commander";
 import type { CommandOptions, ListResult, OutputSchema } from "../../output/index.js";
-import { AGENT_PROVIDER_DEFINITIONS } from "@everton-dgn/polyhive-server";
+import { AGENT_PROVIDER_DEFINITIONS } from "@evertondgn/polyhive-server";
 import { tryConnectToDaemon } from "../../utils/client.js";
 
 /** Provider list item for display */

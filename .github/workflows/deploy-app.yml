@@ -58,7 +58,7 @@ jobs:
         run: npm install --workspace=polyhive-app --include-workspace-root
 
       - name: Build workspace dependencies
-        run: npm run build --workspace=@everton-dgn/polyhive-highlight
+        run: npm run build --workspace=@evertondgn/polyhive-highlight
 
       - name: Pull Vercel environment
         run: vercel pull --yes --environment=production --token=$VERCEL_TOKEN

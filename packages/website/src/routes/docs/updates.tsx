@@ -1,5 +1,10 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { GITHUB_WEB_BASE, WEB_APP_URL } from "~/fork-identity";
+import {
+  CLI_INSTALL_COMMAND,
+  CLI_START_COMMAND,
+  GITHUB_WEB_BASE,
+  WEB_APP_URL,
+} from "~/fork-identity";
 import { pageMeta } from "~/meta";
 
 const WEB_APP_LABEL = WEB_APP_URL.replace(/^https?:\/\//, "");
@@ -33,19 +38,21 @@ function UpdatesDocs() {
         </p>
       </section>
 
-      <section className="space-y-4">
-        <h2 className="text-xl font-medium">Update the daemon</h2>
-        <p className="text-white/60">Install the latest CLI/daemon package globally:</p>
-        <div className="bg-card border border-border rounded-lg p-4 font-mono text-sm">
-          <span className="text-muted-foreground select-none">$ </span>
-          <span>npm install -g @getpaseo/cli@latest</span>
-        </div>
-        <p className="text-white/60">Then restart the daemon:</p>
-        <div className="bg-card border border-border rounded-lg p-4 font-mono text-sm">
-          <span className="text-muted-foreground select-none">$ </span>
-          <span>paseo daemon restart</span>
-        </div>
-      </section>
+      {CLI_INSTALL_COMMAND && (
+        <section className="space-y-4">
+          <h2 className="text-xl font-medium">Update the daemon</h2>
+          <p className="text-white/60">Install the latest CLI/daemon package globally:</p>
+          <div className="bg-card border border-border rounded-lg p-4 font-mono text-sm">
+            <span className="text-muted-foreground select-none">$ </span>
+            <span>{CLI_INSTALL_COMMAND}</span>
+          </div>
+          <p className="text-white/60">Then restart the daemon:</p>
+          <div className="bg-card border border-border rounded-lg p-4 font-mono text-sm">
+            <span className="text-muted-foreground select-none">$ </span>
+            <span>{CLI_START_COMMAND} daemon restart</span>
+          </div>
+        </section>
+      )}
 
       <section className="space-y-4">
         <h2 className="text-xl font-medium">Web app</h2>
@@ -74,7 +81,7 @@ function UpdatesDocs() {
           rel="noopener noreferrer"
           className="underline hover:text-white/80"
         >
-          Paseo releases
+          GitHub releases
         </a>
       </section>
 

@@ -73,22 +73,36 @@ jobs:
           npm pack --dry-run --workspace=polyhive-server
           npm pack --dry-run --workspace=polyhive
 
-      - name: Publish polyhive-highlight
+      - name: Publish to npm (idempotent)
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-        run: npm publish --workspace=polyhive-highlight --access public --provenance
+        shell: bash
+        run: |
+          set -euo pipefail
+          VERSION=$(node -p "require('./package.json').version")
 
-      - name: Publish polyhive-relay
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-        run: npm publish --workspace=polyhive-relay --access public --provenance
+          publish_workspace() {
+            local workspace="$1"
+            local current
+            if current=$(npm view "$workspace@$VERSION" version 2>/dev/null) && [[ -n "$current" ]]; then
+              echo "✓ $workspace@$VERSION already on npm; skipping."
+              return 0
+            fi
 
-      - name: Publish polyhive-server
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-        run: npm publish --workspace=polyhive-server --access public --provenance
+            echo "→ Publishing $workspace@$VERSION"
+            local out
+            if ! out=$(npm publish --workspace="$workspace" --access public --provenance 2>&1); then
+              echo "$out"
+              if echo "$out" | grep -qE 'EPUBLISHCONFLICT|cannot publish over the previously published versions|previously published version'; then
+                echo "✓ $workspace@$VERSION raced to publish; treating conflict as success."
+                return 0
+              fi
+              return 1
+            fi
+            echo "$out"
+          }
 
-      - name: Publish polyhive (CLI)
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-        run: npm publish --workspace=polyhive --access public --provenance
+          publish_workspace polyhive-highlight
+          publish_workspace polyhive-relay
+          publish_workspace polyhive-server
+          publish_workspace polyhive

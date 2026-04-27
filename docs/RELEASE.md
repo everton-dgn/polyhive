@@ -52,7 +52,7 @@ This is the preferred publish path. `npm run release:publish` is kept as a manua
 
 **The workflow does not run on beta tags** (`vX.Y.Z-beta.N`). Betas only ship desktop assets, never npm.
 
-**Re-running a publish:** push the same stable tag with `--force` (`git tag -f vX.Y.Z HEAD && git push origin vX.Y.Z --force`). Already-published versions are skipped by npm with a `403 Forbidden` — that is expected and not a regression.
+**Re-running a publish:** push the same stable tag with `--force` (`git tag -f vX.Y.Z HEAD && git push origin vX.Y.Z --force`). The publish step is idempotent — it pre-checks each workspace against the registry and skips versions that are already published, and falls back to treating an `EPUBLISHCONFLICT` from a raced publish as success.
 
 **Manual dispatch:** `gh workflow run "NPM Publish" -f tag=vX.Y.Z` triggers the workflow on the existing tag without re-pushing.
 

@@ -1,6 +1,6 @@
 import type { Command } from "commander";
 import type { CommandOptions, ListResult, OutputSchema } from "../../output/index.js";
-import { AGENT_PROVIDER_DEFINITIONS } from "@getpaseo/server";
+import { AGENT_PROVIDER_DEFINITIONS } from "polyhive-server";
 import { tryConnectToDaemon } from "../../utils/client.js";
 
 /** Provider list item for display */

@@ -121,7 +121,7 @@ export function WorkspaceSetupDialog() {
       const wirePayload = splitComposerAttachmentsForSubmit(input.attachments);
       const payload =
         pendingWorkspaceSetup.creationMethod === "create_worktree"
-          ? await connectedClient.createPaseoWorktree({
+          ? await connectedClient.createPolyHiveWorktree({
               cwd: input.cwd,
               worktreeSlug: createNameId(),
               ...(wirePayload.attachments.length > 0

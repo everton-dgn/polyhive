@@ -7,9 +7,9 @@ function readEnv(key: string): string | undefined {
   return typeof value === "string" && value.trim().length > 0 ? value.trim() : undefined;
 }
 
-export const SITE_HOST = readEnv("EXPO_PUBLIC_PASEO_SITE_HOST") ?? DEFAULT_SITE_HOST;
-export const GITHUB_REPO = readEnv("EXPO_PUBLIC_PASEO_GITHUB_REPO") ?? DEFAULT_GITHUB_REPO;
-export const WEB_APP_URL = readEnv("EXPO_PUBLIC_PASEO_WEB_APP_URL") ?? DEFAULT_WEB_APP_URL;
+export const SITE_HOST = readEnv("EXPO_PUBLIC_POLYHIVE_SITE_HOST") ?? DEFAULT_SITE_HOST;
+export const GITHUB_REPO = readEnv("EXPO_PUBLIC_POLYHIVE_GITHUB_REPO") ?? DEFAULT_GITHUB_REPO;
+export const WEB_APP_URL = readEnv("EXPO_PUBLIC_POLYHIVE_WEB_APP_URL") ?? DEFAULT_WEB_APP_URL;
 
 export const DOCS_BASE_URL = `${SITE_HOST}/docs`;
 export const DOCS_CONFIGURATION_URL = `${DOCS_BASE_URL}/configuration`;

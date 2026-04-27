@@ -1,12 +1,12 @@
 # Security
 
-Paseo follows a client-server architecture, similar to Docker. The daemon runs on your machine and manages your coding agents. Clients (the web app in any browser, including mobile, the desktop wrapper, or the CLI) connect to the daemon to monitor and control those agents.
+PolyHive follows a client-server architecture, similar to Docker. The daemon runs on your machine and manages your coding agents. Clients (the web app in any browser, including mobile, the desktop wrapper, or the CLI) connect to the daemon to monitor and control those agents.
 
-Your code never leaves your machine. Paseo is a local-first tool that connects directly to your development environment.
+Your code never leaves your machine. PolyHive is a local-first tool that connects directly to your development environment.
 
 ## Architecture
 
-The Paseo daemon can run anywhere you want to execute agents: your laptop, a Mac Mini, a VPS, or a Docker container. The daemon listens for connections and manages agent lifecycles.
+The PolyHive daemon can run anywhere you want to execute agents: your laptop, a Mac Mini, a VPS, or a Docker container. The daemon listens for connections and manages agent lifecycles.
 
 Clients connect to the daemon over WebSocket. There are two ways to establish this connection:
 
@@ -55,11 +55,11 @@ Host header validation and CORS origin checks are defense-in-depth controls for 
 
 CORS is not a complete security boundary. It controls which browser origins can make requests, but does not prevent a malicious website from resolving its domain to your local machine (DNS rebinding).
 
-Paseo validates the `Host` header on incoming requests against configured hostnames. Requests with unrecognized hosts are rejected.
+PolyHive validates the `Host` header on incoming requests against configured hostnames. Requests with unrecognized hosts are rejected.
 
 ## Agent authentication
 
-Paseo wraps agent CLIs (Claude Code, Codex, OpenCode) but does not manage their authentication. Each agent provider handles its own credentials. Paseo never stores or transmits provider API keys. Agents run in your user context with your existing credentials.
+PolyHive wraps agent CLIs (Claude Code, Codex, OpenCode) but does not manage their authentication. Each agent provider handles its own credentials. PolyHive never stores or transmits provider API keys. Agents run in your user context with your existing credentials.
 
 ## Reporting vulnerabilities
 

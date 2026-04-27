@@ -73,7 +73,7 @@ function formatListenTarget(listenTarget: ListenTarget | null): string | null {
 
 import { VoiceAssistantWebSocketServer } from "./websocket-server.js";
 import { createGitHubService } from "../services/github-service.js";
-import { createPaseoWorktree } from "./paseo-worktree-service.js";
+import { createPolyHiveWorktree } from "./polyhive-worktree-service.js";
 import { createWorktreeCoreDeps } from "./worktree-core.js";
 import { DownloadTokenStore } from "./file-download/token-store.js";
 import type { OpenAiSpeechProviderConfig } from "./speech/providers/openai/config.js";
@@ -134,12 +134,12 @@ function createAgentMcpBaseUrl(listenTarget: ListenTarget | null): string | null
   ).toString();
 }
 
-export type PaseoOpenAIConfig = OpenAiSpeechProviderConfig;
-export type PaseoLocalSpeechConfig = LocalSpeechProviderConfig;
+export type PolyHiveOpenAIConfig = OpenAiSpeechProviderConfig;
+export type PolyHiveLocalSpeechConfig = LocalSpeechProviderConfig;
 
-export type PaseoSpeechConfig = {
+export type PolyHiveSpeechConfig = {
   providers: RequestedSpeechProviders;
-  local?: PaseoLocalSpeechConfig;
+  local?: PolyHiveLocalSpeechConfig;
 };
 
 export type DaemonLifecycleIntent =
@@ -155,9 +155,9 @@ export type DaemonLifecycleIntent =
       reason?: string;
     };
 
-export type PaseoDaemonConfig = {
+export type PolyHiveDaemonConfig = {
   listen: string;
-  paseoHome: string;
+  polyhiveHome: string;
   corsAllowedOrigins: string[];
   allowedHosts?: HostnamesConfig;
   hostnames?: HostnamesConfig;
@@ -172,8 +172,8 @@ export type PaseoDaemonConfig = {
   relayEndpoint?: string;
   relayPublicEndpoint?: string;
   appBaseUrl?: string;
-  openai?: PaseoOpenAIConfig;
-  speech?: PaseoSpeechConfig;
+  openai?: PolyHiveOpenAIConfig;
+  speech?: PolyHiveSpeechConfig;
   voiceLlmProvider?: AgentProvider | null;
   voiceLlmProviderExplicit?: boolean;
   voiceLlmModel?: string | null;
@@ -184,8 +184,8 @@ export type PaseoDaemonConfig = {
   onLifecycleIntent?: (intent: DaemonLifecycleIntent) => void;
 };
 
-export interface PaseoDaemon {
-  config: PaseoDaemonConfig;
+export interface PolyHiveDaemon {
+  config: PolyHiveDaemonConfig;
   agentManager: AgentManager;
   agentStorage: AgentStorage;
   terminalManager: TerminalManager;
@@ -196,16 +196,16 @@ export interface PaseoDaemon {
   getListenTarget(): ListenTarget | null;
 }
 
-export async function createPaseoDaemon(
-  config: PaseoDaemonConfig,
+export async function createPolyHiveDaemon(
+  config: PolyHiveDaemonConfig,
   rootLogger: Logger,
-): Promise<PaseoDaemon> {
+): Promise<PolyHiveDaemon> {
   const logger = rootLogger.child({ module: "bootstrap" });
   const bootstrapStart = performance.now();
   const elapsed = () => `${(performance.now() - bootstrapStart).toFixed(0)}ms`;
   const daemonVersion = resolveDaemonVersion(import.meta.url);
   const daemonConfigStore = new DaemonConfigStore(
-    config.paseoHome,
+    config.polyhiveHome,
     {
       mcp: { injectIntoAgents: config.mcpInjectIntoAgents ?? true },
     },
@@ -213,8 +213,8 @@ export async function createPaseoDaemon(
   );
 
   try {
-    const serverId = getOrCreateServerId(config.paseoHome, { logger });
-    const daemonKeyPair = await loadOrCreateDaemonKeyPair(config.paseoHome, logger);
+    const serverId = getOrCreateServerId(config.polyhiveHome, { logger });
+    const daemonKeyPair = await loadOrCreateDaemonKeyPair(config.polyhiveHome, logger);
     let relayTransport: RelayTransportController | null = null;
 
     const staticDir = config.staticDir;
@@ -276,8 +276,8 @@ export async function createPaseoDaemon(
     // CORS - allow same-origin + configured origins
     const allowedOrigins = new Set([
       ...config.corsAllowedOrigins,
-      // Packaged desktop renderers use the custom paseo:// protocol scheme.
-      "paseo://app",
+      // Packaged desktop renderers use the custom polyhive:// protocol scheme.
+      "polyhive://app",
       // For TCP, add localhost variants
       ...(listenTarget.type === "tcp"
         ? [
@@ -385,22 +385,22 @@ export async function createPaseoDaemon(
 
     const agentStorage = new AgentStorage(config.agentStoragePath, logger);
     const projectRegistry = new FileBackedProjectRegistry(
-      path.join(config.paseoHome, "projects", "projects.json"),
+      path.join(config.polyhiveHome, "projects", "projects.json"),
       logger,
     );
     workspaceRegistry = new FileBackedWorkspaceRegistry(
-      path.join(config.paseoHome, "projects", "workspaces.json"),
+      path.join(config.polyhiveHome, "projects", "workspaces.json"),
       logger,
     );
     const chatService = new FileBackedChatService({
-      paseoHome: config.paseoHome,
+      polyhiveHome: config.polyhiveHome,
       logger,
     });
     const terminalManager = createTerminalManager();
     const github = createGitHubService();
     const workspaceGitService = new WorkspaceGitServiceImpl({
       logger,
-      paseoHome: config.paseoHome,
+      polyhiveHome: config.polyhiveHome,
       deps: {
         github,
       },
@@ -433,7 +433,7 @@ export async function createPaseoDaemon(
     await agentStorage.initialize();
     logger.info({ elapsed: elapsed() }, "Agent storage initialized");
     await bootstrapWorkspaceRegistries({
-      paseoHome: config.paseoHome,
+      polyhiveHome: config.polyhiveHome,
       agentStorage,
       projectRegistry,
       workspaceRegistry,
@@ -445,18 +445,18 @@ export async function createPaseoDaemon(
     logger.info({ elapsed: elapsed() }, "Chat service initialized");
     const checkoutDiffManager = new CheckoutDiffManager({
       logger,
-      paseoHome: config.paseoHome,
+      polyhiveHome: config.polyhiveHome,
       workspaceGitService,
     });
     const loopService = new LoopService({
-      paseoHome: config.paseoHome,
+      polyhiveHome: config.polyhiveHome,
       logger,
       agentManager,
     });
     await loopService.initialize();
     logger.info({ elapsed: elapsed() }, "Loop service initialized");
     const scheduleService = new ScheduleService({
-      paseoHome: config.paseoHome,
+      polyhiveHome: config.polyhiveHome,
       logger,
       agentManager,
       agentStorage,
@@ -490,9 +490,9 @@ export async function createPaseoDaemon(
           providerRegistry,
           github,
           workspaceGitService,
-          createPaseoWorktree: (input, serviceOptions) => {
+          createPolyHiveWorktree: (input, serviceOptions) => {
             const coreDeps = createWorktreeCoreDeps(github);
-            return createPaseoWorktree(input, {
+            return createPolyHiveWorktree(input, {
               ...coreDeps,
               ...(serviceOptions?.resolveDefaultBranch
                 ? {
@@ -520,7 +520,7 @@ export async function createPaseoDaemon(
               },
             });
           },
-          paseoHome: config.paseoHome,
+          polyhiveHome: config.polyhiveHome,
           callerAgentId,
           enableVoiceTools: false,
           resolveSpeakHandler: (agentId) => wsServer?.resolveVoiceSpeakHandler(agentId) ?? null,
@@ -657,9 +657,9 @@ export async function createPaseoDaemon(
               agentManager.setMcpBaseUrl(value ? mcpBaseUrl : null);
             });
             const relayEnabled = config.relayEnabled ?? true;
-            const relayEndpoint = config.relayEndpoint ?? "relay.paseo.sh:443";
+            const relayEndpoint = config.relayEndpoint ?? "relay.polyhive.sh:443";
             const relayPublicEndpoint = config.relayPublicEndpoint ?? relayEndpoint;
-            const appBaseUrl = config.appBaseUrl ?? "https://app.paseo.sh";
+            const appBaseUrl = config.appBaseUrl ?? "https://app.polyhive.sh";
 
             if (boundListenTarget.type === "tcp") {
               logger.info(
@@ -684,7 +684,7 @@ export async function createPaseoDaemon(
               agentManager,
               agentStorage,
               downloadTokenStore,
-              config.paseoHome,
+              config.polyhiveHome,
               daemonConfigStore,
               mcpBaseUrl,
               { allowedOrigins, hostnames: configuredHostnames },
@@ -720,9 +720,9 @@ export async function createPaseoDaemon(
               github,
             );
 
-            if (typeof process.send === "function" && process.env.PASEO_SUPERVISED === "1") {
+            if (typeof process.send === "function" && process.env.POLYHIVE_SUPERVISED === "1") {
               process.send({
-                type: "paseo:ready",
+                type: "polyhive:ready",
                 listen:
                   boundListenTarget.type === "tcp"
                     ? `${boundListenTarget.host}:${boundListenTarget.port}`

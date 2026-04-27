@@ -39,9 +39,9 @@ export function resolveSelectedAgentForNewAgent(input: {
   return parseHostAgentRouteFromPathname(input.pathname) ?? parseAgentKey(input.selectedAgentId);
 }
 
-function inferMainRepoRootFromPaseoWorktreePath(cwd: string): string | null {
+function inferMainRepoRootFromPolyHiveWorktreePath(cwd: string): string | null {
   const normalizedPath = cwd.replace(/\\/g, "/");
-  const marker = "/.paseo/worktrees";
+  const marker = "/.polyhive/worktrees";
   const markerIndex = normalizedPath.indexOf(marker);
   if (markerIndex <= 0) {
     return null;
@@ -59,14 +59,14 @@ export function resolveNewAgentWorkingDir(
   cwd: string,
   checkout: CheckoutStatusPayload | null,
 ): string {
-  const explicitMainRepoRoot = checkout?.isPaseoOwnedWorktree
+  const explicitMainRepoRoot = checkout?.isPolyHiveOwnedWorktree
     ? checkout.mainRepoRoot?.trim() || null
     : null;
   if (explicitMainRepoRoot) {
     return explicitMainRepoRoot;
   }
 
-  return inferMainRepoRootFromPaseoWorktreePath(cwd) ?? cwd;
+  return inferMainRepoRootFromPolyHiveWorktreePath(cwd) ?? cwd;
 }
 
 export function buildNewAgentRoute(serverId: string, workingDir?: string | null) {

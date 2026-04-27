@@ -53,7 +53,7 @@ import { STTManager } from "./agent/stt-manager.js";
 import type { SpeechToTextProvider, TextToSpeechProvider } from "./speech/speech-provider.js";
 import type { TurnDetectionProvider } from "./speech/turn-detection-provider.js";
 import { maybePersistTtsDebugAudio } from "./agent/tts-debug.js";
-import { isPaseoDictationDebugEnabled } from "./agent/recordings-debug.js";
+import { isPolyHiveDictationDebugEnabled } from "./agent/recordings-debug.js";
 import { listAvailableEditorTargets, openInEditorTarget } from "./editor-targets.js";
 import {
   DictationStreamManager,
@@ -193,18 +193,18 @@ import {
   type PullRequestTimelineItem,
 } from "../services/github-service.js";
 import {
-  createPaseoWorktree,
-  type CreatePaseoWorktreeInput,
-  type CreatePaseoWorktreeResult,
-} from "./paseo-worktree-service.js";
+  createPolyHiveWorktree,
+  type CreatePolyHiveWorktreeInput,
+  type CreatePolyHiveWorktreeResult,
+} from "./polyhive-worktree-service.js";
 import { createWorktreeCoreDeps } from "./worktree-core.js";
 import {
   assertSafeGitRef as assertWorktreeSafeGitRef,
   buildAgentSessionConfig as buildWorktreeAgentSessionConfig,
   runWorktreeSetupInBackground as runWorktreeSetupInBackgroundSession,
-  handleCreatePaseoWorktreeRequest as handleCreateWorktreeRequest,
-  handlePaseoWorktreeArchiveRequest as handleWorktreeArchiveRequest,
-  handlePaseoWorktreeListRequest as handleWorktreeListRequest,
+  handleCreatePolyHiveWorktreeRequest as handleCreateWorktreeRequest,
+  handlePolyHiveWorktreeArchiveRequest as handleWorktreeArchiveRequest,
+  handlePolyHiveWorktreeListRequest as handleWorktreeListRequest,
   handleWorkspaceSetupStatusRequest as handleWorkspaceSetupStatusRequestMessage,
   killTerminalsUnderPath as killWorktreeTerminalsUnderPath,
 } from "./worktree-session.js";
@@ -509,7 +509,7 @@ export type SessionOptions = {
   onLifecycleIntent?: (intent: SessionLifecycleIntent) => void;
   logger: pino.Logger;
   downloadTokenStore: DownloadTokenStore;
-  paseoHome: string;
+  polyhiveHome: string;
   agentManager: AgentManager;
   agentStorage: AgentStorage;
   projectRegistry: ProjectRegistry;
@@ -649,7 +649,7 @@ export class Session {
   private readonly onBinaryMessage: ((frame: Uint8Array) => void) | null;
   private readonly onLifecycleIntent: ((intent: SessionLifecycleIntent) => void) | null;
   private readonly sessionLogger: pino.Logger;
-  private readonly paseoHome: string;
+  private readonly polyhiveHome: string;
 
   // State machine
   private abortController: AbortController;
@@ -760,7 +760,7 @@ export class Session {
       onLifecycleIntent,
       logger,
       downloadTokenStore,
-      paseoHome,
+      polyhiveHome,
       agentManager,
       agentStorage,
       projectRegistry,
@@ -797,7 +797,7 @@ export class Session {
     this.onBinaryMessage = onBinaryMessage ?? null;
     this.onLifecycleIntent = onLifecycleIntent ?? null;
     this.downloadTokenStore = downloadTokenStore;
-    this.paseoHome = paseoHome;
+    this.polyhiveHome = polyhiveHome;
     this.sessionLogger = logger.child({
       module: "session",
       clientId: this.clientId,
@@ -1385,7 +1385,7 @@ export class Session {
             currentBranch: null,
             remoteUrl: null,
             worktreeRoot: null,
-            isPaseoOwnedWorktree: false as const,
+            isPolyHiveOwnedWorktree: false as const,
             mainRepoRoot: null,
           }
         : workspace.kind === "worktree"
@@ -1395,7 +1395,7 @@ export class Session {
               currentBranch: workspace.displayName,
               remoteUrl: null,
               worktreeRoot: workspace.cwd,
-              isPaseoOwnedWorktree: true as const,
+              isPolyHiveOwnedWorktree: true as const,
               mainRepoRoot: project.rootPath,
             }
           : {
@@ -1404,7 +1404,7 @@ export class Session {
               currentBranch: workspace.displayName,
               remoteUrl: null,
               worktreeRoot: workspace.cwd,
-              isPaseoOwnedWorktree: false as const,
+              isPolyHiveOwnedWorktree: false as const,
               mainRepoRoot: null,
             };
     return {
@@ -1714,16 +1714,16 @@ export class Session {
             await this.handleGitHubSearchRequest(msg);
             break;
 
-          case "paseo_worktree_list_request":
-            await this.handlePaseoWorktreeListRequest(msg);
+          case "polyhive_worktree_list_request":
+            await this.handlePolyHiveWorktreeListRequest(msg);
             break;
 
-          case "paseo_worktree_archive_request":
-            await this.handlePaseoWorktreeArchiveRequest(msg);
+          case "polyhive_worktree_archive_request":
+            await this.handlePolyHiveWorktreeArchiveRequest(msg);
             break;
 
-          case "create_paseo_worktree_request":
-            await this.handleCreatePaseoWorktreeRequest(msg);
+          case "create_polyhive_worktree_request":
+            await this.handleCreatePolyHiveWorktreeRequest(msg);
             break;
 
           case "workspace_setup_status_request":
@@ -2839,7 +2839,7 @@ export class Session {
           cwd: snapshot.cwd,
           initialPrompt: trimmedPrompt,
           explicitTitle,
-          paseoHome: this.paseoHome,
+          polyhiveHome: this.polyhiveHome,
           logger: this.sessionLogger,
           deps: {
             workspaceGitService: this.workspaceGitService,
@@ -3073,11 +3073,11 @@ export class Session {
   }> {
     return buildWorktreeAgentSessionConfig(
       {
-        paseoHome: this.paseoHome,
+        polyhiveHome: this.polyhiveHome,
         sessionLogger: this.sessionLogger,
         workspaceGitService: this.workspaceGitService,
-        createPaseoWorktree: (input, serviceOptions) =>
-          this.createPaseoWorktree(input, serviceOptions),
+        createPolyHiveWorktree: (input, serviceOptions) =>
+          this.createPolyHiveWorktree(input, serviceOptions),
         checkoutExistingBranch: (cwd, branch) => this.checkoutExistingBranch(cwd, branch),
         createBranchFromBase: (params) => this.createBranchFromBase(params),
         github: this.github,
@@ -3518,7 +3518,7 @@ export class Session {
       ) {
         return {
           title: "Update changes",
-          body: "Automated PR generated by Paseo.",
+          body: "Automated PR generated by PolyHive.",
         };
       }
       throw error;
@@ -3999,7 +3999,7 @@ export class Session {
           behindOfOrigin: null,
           hasRemote: false,
           remoteUrl: null,
-          isPaseoOwnedWorktree: false,
+          isPolyHiveOwnedWorktree: false,
           error: toCheckoutError(error),
           requestId,
         },
@@ -4358,7 +4358,7 @@ export class Session {
         behindOfOrigin: null,
         hasRemote: false,
         remoteUrl: null,
-        isPaseoOwnedWorktree: false,
+        isPolyHiveOwnedWorktree: false,
         error: null,
         requestId,
       };
@@ -4368,7 +4368,7 @@ export class Session {
       throw new Error("Workspace git snapshot is missing required checkout status fields");
     }
 
-    if (snapshot.git.isPaseoOwnedWorktree) {
+    if (snapshot.git.isPolyHiveOwnedWorktree) {
       if (snapshot.git.mainRepoRoot === null || snapshot.git.baseRef === null) {
         throw new Error("Workspace git snapshot is missing required worktree status fields");
       }
@@ -4386,7 +4386,7 @@ export class Session {
         behindOfOrigin: snapshot.git.behindOfOrigin ?? null,
         hasRemote: snapshot.git.hasRemote,
         remoteUrl: snapshot.git.remoteUrl,
-        isPaseoOwnedWorktree: true,
+        isPolyHiveOwnedWorktree: true,
         error: null,
         requestId,
       };
@@ -4404,7 +4404,7 @@ export class Session {
       behindOfOrigin: snapshot.git.behindOfOrigin ?? null,
       hasRemote: snapshot.git.hasRemote,
       remoteUrl: snapshot.git.remoteUrl,
-      isPaseoOwnedWorktree: false,
+      isPolyHiveOwnedWorktree: false,
       error: null,
       requestId,
     };
@@ -4501,7 +4501,7 @@ export class Session {
   // Stash handlers
   // ---------------------------------------------------------------------------
 
-  private static readonly PASEO_STASH_PREFIX = "paseo-auto-stash:";
+  private static readonly POLYHIVE_STASH_PREFIX = "polyhive-auto-stash:";
 
   private async handleStashSaveRequest(
     msg: Extract<SessionInboundMessage, { type: "stash_save_request" }>,
@@ -4510,8 +4510,8 @@ export class Session {
     try {
       const branchLabel = msg.branch?.trim() ?? "";
       const message = branchLabel
-        ? `${Session.PASEO_STASH_PREFIX} ${branchLabel}`
-        : `${Session.PASEO_STASH_PREFIX} unnamed`;
+        ? `${Session.POLYHIVE_STASH_PREFIX} ${branchLabel}`
+        : `${Session.POLYHIVE_STASH_PREFIX} unnamed`;
       await execCommand("git", ["stash", "push", "--include-untracked", "-m", message], { cwd });
       await this.notifyGitMutation(cwd, "stash-push");
       this.checkoutDiffManager.scheduleRefreshForCwd(cwd);
@@ -4551,9 +4551,9 @@ export class Session {
     msg: Extract<SessionInboundMessage, { type: "stash_list_request" }>,
   ): Promise<void> {
     const { cwd, requestId } = msg;
-    const paseoOnly = msg.paseoOnly !== false;
+    const polyhiveOnly = msg.polyhiveOnly !== false;
     try {
-      const entries = await this.workspaceGitService.listStashes(cwd, { paseoOnly });
+      const entries = await this.workspaceGitService.listStashes(cwd, { polyhiveOnly });
 
       this.emit({
         type: "stash_list_response",
@@ -4641,7 +4641,7 @@ export class Session {
           baseRef,
           mode: msg.strategy === "squash" ? "squash" : "merge",
         },
-        { paseoHome: this.paseoHome },
+        { polyhiveHome: this.polyhiveHome },
       );
       await Promise.all([
         this.notifyGitMutation(mutatedCwd, "merge-to-base", { invalidateGithub: true }),
@@ -4944,25 +4944,25 @@ export class Session {
     }
   }
 
-  private async handlePaseoWorktreeListRequest(
-    msg: Extract<SessionInboundMessage, { type: "paseo_worktree_list_request" }>,
+  private async handlePolyHiveWorktreeListRequest(
+    msg: Extract<SessionInboundMessage, { type: "polyhive_worktree_list_request" }>,
   ): Promise<void> {
     return handleWorktreeListRequest(
       {
         emit: (message) => this.emit(message),
-        paseoHome: this.paseoHome,
+        polyhiveHome: this.polyhiveHome,
         workspaceGitService: this.workspaceGitService,
       },
       msg,
     );
   }
 
-  private async handlePaseoWorktreeArchiveRequest(
-    msg: Extract<SessionInboundMessage, { type: "paseo_worktree_archive_request" }>,
+  private async handlePolyHiveWorktreeArchiveRequest(
+    msg: Extract<SessionInboundMessage, { type: "polyhive_worktree_archive_request" }>,
   ): Promise<void> {
     return handleWorktreeArchiveRequest(
       {
-        paseoHome: this.paseoHome,
+        polyhiveHome: this.polyhiveHome,
         github: this.github,
         workspaceGitService: this.workspaceGitService,
         agentManager: this.agentManager,
@@ -5649,7 +5649,7 @@ export class Session {
     return {
       currentBranch: snapshot.git.currentBranch,
       remoteUrl: snapshot.git.remoteUrl,
-      isPaseoOwnedWorktree: snapshot.git.isPaseoOwnedWorktree,
+      isPolyHiveOwnedWorktree: snapshot.git.isPolyHiveOwnedWorktree,
       isDirty: snapshot.git.isDirty,
       aheadBehind: snapshot.git.aheadBehind,
       aheadOfOrigin: snapshot.git.aheadOfOrigin,
@@ -6163,14 +6163,14 @@ export class Session {
     return unarchivedWorkspace;
   }
 
-  private async createPaseoWorktree(
-    input: CreatePaseoWorktreeInput,
+  private async createPolyHiveWorktree(
+    input: CreatePolyHiveWorktreeInput,
     options?: {
       resolveDefaultBranch?: (repoRoot: string) => Promise<string>;
     },
-  ): Promise<CreatePaseoWorktreeResult> {
+  ): Promise<CreatePolyHiveWorktreeResult> {
     const coreDeps = createWorktreeCoreDeps(this.github);
-    const result = await createPaseoWorktree(input, {
+    const result = await createPolyHiveWorktree(input, {
       ...coreDeps,
       ...(options?.resolveDefaultBranch
         ? { resolveDefaultBranch: options.resolveDefaultBranch }
@@ -6674,15 +6674,15 @@ export class Session {
     }
   }
 
-  private async handleCreatePaseoWorktreeRequest(
-    request: Extract<SessionInboundMessage, { type: "create_paseo_worktree_request" }>,
+  private async handleCreatePolyHiveWorktreeRequest(
+    request: Extract<SessionInboundMessage, { type: "create_polyhive_worktree_request" }>,
   ): Promise<void> {
     return handleCreateWorktreeRequest(
       {
-        paseoHome: this.paseoHome,
+        polyhiveHome: this.polyhiveHome,
         describeWorkspaceRecord: (workspace) => this.describeWorkspaceRecordWithGitData(workspace),
         emit: (message) => this.emit(message),
-        createPaseoWorktree: (input) => this.createPaseoWorktree(input),
+        createPolyHiveWorktree: (input) => this.createPolyHiveWorktree(input),
         sessionLogger: this.sessionLogger,
         runWorktreeSetupInBackground: (options) => this.runWorktreeSetupInBackground(options),
       },
@@ -6701,7 +6701,7 @@ export class Session {
   }): Promise<void> {
     return runWorktreeSetupInBackgroundSession(
       {
-        paseoHome: this.paseoHome,
+        polyhiveHome: this.polyhiveHome,
         emitWorkspaceUpdateForCwd: (cwd, emitOptions) =>
           this.emitWorkspaceUpdateForCwd(cwd, emitOptions),
         cacheWorkspaceSetupSnapshot: (workspaceId, snapshot) => {
@@ -6744,7 +6744,7 @@ export class Session {
         throw new Error(`Workspace not found: ${request.workspaceId}`);
       }
       if (existing.kind === "worktree") {
-        throw new Error("Use worktree archive for Paseo worktrees");
+        throw new Error("Use worktree archive for PolyHive worktrees");
       }
       const archivedAt = new Date().toISOString();
       await this.archiveWorkspaceRecord(existing.workspaceId, archivedAt);
@@ -7772,7 +7772,7 @@ export class Session {
     );
     if (
       msg.type === "audio_output" &&
-      (process.env.TTS_DEBUG_AUDIO_DIR || isPaseoDictationDebugEnabled()) &&
+      (process.env.TTS_DEBUG_AUDIO_DIR || isPolyHiveDictationDebugEnabled()) &&
       msg.payload.groupId &&
       typeof msg.payload.audio === "string"
     ) {

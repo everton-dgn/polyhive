@@ -1,9 +1,9 @@
-import { createE2ETestContext } from "/Users/moboudra/.paseo/worktrees/1luy0po7/beefy-parrot/packages/cli/tests/helpers/test-daemon.ts";
+import { createE2ETestContext } from "/Users/moboudra/.polyhive/worktrees/1luy0po7/beefy-parrot/packages/cli/tests/helpers/test-daemon.ts";
 
 async function main() {
   const ctx = await createE2ETestContext({ timeout: 180000 });
   try {
-    const run = await ctx.paseo(
+    const run = await ctx.polyhive(
       [
         "run",
         "--provider",

@@ -8,8 +8,8 @@ import { spawn, type ChildProcess } from "node:child_process";
 import { Buffer } from "node:buffer";
 
 import { generateLocalPairingOffer } from "../pairing-offer.js";
-import { createTestPaseoDaemon } from "../test-utils/paseo-daemon.js";
-import { createClientChannel, type Transport } from "@getpaseo/relay/e2ee";
+import { createTestPolyHiveDaemon } from "../test-utils/polyhive-daemon.js";
+import { createClientChannel, type Transport } from "polyhive-relay/e2ee";
 import { buildRelayWebSocketUrl } from "../../shared/daemon-endpoints.js";
 
 const nodeMajor = Number((process.versions.node ?? "0").split(".")[0] ?? "0");
@@ -28,14 +28,14 @@ function createCapturingLogger() {
 }
 
 async function getPairingOfferUrl(args: {
-  paseoHome: string;
+  polyhiveHome: string;
   relayEnabled?: boolean;
   relayEndpoint?: string;
   relayPublicEndpoint?: string;
   appBaseUrl?: string;
 }): Promise<string> {
   const pairing = await generateLocalPairingOffer({
-    paseoHome: args.paseoHome,
+    polyhiveHome: args.polyhiveHome,
     relayEnabled: args.relayEnabled,
     relayEndpoint: args.relayEndpoint,
     relayPublicEndpoint: args.relayPublicEndpoint,
@@ -193,12 +193,12 @@ async function waitForRelayWebSocketReady(port: number, timeout = 60000): Promis
   };
 
   test("daemon connects to relay and client ping/pong works through relay", async () => {
-    process.env.PASEO_PRIMARY_LAN_IP = "192.168.1.12";
+    process.env.POLYHIVE_PRIMARY_LAN_IP = "192.168.1.12";
 
     const { logger, lines } = createCapturingLogger();
     await startRelay();
 
-    const daemon = await createTestPaseoDaemon({
+    const daemon = await createTestPolyHiveDaemon({
       listen: "127.0.0.1",
       logger,
       relayEnabled: true,
@@ -207,7 +207,7 @@ async function waitForRelayWebSocketReady(port: number, timeout = 60000): Promis
 
     try {
       const offerUrl = await getPairingOfferUrl({
-        paseoHome: daemon.paseoHome,
+        polyhiveHome: daemon.polyhiveHome,
         relayEnabled: daemon.config.relayEnabled,
         relayEndpoint: daemon.config.relayEndpoint,
         relayPublicEndpoint: daemon.config.relayPublicEndpoint,
@@ -314,12 +314,12 @@ async function waitForRelayWebSocketReady(port: number, timeout = 60000): Promis
   }, 90000);
 
   test("daemon keeps relay socket open while idle (no handshake timeout loop)", async () => {
-    process.env.PASEO_PRIMARY_LAN_IP = "192.168.1.12";
+    process.env.POLYHIVE_PRIMARY_LAN_IP = "192.168.1.12";
 
     const { logger, lines } = createCapturingLogger();
     await startRelay();
 
-    const daemon = await createTestPaseoDaemon({
+    const daemon = await createTestPolyHiveDaemon({
       listen: "127.0.0.1",
       logger,
       relayEnabled: true,
@@ -328,7 +328,7 @@ async function waitForRelayWebSocketReady(port: number, timeout = 60000): Promis
 
     try {
       const offerUrl = await getPairingOfferUrl({
-        paseoHome: daemon.paseoHome,
+        polyhiveHome: daemon.polyhiveHome,
         relayEnabled: daemon.config.relayEnabled,
         relayEndpoint: daemon.config.relayEndpoint,
         relayPublicEndpoint: daemon.config.relayPublicEndpoint,

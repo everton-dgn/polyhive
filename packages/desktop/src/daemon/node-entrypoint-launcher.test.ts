@@ -6,7 +6,7 @@ import {
 } from "./node-entrypoint-launcher";
 
 const CLI_ENTRYPOINT: NodeEntrypointSpec = {
-  entryPath: "/tmp/paseo-cli.js",
+  entryPath: "/tmp/polyhive-cli.js",
   execArgv: ["--import", "tsx"],
 };
 
@@ -15,7 +15,7 @@ describe("node-entrypoint-launcher", () => {
     it("returns null when no CLI args are provided", () => {
       expect(
         parseCliPassthroughArgsFromArgv({
-          argv: ["/Applications/Paseo.app/Contents/MacOS/Paseo"],
+          argv: ["/Applications/PolyHive.app/Contents/MacOS/PolyHive"],
           isDefaultApp: false,
           forceCli: false,
         }),
@@ -25,7 +25,7 @@ describe("node-entrypoint-launcher", () => {
     it("ignores macOS GUI launch arguments", () => {
       expect(
         parseCliPassthroughArgsFromArgv({
-          argv: ["/Applications/Paseo.app/Contents/MacOS/Paseo", "-psn_0_12345"],
+          argv: ["/Applications/PolyHive.app/Contents/MacOS/PolyHive", "-psn_0_12345"],
           isDefaultApp: false,
           forceCli: false,
         }),
@@ -35,7 +35,7 @@ describe("node-entrypoint-launcher", () => {
     it("preserves CLI flags for direct app invocations", () => {
       expect(
         parseCliPassthroughArgsFromArgv({
-          argv: ["/Applications/Paseo.app/Contents/MacOS/Paseo", "--version"],
+          argv: ["/Applications/PolyHive.app/Contents/MacOS/PolyHive", "--version"],
           isDefaultApp: false,
           forceCli: false,
         }),
@@ -45,7 +45,11 @@ describe("node-entrypoint-launcher", () => {
     it("passes --open-project through as a normal CLI arg", () => {
       expect(
         parseCliPassthroughArgsFromArgv({
-          argv: ["/Applications/Paseo.app/Contents/MacOS/Paseo", "--open-project", "/tmp/project"],
+          argv: [
+            "/Applications/PolyHive.app/Contents/MacOS/PolyHive",
+            "--open-project",
+            "/tmp/project",
+          ],
           isDefaultApp: false,
           forceCli: false,
         }),
@@ -55,7 +59,7 @@ describe("node-entrypoint-launcher", () => {
     it("forces CLI mode for shim launches even without args", () => {
       expect(
         parseCliPassthroughArgsFromArgv({
-          argv: ["/Applications/Paseo.app/Contents/MacOS/Paseo"],
+          argv: ["/Applications/PolyHive.app/Contents/MacOS/PolyHive"],
           isDefaultApp: false,
           forceCli: true,
         }),
@@ -67,22 +71,22 @@ describe("node-entrypoint-launcher", () => {
     it("uses the packaged runner when the desktop app is packaged", () => {
       expect(
         createNodeEntrypointInvocation({
-          execPath: "/Applications/Paseo.app/Contents/MacOS/Paseo",
+          execPath: "/Applications/PolyHive.app/Contents/MacOS/PolyHive",
           isPackaged: true,
           packagedRunnerPath:
-            "/Applications/Paseo.app/Contents/Resources/app.asar/dist/daemon/node-entrypoint-runner.js",
+            "/Applications/PolyHive.app/Contents/Resources/app.asar/dist/daemon/node-entrypoint-runner.js",
           entrypoint: CLI_ENTRYPOINT,
           argvMode: "node-script",
           args: ["ls", "--json"],
           baseEnv: { PATH: "/usr/bin" },
         }),
       ).toEqual({
-        command: "/Applications/Paseo.app/Contents/MacOS/Paseo",
+        command: "/Applications/PolyHive.app/Contents/MacOS/PolyHive",
         args: [
           "--disable-warning=DEP0040",
-          "/Applications/Paseo.app/Contents/Resources/app.asar/dist/daemon/node-entrypoint-runner.js",
+          "/Applications/PolyHive.app/Contents/Resources/app.asar/dist/daemon/node-entrypoint-runner.js",
           "node-script",
-          "/tmp/paseo-cli.js",
+          "/tmp/polyhive-cli.js",
           "ls",
           "--json",
         ],
@@ -107,7 +111,7 @@ describe("node-entrypoint-launcher", () => {
         }),
       ).toEqual({
         command: "/opt/homebrew/bin/electron",
-        args: ["--import", "tsx", "/tmp/paseo-cli.js", "ls"],
+        args: ["--import", "tsx", "/tmp/polyhive-cli.js", "ls"],
         env: {
           PATH: "/usr/bin",
           ELECTRON_RUN_AS_NODE: "1",
@@ -118,10 +122,10 @@ describe("node-entrypoint-launcher", () => {
     it("forces packaged launches to production even when NODE_ENV is inherited as development", () => {
       expect(
         createNodeEntrypointInvocation({
-          execPath: "/Applications/Paseo.app/Contents/MacOS/Paseo",
+          execPath: "/Applications/PolyHive.app/Contents/MacOS/PolyHive",
           isPackaged: true,
           packagedRunnerPath:
-            "/Applications/Paseo.app/Contents/Resources/app.asar/dist/daemon/node-entrypoint-runner.js",
+            "/Applications/PolyHive.app/Contents/Resources/app.asar/dist/daemon/node-entrypoint-runner.js",
           entrypoint: CLI_ENTRYPOINT,
           argvMode: "node-script",
           args: [],
@@ -137,22 +141,22 @@ describe("node-entrypoint-launcher", () => {
     it("keeps node-style argv for packaged script entrypoints", () => {
       expect(
         createNodeEntrypointInvocation({
-          execPath: "/Applications/Paseo.app/Contents/MacOS/Paseo",
+          execPath: "/Applications/PolyHive.app/Contents/MacOS/PolyHive",
           isPackaged: true,
           packagedRunnerPath:
-            "/Applications/Paseo.app/Contents/Resources/app.asar/dist/daemon/node-entrypoint-runner.js",
+            "/Applications/PolyHive.app/Contents/Resources/app.asar/dist/daemon/node-entrypoint-runner.js",
           entrypoint: CLI_ENTRYPOINT,
           argvMode: "node-script",
           args: ["--dev"],
           baseEnv: { PATH: "/usr/bin" },
         }),
       ).toEqual({
-        command: "/Applications/Paseo.app/Contents/MacOS/Paseo",
+        command: "/Applications/PolyHive.app/Contents/MacOS/PolyHive",
         args: [
           "--disable-warning=DEP0040",
-          "/Applications/Paseo.app/Contents/Resources/app.asar/dist/daemon/node-entrypoint-runner.js",
+          "/Applications/PolyHive.app/Contents/Resources/app.asar/dist/daemon/node-entrypoint-runner.js",
           "node-script",
-          "/tmp/paseo-cli.js",
+          "/tmp/polyhive-cli.js",
           "--dev",
         ],
         env: {

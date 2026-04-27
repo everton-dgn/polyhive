@@ -7,8 +7,8 @@ import { SiteHeader } from "~/components/site-header";
 export const Route = createFileRoute("/changelog")({
   head: () => ({
     meta: pageMeta(
-      "Changelog - Paseo",
-      "Product updates, fixes, and improvements shipped in each Paseo release.",
+      "Changelog - PolyHive",
+      "Product updates, fixes, and improvements shipped in each PolyHive release.",
     ),
   }),
   component: Changelog,

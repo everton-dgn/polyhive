@@ -3,7 +3,7 @@ import { readFileSync } from "node:fs";
 import path from "node:path";
 import { app, ipcMain, powerMonitor } from "electron";
 import log from "electron-log/main";
-import { resolvePaseoHome, spawnProcess } from "@getpaseo/server";
+import { resolvePolyHiveHome, spawnProcess } from "polyhive-server";
 import {
   copyAttachmentFileToManagedStorage,
   deleteManagedAttachmentFile,
@@ -77,12 +77,12 @@ function parseReleaseChannel(args: Record<string, unknown> | undefined): AppRele
 // Utilities
 // ---------------------------------------------------------------------------
 
-function getPaseoHome(): string {
-  return resolvePaseoHome(process.env);
+function getPolyHiveHome(): string {
+  return resolvePolyHiveHome(process.env);
 }
 
 function logFilePath(): string {
-  return path.join(getPaseoHome(), DAEMON_LOG_FILENAME);
+  return path.join(getPolyHiveHome(), DAEMON_LOG_FILENAME);
 }
 
 function isProcessRunning(pid: number): boolean {
@@ -193,7 +193,7 @@ function resolveDesktopAppVersion(): string {
 // ---------------------------------------------------------------------------
 
 async function resolveStatus(): Promise<DesktopDaemonStatus> {
-  const home = getPaseoHome();
+  const home = getPolyHiveHome();
 
   try {
     const payload = (await runCliJsonCommand(["daemon", "status", "--json"])) as Record<
@@ -279,7 +279,7 @@ async function startDaemon(): Promise<DesktopDaemonStatus> {
 
   const child: ChildProcess = spawnProcess(invocation.command, invocation.args, {
     detached: true,
-    env: { ...invocation.env, PASEO_DESKTOP_MANAGED: "1" },
+    env: { ...invocation.env, POLYHIVE_DESKTOP_MANAGED: "1" },
     stdio: ["ignore", "pipe", "pipe"],
   });
 
@@ -515,7 +515,7 @@ export function registerDaemonManager(): void {
   const handlers = createDaemonCommandHandlers();
 
   ipcMain.handle(
-    "paseo:invoke",
+    "polyhive:invoke",
     async (_event, command: string, args?: Record<string, unknown>) => {
       const handler = handlers[command];
       if (!handler) {

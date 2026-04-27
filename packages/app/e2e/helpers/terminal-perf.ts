@@ -102,7 +102,7 @@ function buildWorkspaceUrl(workspaceId: string): string {
 
 export async function getTerminalBufferText(page: Page): Promise<string> {
   return page.evaluate(() => {
-    const term = (window as any).__paseoTerminal;
+    const term = (window as any).__polyhiveTerminal;
     if (!term) {
       return "";
     }
@@ -207,9 +207,9 @@ export type LatencySample = {
  */
 export async function measureKeystrokeLatency(page: Page, char: string): Promise<number> {
   await page.evaluate(() => {
-    const term = (window as any).__paseoTerminal;
+    const term = (window as any).__polyhiveTerminal;
     if (!term) {
-      throw new Error("__paseoTerminal not available");
+      throw new Error("__polyhiveTerminal not available");
     }
 
     const state = ((window as any).__perfKeystroke = {

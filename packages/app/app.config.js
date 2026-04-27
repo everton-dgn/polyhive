@@ -2,11 +2,11 @@ const pkg = require("./package.json");
 
 export default {
   expo: {
-    name: "Paseo",
-    slug: "paseo",
+    name: "PolyHive",
+    slug: "polyhive",
     version: pkg.version,
     icon: "./assets/images/icon.png",
-    scheme: "paseo",
+    scheme: "polyhive",
     userInterfaceStyle: "automatic",
     web: {
       output: "single",
@@ -24,6 +24,6 @@ export default {
     extra: {
       router: {},
     },
-    owner: "getpaseo",
+    owner: "polyhive",
   },
 };

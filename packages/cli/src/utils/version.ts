@@ -11,7 +11,7 @@ export function resolveCliVersion(): string {
   if (typeof packageJson.version === "string" && packageJson.version.trim().length > 0) {
     return packageJson.version.trim();
   }
-  throw new Error("Unable to resolve @getpaseo/cli version from package.json.");
+  throw new Error("Unable to resolve polyhive version from package.json.");
 }
 
 export function resolveCliVersionOrUnknown(): string {
@@ -31,7 +31,7 @@ export function getCliVersionOrNull(): string | null {
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
     console.warn(
-      `[paseo-cli] Could not resolve CLI version: ${message}. The daemon may filter out non-legacy providers.`,
+      `[polyhive-cli] Could not resolve CLI version: ${message}. The daemon may filter out non-legacy providers.`,
     );
     cachedCliVersion = null;
   }

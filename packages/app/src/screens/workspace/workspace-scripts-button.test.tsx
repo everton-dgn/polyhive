@@ -282,7 +282,7 @@ describe.skip("WorkspaceScriptsButton", () => {
       script({
         scriptName: "web",
         type: "service",
-        hostname: "web.paseo.localhost",
+        hostname: "web.polyhive.localhost",
         lifecycle: "running",
         health: "healthy",
         port: 3000,
@@ -290,7 +290,7 @@ describe.skip("WorkspaceScriptsButton", () => {
       script({
         scriptName: "api",
         type: "service",
-        hostname: "api.paseo.localhost",
+        hostname: "api.polyhive.localhost",
         lifecycle: "running",
         health: "unhealthy",
         port: 4000,
@@ -298,7 +298,7 @@ describe.skip("WorkspaceScriptsButton", () => {
       script({
         scriptName: "worker",
         type: "service",
-        hostname: "worker.paseo.localhost",
+        hostname: "worker.polyhive.localhost",
         lifecycle: "running",
         health: null,
         port: 5000,
@@ -306,7 +306,7 @@ describe.skip("WorkspaceScriptsButton", () => {
       script({
         scriptName: "old-service",
         type: "service",
-        hostname: "old-service.paseo.localhost",
+        hostname: "old-service.polyhive.localhost",
         lifecycle: "stopped",
         exitCode: 1,
       }),

@@ -76,13 +76,13 @@ function shouldIncludeLocalProviderConfig(params: {
 
   return (
     localRequestedByFeature ||
-    params.env.PASEO_LOCAL_MODELS_DIR !== undefined ||
+    params.env.POLYHIVE_LOCAL_MODELS_DIR !== undefined ||
     params.persisted.providers?.local?.modelsDir !== undefined
   );
 }
 
 export function resolveLocalSpeechConfig(params: {
-  paseoHome: string;
+  polyhiveHome: string;
   env: NodeJS.ProcessEnv;
   persisted: PersistedConfig;
   providers: RequestedSpeechProviders;
@@ -92,11 +92,11 @@ export function resolveLocalSpeechConfig(params: {
   const parsed = LocalSpeechResolutionSchema.parse({
     includeProviderConfig,
     modelsDir:
-      params.env.PASEO_LOCAL_MODELS_DIR ??
+      params.env.POLYHIVE_LOCAL_MODELS_DIR ??
       params.persisted.providers?.local?.modelsDir ??
-      path.join(params.paseoHome, DEFAULT_LOCAL_MODELS_SUBDIR),
+      path.join(params.polyhiveHome, DEFAULT_LOCAL_MODELS_SUBDIR),
     dictationLocalSttModel:
-      params.env.PASEO_DICTATION_LOCAL_STT_MODEL ??
+      params.env.POLYHIVE_DICTATION_LOCAL_STT_MODEL ??
       persistedLocalFeatureModel(
         params.providers.dictationStt.provider,
         params.providers.dictationStt.enabled,
@@ -104,7 +104,7 @@ export function resolveLocalSpeechConfig(params: {
       ) ??
       DEFAULT_LOCAL_STT_MODEL,
     voiceLocalSttModel:
-      params.env.PASEO_VOICE_LOCAL_STT_MODEL ??
+      params.env.POLYHIVE_VOICE_LOCAL_STT_MODEL ??
       persistedLocalFeatureModel(
         params.providers.voiceStt.provider,
         params.providers.voiceStt.enabled,
@@ -112,7 +112,7 @@ export function resolveLocalSpeechConfig(params: {
       ) ??
       DEFAULT_LOCAL_STT_MODEL,
     voiceLocalTtsModel:
-      params.env.PASEO_VOICE_LOCAL_TTS_MODEL ??
+      params.env.POLYHIVE_VOICE_LOCAL_TTS_MODEL ??
       persistedLocalFeatureModel(
         params.providers.voiceTts.provider,
         params.providers.voiceTts.enabled,
@@ -120,10 +120,10 @@ export function resolveLocalSpeechConfig(params: {
       ) ??
       DEFAULT_LOCAL_TTS_MODEL,
     voiceLocalTtsSpeakerId:
-      params.env.PASEO_VOICE_LOCAL_TTS_SPEAKER_ID ??
+      params.env.POLYHIVE_VOICE_LOCAL_TTS_SPEAKER_ID ??
       params.persisted.features?.voiceMode?.tts?.speakerId,
     voiceLocalTtsSpeed:
-      params.env.PASEO_VOICE_LOCAL_TTS_SPEED ?? params.persisted.features?.voiceMode?.tts?.speed,
+      params.env.POLYHIVE_VOICE_LOCAL_TTS_SPEED ?? params.persisted.features?.voiceMode?.tts?.speed,
   });
 
   const resolvedVoiceTtsSpeakerId =

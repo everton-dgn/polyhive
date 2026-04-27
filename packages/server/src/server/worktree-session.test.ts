@@ -15,13 +15,13 @@ import pino, { type Logger } from "pino";
 import type { SessionOutboundMessage, WorkspaceDescriptorPayload } from "./messages.js";
 import { ScriptRouteStore } from "./script-proxy.js";
 import {
-  archivePaseoWorktree,
+  archivePolyHiveWorktree,
   buildAgentSessionConfig,
-  handlePaseoWorktreeArchiveRequest,
-  handlePaseoWorktreeListRequest,
+  handlePolyHiveWorktreeArchiveRequest,
+  handlePolyHiveWorktreeListRequest,
   resolveGitCreateBaseBranch,
   runWorktreeSetupInBackground,
-  handleCreatePaseoWorktreeRequest,
+  handleCreatePolyHiveWorktreeRequest,
   handleWorkspaceSetupStatusRequest,
 } from "./worktree-session.js";
 import {
@@ -36,9 +36,9 @@ import type { AgentStorage, StoredAgentRecord } from "./agent/agent-storage.js";
 import type { PersistedProjectRecord, PersistedWorkspaceRecord } from "./workspace-registry.js";
 import type { GitHubService } from "../services/github-service.js";
 import {
-  createPaseoWorktree as createPaseoWorktreeService,
-  type CreatePaseoWorktreeFn,
-} from "./paseo-worktree-service.js";
+  createPolyHiveWorktree as createPolyHiveWorktreeService,
+  type CreatePolyHiveWorktreeFn,
+} from "./polyhive-worktree-service.js";
 import { createWorktreeCoreDeps } from "./worktree-core.js";
 import { WorkspaceGitServiceImpl } from "./workspace-git-service.js";
 
@@ -48,7 +48,7 @@ interface LegacyCreateWorktreeTestOptions {
   baseBranch: string;
   worktreeSlug: string;
   runSetup?: boolean;
-  paseoHome?: string;
+  polyhiveHome?: string;
 }
 
 function createLegacyWorktreeForTest(
@@ -67,7 +67,7 @@ function createLegacyWorktreeForTest(
       newBranchName: options.branchName,
     },
     runSetup: options.runSetup ?? true,
-    paseoHome: options.paseoHome,
+    polyhiveHome: options.polyhiveHome,
   });
 }
 
@@ -199,15 +199,15 @@ function createWorkspaceDescriptor(input: {
   };
 }
 
-function createPaseoWorktreeForTest(options: {
-  paseoHome: string;
+function createPolyHiveWorktreeForTest(options: {
+  polyhiveHome: string;
   events?: string[];
-}): CreatePaseoWorktreeFn {
+}): CreatePolyHiveWorktreeFn {
   const projects = new Map<string, PersistedProjectRecord>();
   const workspaces = new Map<string, PersistedWorkspaceRecord>();
   const workspaceGitService = new WorkspaceGitServiceImpl({
     logger: createLogger(),
-    paseoHome: options.paseoHome,
+    polyhiveHome: options.polyhiveHome,
     deps: {
       github: createGitHubServiceStub(),
     },
@@ -215,7 +215,7 @@ function createPaseoWorktreeForTest(options: {
 
   return (input, serviceOptions) => {
     const coreDeps = createWorktreeCoreDeps(createGitHubServiceStub());
-    return createPaseoWorktreeService(input, {
+    return createPolyHiveWorktreeService(input, {
       ...coreDeps,
       ...(serviceOptions?.resolveDefaultBranch
         ? { resolveDefaultBranch: serviceOptions.resolveDefaultBranch }
@@ -282,13 +282,13 @@ function createManagedAgentForArchive(input: { id: string; cwd: string }): Manag
   };
 }
 
-describe("handlePaseoWorktreeListRequest", () => {
+describe("handlePolyHiveWorktreeListRequest", () => {
   test("lists worktrees through the workspace git service", async () => {
     const emitted: SessionOutboundMessage[] = [];
     const workspaceGitService = {
       listWorktrees: vi.fn().mockResolvedValue([
         {
-          path: "/tmp/paseo-home/worktrees/repo/feature",
+          path: "/tmp/polyhive-home/worktrees/repo/feature",
           createdAt: "2026-04-12T00:00:00.000Z",
           branchName: "feature",
           head: "abc123",
@@ -296,14 +296,14 @@ describe("handlePaseoWorktreeListRequest", () => {
       ]),
     };
 
-    await handlePaseoWorktreeListRequest(
+    await handlePolyHiveWorktreeListRequest(
       {
         emit: (message) => emitted.push(message),
-        paseoHome: "/tmp/paseo-home",
+        polyhiveHome: "/tmp/polyhive-home",
         workspaceGitService: workspaceGitService as any,
       },
       {
-        type: "paseo_worktree_list_request",
+        type: "polyhive_worktree_list_request",
         cwd: "/tmp/repo",
         requestId: "request-worktrees",
       },
@@ -312,11 +312,11 @@ describe("handlePaseoWorktreeListRequest", () => {
     expect(workspaceGitService.listWorktrees).toHaveBeenCalledTimes(1);
     expect(workspaceGitService.listWorktrees).toHaveBeenCalledWith("/tmp/repo");
     expect(emitted).toContainEqual({
-      type: "paseo_worktree_list_response",
+      type: "polyhive_worktree_list_response",
       payload: {
         worktrees: [
           {
-            worktreePath: "/tmp/paseo-home/worktrees/repo/feature",
+            worktreePath: "/tmp/polyhive-home/worktrees/repo/feature",
             createdAt: "2026-04-12T00:00:00.000Z",
             branchName: "feature",
             head: "abc123",
@@ -360,7 +360,7 @@ function createAgentStorageStub(): Pick<AgentStorage, "list" | "remove"> {
   };
 }
 
-function createGitRepo(options?: { paseoConfig?: Record<string, unknown> }) {
+function createGitRepo(options?: { polyhiveConfig?: Record<string, unknown> }) {
   const tempDir = realpathSync(mkdtempSync(path.join(tmpdir(), "worktree-session-test-")));
   const repoDir = path.join(tempDir, "repo");
   execSync(`mkdir -p ${JSON.stringify(repoDir)}`);
@@ -368,8 +368,11 @@ function createGitRepo(options?: { paseoConfig?: Record<string, unknown> }) {
   execSync("git config user.email 'test@test.com'", { cwd: repoDir, stdio: "pipe" });
   execSync("git config user.name 'Test'", { cwd: repoDir, stdio: "pipe" });
   writeFileSync(path.join(repoDir, "README.md"), "hello\n");
-  if (options?.paseoConfig) {
-    writeFileSync(path.join(repoDir, "paseo.json"), JSON.stringify(options.paseoConfig, null, 2));
+  if (options?.polyhiveConfig) {
+    writeFileSync(
+      path.join(repoDir, "polyhive.json"),
+      JSON.stringify(options.polyhiveConfig, null, 2),
+    );
   }
   execSync("git add .", { cwd: repoDir, stdio: "pipe" });
   execSync("git -c commit.gpgsign=false commit -m 'initial'", { cwd: repoDir, stdio: "pipe" });
@@ -419,7 +422,7 @@ describe("runWorktreeSetupInBackground", () => {
 
   test("emits running then completed snapshots for no-setup workspaces without auto-starting scripts", async () => {
     const { tempDir, repoDir } = createGitRepo({
-      paseoConfig: {
+      polyhiveConfig: {
         scripts: {
           web: {
             command: "npm run dev",
@@ -429,14 +432,14 @@ describe("runWorktreeSetupInBackground", () => {
     });
     cleanupPaths.push(tempDir);
 
-    const paseoHome = path.join(tempDir, ".paseo");
+    const polyhiveHome = path.join(tempDir, ".polyhive");
     const createdWorktree = await createLegacyWorktreeForTest({
       branchName: "feature-no-setup",
       cwd: repoDir,
       baseBranch: "main",
       worktreeSlug: "feature-no-setup",
       runSetup: false,
-      paseoHome,
+      polyhiveHome,
     });
     const worktreePath = createdWorktree.worktreePath;
     const emitted: SessionOutboundMessage[] = [];
@@ -448,7 +451,7 @@ describe("runWorktreeSetupInBackground", () => {
 
     await runWorktreeSetupInBackground(
       {
-        paseoHome,
+        polyhiveHome,
         emitWorkspaceUpdateForCwd,
         cacheWorkspaceSetupSnapshot: (workspaceId, snapshot) =>
           snapshots.set(workspaceId, snapshot),
@@ -521,21 +524,21 @@ describe("runWorktreeSetupInBackground", () => {
     const { tempDir, repoDir } = createGitRepo();
     cleanupPaths.push(tempDir);
 
-    writeFileSync(path.join(repoDir, "paseo.json"), "{ invalid json\n");
-    execSync("git add paseo.json", { cwd: repoDir, stdio: "pipe" });
+    writeFileSync(path.join(repoDir, "polyhive.json"), "{ invalid json\n");
+    execSync("git add polyhive.json", { cwd: repoDir, stdio: "pipe" });
     execSync("git -c commit.gpgsign=false commit -m 'broken config'", {
       cwd: repoDir,
       stdio: "pipe",
     });
 
-    const paseoHome = path.join(tempDir, ".paseo");
+    const polyhiveHome = path.join(tempDir, ".polyhive");
     const createdWorktree = await createLegacyWorktreeForTest({
       branchName: "broken-feature",
       cwd: repoDir,
       baseBranch: "main",
       worktreeSlug: "broken-feature",
       runSetup: false,
-      paseoHome,
+      polyhiveHome,
     });
     const worktreePath = createdWorktree.worktreePath;
     const emitted: SessionOutboundMessage[] = [];
@@ -547,7 +550,7 @@ describe("runWorktreeSetupInBackground", () => {
 
     await runWorktreeSetupInBackground(
       {
-        paseoHome,
+        polyhiveHome,
         emitWorkspaceUpdateForCwd,
         cacheWorkspaceSetupSnapshot: (workspaceId, snapshot) =>
           snapshots.set(workspaceId, snapshot),
@@ -578,11 +581,11 @@ describe("runWorktreeSetupInBackground", () => {
     expect(progressMessages[0]?.payload.status).toBe("running");
     expect(progressMessages[0]?.payload.error).toBeNull();
     expect(progressMessages[1]?.payload.status).toBe("failed");
-    expect(progressMessages[1]?.payload.error).toContain("Failed to parse paseo.json");
+    expect(progressMessages[1]?.payload.error).toContain("Failed to parse polyhive.json");
     expect(progressMessages[1]?.payload.detail.commands).toEqual([]);
     expect(snapshots.get(workspaceId)).toMatchObject({
       status: "failed",
-      error: expect.stringContaining("Failed to parse paseo.json"),
+      error: expect.stringContaining("Failed to parse polyhive.json"),
     });
     expect(archiveWorkspaceRecord).toHaveBeenCalledWith(workspaceId);
     expect(emitWorkspaceUpdateForCwd).toHaveBeenCalledWith(worktreePath);
@@ -590,7 +593,7 @@ describe("runWorktreeSetupInBackground", () => {
 
   test("emits running setup snapshots before completed for real setup commands", async () => {
     const { tempDir, repoDir } = createGitRepo({
-      paseoConfig: {
+      polyhiveConfig: {
         worktree: {
           setup: ["sh -c \"printf 'phase-one\\\\n'; sleep 0.1; printf 'phase-two\\\\n'\""],
         },
@@ -598,14 +601,14 @@ describe("runWorktreeSetupInBackground", () => {
     });
     cleanupPaths.push(tempDir);
 
-    const paseoHome = path.join(tempDir, ".paseo");
+    const polyhiveHome = path.join(tempDir, ".polyhive");
     const createdWorktree = await createLegacyWorktreeForTest({
       branchName: "feature-running-setup",
       cwd: repoDir,
       baseBranch: "main",
       worktreeSlug: "feature-running-setup",
       runSetup: false,
-      paseoHome,
+      polyhiveHome,
     });
     const worktreePath = createdWorktree.worktreePath;
     const emitted: SessionOutboundMessage[] = [];
@@ -616,7 +619,7 @@ describe("runWorktreeSetupInBackground", () => {
 
     await runWorktreeSetupInBackground(
       {
-        paseoHome,
+        polyhiveHome,
         emitWorkspaceUpdateForCwd,
         cacheWorkspaceSetupSnapshot: (workspaceId, snapshot) =>
           snapshots.set(workspaceId, snapshot),
@@ -703,7 +706,7 @@ describe("runWorktreeSetupInBackground", () => {
 
   test("emits completed when reusing an existing worktree without bootstrapping or auto-starting scripts", async () => {
     const { tempDir, repoDir } = createGitRepo({
-      paseoConfig: {
+      polyhiveConfig: {
         worktree: {
           setup: ["printf 'ran' > setup-ran.txt"],
         },
@@ -716,14 +719,14 @@ describe("runWorktreeSetupInBackground", () => {
     });
     cleanupPaths.push(tempDir);
 
-    const paseoHome = path.join(tempDir, ".paseo");
+    const polyhiveHome = path.join(tempDir, ".polyhive");
     const existingWorktree = await createLegacyWorktreeForTest({
       branchName: "reused-worktree",
       cwd: repoDir,
       baseBranch: "main",
       worktreeSlug: "reused-worktree",
       runSetup: false,
-      paseoHome,
+      polyhiveHome,
     });
 
     const emitted: SessionOutboundMessage[] = [];
@@ -735,7 +738,7 @@ describe("runWorktreeSetupInBackground", () => {
 
     await runWorktreeSetupInBackground(
       {
-        paseoHome,
+        polyhiveHome,
         emitWorkspaceUpdateForCwd,
         cacheWorkspaceSetupSnapshot: (workspaceId, snapshot) =>
           snapshots.set(workspaceId, snapshot),
@@ -797,7 +800,7 @@ describe("runWorktreeSetupInBackground", () => {
 
   test("keeps setup completed without attempting script launch afterward", async () => {
     const { tempDir, repoDir } = createGitRepo({
-      paseoConfig: {
+      polyhiveConfig: {
         scripts: {
           web: {
             command: "npm run dev",
@@ -807,14 +810,14 @@ describe("runWorktreeSetupInBackground", () => {
     });
     cleanupPaths.push(tempDir);
 
-    const paseoHome = path.join(tempDir, ".paseo");
+    const polyhiveHome = path.join(tempDir, ".polyhive");
     const createdWorktree = await createLegacyWorktreeForTest({
       branchName: "feature-service-failure",
       cwd: repoDir,
       baseBranch: "main",
       worktreeSlug: "feature-service-failure",
       runSetup: false,
-      paseoHome,
+      polyhiveHome,
     });
     const worktreePath = createdWorktree.worktreePath;
     const emitted: SessionOutboundMessage[] = [];
@@ -830,7 +833,7 @@ describe("runWorktreeSetupInBackground", () => {
 
     await runWorktreeSetupInBackground(
       {
-        paseoHome,
+        polyhiveHome,
         emitWorkspaceUpdateForCwd,
         cacheWorkspaceSetupSnapshot: (workspaceId, snapshot) =>
           snapshots.set(workspaceId, snapshot),
@@ -883,7 +886,7 @@ describe("runWorktreeSetupInBackground", () => {
 
   test("does not auto-start scripts in socket mode", async () => {
     const { tempDir, repoDir } = createGitRepo({
-      paseoConfig: {
+      polyhiveConfig: {
         scripts: {
           web: {
             command: "npm run dev",
@@ -893,14 +896,14 @@ describe("runWorktreeSetupInBackground", () => {
     });
     cleanupPaths.push(tempDir);
 
-    const paseoHome = path.join(tempDir, ".paseo");
+    const polyhiveHome = path.join(tempDir, ".polyhive");
     const createdWorktree = await createLegacyWorktreeForTest({
       branchName: "feature-socket-mode",
       cwd: repoDir,
       baseBranch: "main",
       worktreeSlug: "feature-socket-mode",
       runSetup: false,
-      paseoHome,
+      polyhiveHome,
     });
     const worktreePath = createdWorktree.worktreePath;
     const emitted: SessionOutboundMessage[] = [];
@@ -912,7 +915,7 @@ describe("runWorktreeSetupInBackground", () => {
 
     await runWorktreeSetupInBackground(
       {
-        paseoHome,
+        polyhiveHome,
         emitWorkspaceUpdateForCwd,
         cacheWorkspaceSetupSnapshot: (workspaceId, snapshot) =>
           snapshots.set(workspaceId, snapshot),
@@ -953,7 +956,7 @@ describe("runWorktreeSetupInBackground", () => {
           status: "completed",
           detail: {
             type: "worktree_setup",
-            worktreePath: "/repo/.paseo/worktrees/feature-a",
+            worktreePath: "/repo/.polyhive/worktrees/feature-a",
             branchName: "feature-a",
             log: "done",
             commands: [],
@@ -984,7 +987,7 @@ describe("runWorktreeSetupInBackground", () => {
           status: "completed",
           detail: {
             type: "worktree_setup",
-            worktreePath: "/repo/.paseo/worktrees/feature-a",
+            worktreePath: "/repo/.polyhive/worktrees/feature-a",
             branchName: "feature-a",
             log: "done",
             commands: [],
@@ -1021,7 +1024,7 @@ describe("runWorktreeSetupInBackground", () => {
   });
 });
 
-describe("handleCreatePaseoWorktreeRequest", () => {
+describe("handleCreatePolyHiveWorktreeRequest", () => {
   const cleanupPaths: string[] = [];
 
   afterEach(() => {
@@ -1036,20 +1039,20 @@ describe("handleCreatePaseoWorktreeRequest", () => {
 
     const emitted: SessionOutboundMessage[] = [];
     const logger = createLogger();
-    const paseoHome = path.join(tempDir, ".paseo");
+    const polyhiveHome = path.join(tempDir, ".polyhive");
 
-    await handleCreatePaseoWorktreeRequest(
+    await handleCreatePolyHiveWorktreeRequest(
       {
-        paseoHome,
+        polyhiveHome,
         describeWorkspaceRecord: async (workspace) =>
           createWorkspaceDescriptor({ workspace, repoDir }),
         emit: (message) => emitted.push(message),
-        createPaseoWorktree: createPaseoWorktreeForTest({ paseoHome }),
+        createPolyHiveWorktree: createPolyHiveWorktreeForTest({ polyhiveHome }),
         sessionLogger: logger,
         runWorktreeSetupInBackground: async () => {},
       },
       {
-        type: "create_paseo_worktree_request",
+        type: "create_polyhive_worktree_request",
         requestId: "req-pr-worktree",
         cwd: repoDir,
         worktreeSlug: "review-pr-123",
@@ -1059,7 +1062,7 @@ describe("handleCreatePaseoWorktreeRequest", () => {
             mimeType: "application/github-pr",
             number: 123,
             title: "Review branch",
-            url: "https://github.com/getpaseo/paseo/pull/123",
+            url: "https://github.com/polyhive/polyhive/pull/123",
             baseRefName: "main",
             headRefName: "feature/review-pr",
           },
@@ -1070,8 +1073,10 @@ describe("handleCreatePaseoWorktreeRequest", () => {
     const response = emitted.find(
       (
         message,
-      ): message is Extract<SessionOutboundMessage, { type: "create_paseo_worktree_response" }> =>
-        message.type === "create_paseo_worktree_response",
+      ): message is Extract<
+        SessionOutboundMessage,
+        { type: "create_polyhive_worktree_response" }
+      > => message.type === "create_polyhive_worktree_response",
     );
 
     expect(response?.payload.error).toBeNull();
@@ -1099,10 +1104,10 @@ describe("handleCreatePaseoWorktreeRequest", () => {
 
     const result = await buildAgentSessionConfig(
       {
-        paseoHome: path.join(tempDir, ".paseo"),
+        polyhiveHome: path.join(tempDir, ".polyhive"),
         sessionLogger: createLogger(),
-        createPaseoWorktree: createPaseoWorktreeForTest({
-          paseoHome: path.join(tempDir, ".paseo"),
+        createPolyHiveWorktree: createPolyHiveWorktreeForTest({
+          polyhiveHome: path.join(tempDir, ".polyhive"),
           events,
         }),
         checkoutExistingBranch: async () => {
@@ -1127,7 +1132,7 @@ describe("handleCreatePaseoWorktreeRequest", () => {
           mimeType: "application/github-pr",
           number: 123,
           title: "Review branch",
-          url: "https://github.com/getpaseo/paseo/pull/123",
+          url: "https://github.com/polyhive/polyhive/pull/123",
           baseRefName: "main",
           headRefName: "feature/review-pr",
         },
@@ -1151,17 +1156,17 @@ describe("handleCreatePaseoWorktreeRequest", () => {
   test("buildAgentSessionConfig uses the normalized new branch name as the worktree slug fallback", async () => {
     const { tempDir, repoDir } = createGitRepo();
     cleanupPaths.push(tempDir);
-    const paseoHome = path.join(tempDir, ".paseo");
+    const polyhiveHome = path.join(tempDir, ".polyhive");
 
     const result = await buildAgentSessionConfig(
       {
-        paseoHome,
+        polyhiveHome,
         sessionLogger: createLogger(),
         workspaceGitService: {
           resolveRepoRoot: vi.fn(async () => repoDir),
           resolveDefaultBranch: vi.fn(async () => "main"),
         } as any,
-        createPaseoWorktree: createPaseoWorktreeForTest({ paseoHome }),
+        createPolyHiveWorktree: createPolyHiveWorktreeForTest({ polyhiveHome }),
         checkoutExistingBranch: async () => {
           throw new Error("should not checkout existing branch");
         },
@@ -1188,14 +1193,14 @@ describe("handleCreatePaseoWorktreeRequest", () => {
     const invalidate = vi.fn();
     const createBranchFromBase = vi.fn(async () => {});
     const checkoutExistingBranch = vi.fn(async () => ({ source: "local" as const }));
-    const createPaseoWorktree = vi.fn(async () => {
+    const createPolyHiveWorktree = vi.fn(async () => {
       throw new Error("should not create worktree");
     });
 
     await buildAgentSessionConfig(
       {
         sessionLogger: createLogger(),
-        createPaseoWorktree,
+        createPolyHiveWorktree,
         checkoutExistingBranch,
         createBranchFromBase,
         github: { invalidate },
@@ -1223,7 +1228,7 @@ describe("handleCreatePaseoWorktreeRequest", () => {
     await buildAgentSessionConfig(
       {
         sessionLogger: createLogger(),
-        createPaseoWorktree,
+        createPolyHiveWorktree,
         checkoutExistingBranch,
         createBranchFromBase,
         github: { invalidate },
@@ -1241,19 +1246,19 @@ describe("handleCreatePaseoWorktreeRequest", () => {
     expect(invalidate).toHaveBeenCalledWith({ cwd: "/tmp/repo" });
   });
 
-  test("createPaseoWorktreeForTest forwards the default branch resolver for branch-off intents", async () => {
+  test("createPolyHiveWorktreeForTest forwards the default branch resolver for branch-off intents", async () => {
     const { tempDir, repoDir } = createGitRepo();
     cleanupPaths.push(tempDir);
-    const paseoHome = path.join(tempDir, ".paseo");
+    const polyhiveHome = path.join(tempDir, ".polyhive");
     const resolveDefaultBranch = vi.fn(async () => "main");
 
-    const result = await createPaseoWorktreeForTest({ paseoHome })(
+    const result = await createPolyHiveWorktreeForTest({ polyhiveHome })(
       {
         cwd: repoDir,
         worktreeSlug: "resolver-feature",
         action: "branch-off",
         runSetup: false,
-        paseoHome,
+        polyhiveHome,
       },
       { resolveDefaultBranch },
     );
@@ -1267,20 +1272,20 @@ describe("handleCreatePaseoWorktreeRequest", () => {
   });
 });
 
-describe("handleCreatePaseoWorktreeRequest", () => {
+describe("handleCreatePolyHiveWorktreeRequest", () => {
   test("registers a pending workspace and emits a successful create response", async () => {
     const { tempDir, repoDir } = createGitRepo();
-    const paseoHome = path.join(tempDir, ".paseo");
+    const polyhiveHome = path.join(tempDir, ".polyhive");
     const emitted: SessionOutboundMessage[] = [];
     const events: string[] = [];
 
     try {
-      await handleCreatePaseoWorktreeRequest(
+      await handleCreatePolyHiveWorktreeRequest(
         {
-          paseoHome,
+          polyhiveHome,
           sessionLogger: createLogger(),
           emit: (message) => emitted.push(message),
-          createPaseoWorktree: createPaseoWorktreeForTest({ paseoHome, events }),
+          createPolyHiveWorktree: createPolyHiveWorktreeForTest({ polyhiveHome, events }),
           describeWorkspaceRecord: vi.fn(async (workspace) => ({
             id: workspace.workspaceId,
             projectId: workspace.projectId,
@@ -1295,7 +1300,7 @@ describe("handleCreatePaseoWorktreeRequest", () => {
           runWorktreeSetupInBackground: vi.fn(async () => {}),
         },
         {
-          type: "create_paseo_worktree_request",
+          type: "create_polyhive_worktree_request",
           cwd: repoDir,
           worktreeSlug: "single-call",
           requestId: "req-single-call",
@@ -1307,8 +1312,10 @@ describe("handleCreatePaseoWorktreeRequest", () => {
       const response = emitted.find(
         (
           message,
-        ): message is Extract<SessionOutboundMessage, { type: "create_paseo_worktree_response" }> =>
-          message.type === "create_paseo_worktree_response",
+        ): message is Extract<
+          SessionOutboundMessage,
+          { type: "create_polyhive_worktree_response" }
+        > => message.type === "create_polyhive_worktree_response",
       );
       expect(response?.payload.error).toBeNull();
     } finally {
@@ -1318,19 +1325,19 @@ describe("handleCreatePaseoWorktreeRequest", () => {
 
   test("creates the worktree before emitting the response", async () => {
     const { tempDir, repoDir } = createGitRepo();
-    const paseoHome = path.join(tempDir, ".paseo");
+    const polyhiveHome = path.join(tempDir, ".polyhive");
     const emitted: SessionOutboundMessage[] = [];
     const backgroundWork = vi.fn(async () => {});
     let registeredWorktreePath: string | null = null;
 
     try {
-      await handleCreatePaseoWorktreeRequest(
+      await handleCreatePolyHiveWorktreeRequest(
         {
-          paseoHome,
+          polyhiveHome,
           sessionLogger: createLogger(),
           emit: (message) => emitted.push(message),
-          createPaseoWorktree: async (input) => {
-            const result = await createPaseoWorktreeForTest({ paseoHome })(input);
+          createPolyHiveWorktree: async (input) => {
+            const result = await createPolyHiveWorktreeForTest({ polyhiveHome })(input);
             expect(existsSync(result.worktree.worktreePath)).toBe(true);
             registeredWorktreePath = result.worktree.worktreePath;
             return result;
@@ -1341,7 +1348,7 @@ describe("handleCreatePaseoWorktreeRequest", () => {
           runWorktreeSetupInBackground: backgroundWork,
         },
         {
-          type: "create_paseo_worktree_request",
+          type: "create_polyhive_worktree_request",
           cwd: repoDir,
           worktreeSlug: "response-after-create",
           requestId: "req-1",
@@ -1351,8 +1358,10 @@ describe("handleCreatePaseoWorktreeRequest", () => {
       const response = emitted.find(
         (
           message,
-        ): message is Extract<SessionOutboundMessage, { type: "create_paseo_worktree_response" }> =>
-          message.type === "create_paseo_worktree_response",
+        ): message is Extract<
+          SessionOutboundMessage,
+          { type: "create_polyhive_worktree_response" }
+        > => message.type === "create_polyhive_worktree_response",
       );
       expect(response?.payload.error).toBeNull();
       expect(response?.payload.workspace?.id).toBeTruthy();
@@ -1376,23 +1385,23 @@ describe("handleCreatePaseoWorktreeRequest", () => {
 
   test("emits a machine-readable error code for invalid worktree intent", async () => {
     const { tempDir, repoDir } = createGitRepo();
-    const paseoHome = path.join(tempDir, ".paseo");
+    const polyhiveHome = path.join(tempDir, ".polyhive");
     const emitted: SessionOutboundMessage[] = [];
 
     try {
-      await handleCreatePaseoWorktreeRequest(
+      await handleCreatePolyHiveWorktreeRequest(
         {
-          paseoHome,
+          polyhiveHome,
           sessionLogger: createLogger(),
           emit: (message) => emitted.push(message),
-          createPaseoWorktree: createPaseoWorktreeForTest({ paseoHome }),
+          createPolyHiveWorktree: createPolyHiveWorktreeForTest({ polyhiveHome }),
           describeWorkspaceRecord: vi.fn(async (workspace) =>
             createWorkspaceDescriptor({ workspace, repoDir }),
           ),
           runWorktreeSetupInBackground: vi.fn(async () => {}),
         },
         {
-          type: "create_paseo_worktree_request",
+          type: "create_polyhive_worktree_request",
           cwd: repoDir,
           action: "checkout",
           attachments: [],
@@ -1403,8 +1412,10 @@ describe("handleCreatePaseoWorktreeRequest", () => {
       const response = emitted.find(
         (
           message,
-        ): message is Extract<SessionOutboundMessage, { type: "create_paseo_worktree_response" }> =>
-          message.type === "create_paseo_worktree_response",
+        ): message is Extract<
+          SessionOutboundMessage,
+          { type: "create_polyhive_worktree_response" }
+        > => message.type === "create_polyhive_worktree_response",
       );
       expect(response?.payload.workspace).toBeNull();
       expect(response?.payload.error).toBe('action "checkout" requires refName or githubPrNumber');
@@ -1416,23 +1427,23 @@ describe("handleCreatePaseoWorktreeRequest", () => {
 
   test("emits a machine-readable error code for unknown checkout branches", async () => {
     const { tempDir, repoDir } = createGitRepo();
-    const paseoHome = path.join(tempDir, ".paseo");
+    const polyhiveHome = path.join(tempDir, ".polyhive");
     const emitted: SessionOutboundMessage[] = [];
 
     try {
-      await handleCreatePaseoWorktreeRequest(
+      await handleCreatePolyHiveWorktreeRequest(
         {
-          paseoHome,
+          polyhiveHome,
           sessionLogger: createLogger(),
           emit: (message) => emitted.push(message),
-          createPaseoWorktree: createPaseoWorktreeForTest({ paseoHome }),
+          createPolyHiveWorktree: createPolyHiveWorktreeForTest({ polyhiveHome }),
           describeWorkspaceRecord: vi.fn(async (workspace) =>
             createWorkspaceDescriptor({ workspace, repoDir }),
           ),
           runWorktreeSetupInBackground: vi.fn(async () => {}),
         },
         {
-          type: "create_paseo_worktree_request",
+          type: "create_polyhive_worktree_request",
           cwd: repoDir,
           action: "checkout",
           refName: "missing-branch",
@@ -1444,8 +1455,10 @@ describe("handleCreatePaseoWorktreeRequest", () => {
       const response = emitted.find(
         (
           message,
-        ): message is Extract<SessionOutboundMessage, { type: "create_paseo_worktree_response" }> =>
-          message.type === "create_paseo_worktree_response",
+        ): message is Extract<
+          SessionOutboundMessage,
+          { type: "create_polyhive_worktree_response" }
+        > => message.type === "create_polyhive_worktree_response",
       );
       expect(response?.payload.workspace).toBeNull();
       expect(response?.payload.error).toBe("Unknown branch: missing-branch");
@@ -1456,7 +1469,7 @@ describe("handleCreatePaseoWorktreeRequest", () => {
   });
 });
 
-describe("archivePaseoWorktree", () => {
+describe("archivePolyHiveWorktree", () => {
   const cleanupPaths: string[] = [];
 
   afterEach(() => {
@@ -1480,14 +1493,14 @@ describe("archivePaseoWorktree", () => {
     const { tempDir, repoDir } = createGitRepo();
     cleanupPaths.push(tempDir);
 
-    const paseoHome = path.join(tempDir, ".paseo");
+    const polyhiveHome = path.join(tempDir, ".polyhive");
     const created = await createLegacyWorktreeForTest({
       branchName: "archive-parallel",
       cwd: repoDir,
       baseBranch: "main",
       worktreeSlug: "archive-parallel",
       runSetup: false,
-      paseoHome,
+      polyhiveHome,
     });
 
     const teardownStartTimes: Record<string, number> = {};
@@ -1504,9 +1517,9 @@ describe("archivePaseoWorktree", () => {
     });
 
     const emitted: SessionOutboundMessage[] = [];
-    const removedAgents = await archivePaseoWorktree(
+    const removedAgents = await archivePolyHiveWorktree(
       {
-        paseoHome,
+        polyhiveHome,
         github: createGitHubServiceStub(),
         agentManager: {
           listAgents: () => [
@@ -1547,23 +1560,23 @@ describe("archivePaseoWorktree", () => {
     const { tempDir, repoDir } = createGitRepo();
     cleanupPaths.push(tempDir);
 
-    const paseoHome = path.join(tempDir, ".paseo");
+    const polyhiveHome = path.join(tempDir, ".polyhive");
     const created = await createLegacyWorktreeForTest({
       branchName: "archive-terminal-throws",
       cwd: repoDir,
       baseBranch: "main",
       worktreeSlug: "archive-terminal-throws",
       runSetup: false,
-      paseoHome,
+      polyhiveHome,
     });
 
     const killTerminalsUnderPath = vi.fn(async () => {
       throw new Error("simulated terminal teardown failure");
     });
 
-    await archivePaseoWorktree(
+    await archivePolyHiveWorktree(
       {
-        paseoHome,
+        polyhiveHome,
         github: createGitHubServiceStub(),
         agentManager: {
           listAgents: () => [],
@@ -1592,22 +1605,22 @@ describe("archivePaseoWorktree", () => {
     const { tempDir, repoDir } = createGitRepo();
     cleanupPaths.push(tempDir);
 
-    const paseoHome = path.join(tempDir, ".paseo");
+    const polyhiveHome = path.join(tempDir, ".polyhive");
     const created = await createLegacyWorktreeForTest({
       branchName: "archive-refresh",
       cwd: repoDir,
       baseBranch: "main",
       worktreeSlug: "archive-refresh",
       runSetup: false,
-      paseoHome,
+      polyhiveHome,
     });
     const workspaceGitService = {
       getSnapshot: vi.fn(async () => null),
     };
 
-    await archivePaseoWorktree(
+    await archivePolyHiveWorktree(
       {
-        paseoHome,
+        polyhiveHome,
         github: createGitHubServiceStub(),
         workspaceGitService: workspaceGitService as any,
         agentManager: {
@@ -1639,14 +1652,14 @@ describe("archivePaseoWorktree", () => {
     const { tempDir, repoDir } = createGitRepo();
     cleanupPaths.push(tempDir);
 
-    const paseoHome = path.join(tempDir, ".paseo");
+    const polyhiveHome = path.join(tempDir, ".polyhive");
     const created = await createLegacyWorktreeForTest({
       branchName: "archive-orphan",
       cwd: repoDir,
       baseBranch: "main",
       worktreeSlug: "archive-orphan",
       runSetup: false,
-      paseoHome,
+      polyhiveHome,
     });
 
     // Simulate a prior failed archive that stripped git's admin dir.
@@ -1657,9 +1670,9 @@ describe("archivePaseoWorktree", () => {
     expect(existsSync(created.worktreePath)).toBe(true);
 
     const emitted: SessionOutboundMessage[] = [];
-    await handlePaseoWorktreeArchiveRequest(
+    await handlePolyHiveWorktreeArchiveRequest(
       {
-        paseoHome,
+        polyhiveHome,
         github: createGitHubServiceStub(),
         agentManager: {
           listAgents: () => [],
@@ -1674,7 +1687,7 @@ describe("archivePaseoWorktree", () => {
         sessionLogger: createLogger(),
       },
       {
-        type: "paseo_worktree_archive_request",
+        type: "polyhive_worktree_archive_request",
         requestId: "req-archive-orphan",
         worktreePath: created.worktreePath,
       },
@@ -1683,8 +1696,10 @@ describe("archivePaseoWorktree", () => {
     const response = emitted.find(
       (
         message,
-      ): message is Extract<SessionOutboundMessage, { type: "paseo_worktree_archive_response" }> =>
-        message.type === "paseo_worktree_archive_response",
+      ): message is Extract<
+        SessionOutboundMessage,
+        { type: "polyhive_worktree_archive_response" }
+      > => message.type === "polyhive_worktree_archive_response",
     );
     expect(response?.payload.success).toBe(true);
     expect(response?.payload.error).toBeNull();

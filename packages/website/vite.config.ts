@@ -7,7 +7,7 @@ import react from "@vitejs/plugin-react";
 import tailwindcss from "@tailwindcss/vite";
 
 const repoRoot = path.resolve(__dirname, "../..");
-const siteHost = process.env.VITE_PASEO_SITE_HOST?.trim() || "https://polyhive.vercel.app";
+const siteHost = process.env.VITE_POLYHIVE_SITE_HOST?.trim() || "https://polyhive.vercel.app";
 const sitemapPages = [
   "/",
   "/changelog",

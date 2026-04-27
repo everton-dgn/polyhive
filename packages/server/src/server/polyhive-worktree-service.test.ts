@@ -8,10 +8,13 @@ import { afterEach, describe, expect, test, vi } from "vitest";
 import type { GitHubService } from "../services/github-service.js";
 import type { WorkspaceGitRuntimeSnapshot, WorkspaceGitService } from "./workspace-git-service.js";
 import type { PersistedProjectRecord, PersistedWorkspaceRecord } from "./workspace-registry.js";
-import { createPaseoWorktree, type CreatePaseoWorktreeDeps } from "./paseo-worktree-service.js";
+import {
+  createPolyHiveWorktree,
+  type CreatePolyHiveWorktreeDeps,
+} from "./polyhive-worktree-service.js";
 import { createWorktreeCoreDeps } from "./worktree-core.js";
 
-describe("createPaseoWorktree", () => {
+describe("createPolyHiveWorktree", () => {
   const cleanupPaths: string[] = [];
 
   afterEach(() => {
@@ -26,12 +29,12 @@ describe("createPaseoWorktree", () => {
     const events: string[] = [];
     const deps = createDeps({ events });
 
-    const result = await createPaseoWorktree(
+    const result = await createPolyHiveWorktree(
       {
         cwd: repoDir,
         worktreeSlug: "feature-one",
         runSetup: false,
-        paseoHome: path.join(tempDir, ".paseo"),
+        polyhiveHome: path.join(tempDir, ".polyhive"),
       },
       deps,
     );
@@ -50,14 +53,14 @@ describe("createPaseoWorktree", () => {
   test("reuses an existing worktree and still upserts and broadcasts", async () => {
     const { repoDir, tempDir } = createGitRepo();
     cleanupPaths.push(tempDir);
-    const paseoHome = path.join(tempDir, ".paseo");
+    const polyhiveHome = path.join(tempDir, ".polyhive");
     const firstDeps = createDeps();
-    const first = await createPaseoWorktree(
+    const first = await createPolyHiveWorktree(
       {
         cwd: repoDir,
         worktreeSlug: "reuse-me",
         runSetup: false,
-        paseoHome,
+        polyhiveHome,
       },
       firstDeps,
     );
@@ -68,12 +71,12 @@ describe("createPaseoWorktree", () => {
       workspaces: firstDeps.workspaces,
     });
 
-    const second = await createPaseoWorktree(
+    const second = await createPolyHiveWorktree(
       {
         cwd: repoDir,
         worktreeSlug: "reuse-me",
         runSetup: false,
-        paseoHome,
+        polyhiveHome,
       },
       deps,
     );
@@ -85,17 +88,17 @@ describe("createPaseoWorktree", () => {
   });
 
   test("does not mutate registries or broadcast when core worktree creation fails", async () => {
-    const tempDir = mkdtempSync(path.join(tmpdir(), "paseo-worktree-service-"));
+    const tempDir = mkdtempSync(path.join(tmpdir(), "polyhive-worktree-service-"));
     cleanupPaths.push(tempDir);
     const deps = createDeps();
 
     await expect(
-      createPaseoWorktree(
+      createPolyHiveWorktree(
         {
           cwd: tempDir,
           worktreeSlug: "not-git",
           runSetup: false,
-          paseoHome: path.join(tempDir, ".paseo"),
+          polyhiveHome: path.join(tempDir, ".polyhive"),
         },
         deps,
       ),
@@ -119,11 +122,11 @@ describe("createPaseoWorktree", () => {
       return Array.from(contents.matchAll(pattern), () => path.relative(serverSrc, filePath));
     });
 
-    expect(matches).toEqual(["paseo-worktree-service.test.ts", "paseo-worktree-service.ts"]);
+    expect(matches).toEqual(["polyhive-worktree-service.test.ts", "polyhive-worktree-service.ts"]);
   });
 });
 
-interface TestDeps extends CreatePaseoWorktreeDeps {
+interface TestDeps extends CreatePolyHiveWorktreeDeps {
   projects: Map<string, PersistedProjectRecord>;
   workspaces: Map<string, PersistedWorkspaceRecord>;
 }
@@ -241,7 +244,7 @@ function createWorkspaceGitSnapshot(cwd: string): WorkspaceGitRuntimeSnapshot {
       mainRepoRoot,
       currentBranch,
       remoteUrl: null,
-      isPaseoOwnedWorktree: repoRoot !== mainRepoRoot,
+      isPolyHiveOwnedWorktree: repoRoot !== mainRepoRoot,
       isDirty: false,
       baseRef: "main",
       aheadBehind: null,
@@ -260,7 +263,7 @@ function createWorkspaceGitSnapshot(cwd: string): WorkspaceGitRuntimeSnapshot {
 }
 
 function createGitRepo(): { tempDir: string; repoDir: string } {
-  const tempDir = mkdtempSync(path.join(tmpdir(), "paseo-worktree-service-"));
+  const tempDir = mkdtempSync(path.join(tmpdir(), "polyhive-worktree-service-"));
   const repoDir = path.join(tempDir, "repo");
   execSync(`git init ${JSON.stringify(repoDir)}`, { stdio: "pipe" });
   execSync("git config user.email test@example.com", { cwd: repoDir, stdio: "pipe" });

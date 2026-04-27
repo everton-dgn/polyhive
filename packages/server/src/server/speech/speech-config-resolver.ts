@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 import type { PersistedConfig } from "../persisted-config.js";
-import type { PaseoOpenAIConfig, PaseoSpeechConfig } from "../bootstrap.js";
+import type { PolyHiveOpenAIConfig, PolyHiveSpeechConfig } from "../bootstrap.js";
 import { resolveLocalSpeechConfig } from "./providers/local/config.js";
 import { resolveOpenAiSpeechConfig } from "./providers/openai/config.js";
 import {
@@ -62,31 +62,33 @@ function resolveRequestedSpeechProviders(params: {
   });
 
   const voiceModeEnabled = resolveOptionalBooleanFlag(
-    params.env.PASEO_VOICE_MODE_ENABLED ?? params.persisted.features?.voiceMode?.enabled,
+    params.env.POLYHIVE_VOICE_MODE_ENABLED ?? params.persisted.features?.voiceMode?.enabled,
   );
   const featureProviders = {
     dictationStt: {
       configuredValue:
-        params.env.PASEO_DICTATION_STT_PROVIDER ??
+        params.env.POLYHIVE_DICTATION_STT_PROVIDER ??
         params.persisted.features?.dictation?.stt?.provider,
       enabled: resolveOptionalBooleanFlag(
-        params.env.PASEO_DICTATION_ENABLED ?? params.persisted.features?.dictation?.enabled,
+        params.env.POLYHIVE_DICTATION_ENABLED ?? params.persisted.features?.dictation?.enabled,
       ),
     },
     voiceTurnDetection: {
       configuredValue:
-        params.env.PASEO_VOICE_TURN_DETECTION_PROVIDER ??
+        params.env.POLYHIVE_VOICE_TURN_DETECTION_PROVIDER ??
         params.persisted.features?.voiceMode?.turnDetection?.provider,
       enabled: voiceModeEnabled,
     },
     voiceStt: {
       configuredValue:
-        params.env.PASEO_VOICE_STT_PROVIDER ?? params.persisted.features?.voiceMode?.stt?.provider,
+        params.env.POLYHIVE_VOICE_STT_PROVIDER ??
+        params.persisted.features?.voiceMode?.stt?.provider,
       enabled: voiceModeEnabled,
     },
     voiceTts: {
       configuredValue:
-        params.env.PASEO_VOICE_TTS_PROVIDER ?? params.persisted.features?.voiceMode?.tts?.provider,
+        params.env.POLYHIVE_VOICE_TTS_PROVIDER ??
+        params.persisted.features?.voiceMode?.tts?.provider,
       enabled: voiceModeEnabled,
     },
   } satisfies Record<
@@ -129,12 +131,12 @@ function resolveRequestedSpeechProviders(params: {
 }
 
 export function resolveSpeechConfig(params: {
-  paseoHome: string;
+  polyhiveHome: string;
   env: NodeJS.ProcessEnv;
   persisted: PersistedConfig;
 }): {
-  openai: PaseoOpenAIConfig | undefined;
-  speech: PaseoSpeechConfig;
+  openai: PolyHiveOpenAIConfig | undefined;
+  speech: PolyHiveSpeechConfig;
 } {
   const providers = resolveRequestedSpeechProviders({
     env: params.env,
@@ -142,7 +144,7 @@ export function resolveSpeechConfig(params: {
   });
 
   const local = resolveLocalSpeechConfig({
-    paseoHome: params.paseoHome,
+    polyhiveHome: params.polyhiveHome,
     env: params.env,
     persisted: params.persisted,
     providers,

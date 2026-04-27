@@ -12,10 +12,10 @@ import type {
 } from "../agent/agent-sdk-types.js";
 import { PiDirectAgentClient } from "../agent/providers/pi-direct-agent.js";
 import { DaemonClient } from "../test-utils/daemon-client.js";
-import { createTestPaseoDaemon } from "../test-utils/paseo-daemon.js";
+import { createTestPolyHiveDaemon } from "../test-utils/polyhive-daemon.js";
 import { isProviderAvailable } from "./agent-configs.js";
 
-process.env.PASEO_SUPERVISED = "0";
+process.env.POLYHIVE_SUPERVISED = "0";
 
 const PI_TEST_TIMEOUT_MS = 240_000;
 const PI_SUITE_TIMEOUT_MS = 600_000;
@@ -33,7 +33,7 @@ function createPiClient(): PiDirectAgentClient {
 
 function createPiToolDaemon() {
   const logger = pino({ level: "silent" });
-  return createTestPaseoDaemon({
+  return createTestPolyHiveDaemon({
     agentClients: { pi: new PiDirectAgentClient({ logger }) },
     logger,
   });

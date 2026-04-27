@@ -35,9 +35,9 @@ import { setupApplicationMenu } from "./features/menu.js";
 import { parseOpenProjectPathFromArgv } from "./open-project-routing.js";
 
 const DEV_SERVER_URL = process.env.EXPO_DEV_URL ?? "http://localhost:8081";
-const APP_SCHEME = "paseo";
-const OPEN_PROJECT_EVENT = "paseo:event:open-project";
-app.setName("Paseo");
+const APP_SCHEME = "polyhive";
+const OPEN_PROJECT_EVENT = "polyhive:event:open-project";
+app.setName("PolyHive");
 
 // In dev mode, detect git worktrees and isolate each instance so multiple
 // Electron windows can run side-by-side (separate userData = separate lock).
@@ -49,7 +49,7 @@ if (!app.isPackaged) {
       timeout: 3000,
     }).trim();
     devWorktreeName = path.basename(topLevel);
-    // Main checkout (e.g. "paseo") gets default userData — only worktrees diverge.
+    // Main checkout (e.g. "polyhive") gets default userData — only worktrees diverge.
     const commonDir = path.resolve(
       topLevel,
       execFileSync("git", ["rev-parse", "--git-common-dir"], {
@@ -60,7 +60,7 @@ if (!app.isPackaged) {
     );
     const isWorktree = path.resolve(topLevel, ".git") !== commonDir;
     if (isWorktree) {
-      app.setPath("userData", path.join(app.getPath("appData"), `Paseo-${devWorktreeName}`));
+      app.setPath("userData", path.join(app.getPath("appData"), `PolyHive-${devWorktreeName}`));
       log.info("[worktree] isolated userData for worktree:", devWorktreeName);
     } else {
       devWorktreeName = null;
@@ -70,10 +70,10 @@ if (!app.isPackaged) {
   }
 }
 
-// Allow users to pass Chromium flags via PASEO_ELECTRON_FLAGS for debugging
+// Allow users to pass Chromium flags via POLYHIVE_ELECTRON_FLAGS for debugging
 // rendering issues (e.g. "--disable-gpu --ozone-platform=x11").
 // Must run before app.whenReady().
-const electronFlags = process.env.PASEO_ELECTRON_FLAGS?.trim();
+const electronFlags = process.env.POLYHIVE_ELECTRON_FLAGS?.trim();
 if (electronFlags) {
   for (const token of electronFlags.split(/\s+/)) {
     const [key, ...rest] = token.replace(/^--/, "").split("=");
@@ -93,7 +93,7 @@ log.info("[open-project] pendingOpenProjectPath:", pendingOpenProjectPath);
 
 // The renderer pulls the pending path on mount via IPC — this avoids
 // a race where the push event arrives before React registers its listener.
-ipcMain.handle("paseo:get-pending-open-project", () => {
+ipcMain.handle("polyhive:get-pending-open-project", () => {
   log.info("[open-project] renderer requested pending path:", pendingOpenProjectPath);
   const result = pendingOpenProjectPath;
   pendingOpenProjectPath = null;
@@ -146,7 +146,7 @@ async function createMainWindow(): Promise<void> {
   const iconPath = getWindowIconPath();
   const systemTheme = resolveSystemWindowTheme();
 
-  const title = devWorktreeName ? `Paseo (${devWorktreeName})` : "Paseo";
+  const title = devWorktreeName ? `PolyHive (${devWorktreeName})` : "PolyHive";
   const mainWindow = new BrowserWindow({
     title,
     width: 1200,

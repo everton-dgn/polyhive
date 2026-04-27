@@ -3,7 +3,7 @@ import {
   getStructuredAgentResponse,
   StructuredAgentResponseError,
   type AgentSnapshotPayload,
-} from "@getpaseo/server";
+} from "polyhive-server";
 import { connectToDaemon, getDaemonHost } from "../../utils/client.js";
 import type {
   CommandOptions,
@@ -233,7 +233,7 @@ export async function runRunCommand(
     const error: CommandError = {
       code: "MISSING_PROMPT",
       message: "A prompt is required",
-      details: "Usage: paseo agent run [options] <prompt>",
+      details: "Usage: polyhive agent run [options] <prompt>",
     };
     throw error;
   }
@@ -243,7 +243,7 @@ export async function runRunCommand(
     const error: CommandError = {
       code: "INVALID_OPTIONS",
       message: "--base can only be used with --worktree",
-      details: "Usage: paseo agent run --worktree <name> --base <branch> <prompt>",
+      details: "Usage: polyhive agent run --worktree <name> --base <branch> <prompt>",
     };
     throw error;
   }
@@ -286,7 +286,7 @@ export async function runRunCommand(
     const error: CommandError = {
       code: "DAEMON_NOT_RUNNING",
       message: `Cannot connect to daemon at ${host}: ${message}`,
-      details: "Start the daemon with: paseo daemon start",
+      details: "Start the daemon with: polyhive daemon start",
     };
     throw error;
   }
@@ -300,7 +300,7 @@ export async function runRunCommand(
         code: "INVALID_THINKING_OPTION",
         message: "--thinking cannot be empty",
         details:
-          'Provide a thinking option ID. Use "paseo provider models <provider> --thinking" to list valid IDs.',
+          'Provide a thinking option ID. Use "polyhive provider models <provider> --thinking" to list valid IDs.',
       };
       throw error;
     }

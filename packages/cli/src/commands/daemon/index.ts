@@ -8,23 +8,23 @@ import { withOutput } from "../../output/index.js";
 import { addJsonOption } from "../../utils/command-options.js";
 
 export function createDaemonCommand(): Command {
-  const daemon = new Command("daemon").description("Manage the Paseo daemon");
+  const daemon = new Command("daemon").description("Manage the PolyHive daemon");
 
   daemon.addCommand(startCommand());
   daemon.addCommand(pairCommand());
 
   addJsonOption(daemon.command("status").description("Show local daemon status"))
-    .option("--home <path>", "Paseo home directory (default: ~/.paseo)")
+    .option("--home <path>", "PolyHive home directory (default: ~/.polyhive)")
     .action(withOutput(runStatusCommand));
 
   addJsonOption(daemon.command("stop").description("Stop the local daemon"))
-    .option("--home <path>", "Paseo home directory (default: ~/.paseo)")
+    .option("--home <path>", "PolyHive home directory (default: ~/.polyhive)")
     .option("--timeout <seconds>", "Wait timeout before failing (default: 15)")
     .option("--force", "Send SIGKILL if graceful stop times out")
     .action(withOutput(runStopCommand));
 
   addJsonOption(daemon.command("restart").description("Restart the local daemon"))
-    .option("--home <path>", "Paseo home directory (default: ~/.paseo)")
+    .option("--home <path>", "PolyHive home directory (default: ~/.polyhive)")
     .option("--timeout <seconds>", "Wait timeout before force step (default: 15)")
     .option("--force", "Send SIGKILL if graceful stop times out")
     .option(
@@ -34,7 +34,7 @@ export function createDaemonCommand(): Command {
     .option("--port <port>", "Port for restarted daemon listen target")
     .option("--no-relay", "Disable relay on restarted daemon")
     .option("--no-mcp", "Disable Agent MCP on restarted daemon")
-    .option("--no-inject-mcp", "Disable auto-injecting the Paseo MCP into created agents")
+    .option("--no-inject-mcp", "Disable auto-injecting the PolyHive MCP into created agents")
     .option(
       "--hostnames <hosts>",
       'Daemon hostnames (comma-separated, e.g. "myhost,.example.com" or "true" for any)',

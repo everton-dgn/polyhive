@@ -1,8 +1,8 @@
 # Architecture
 
-Paseo is a client-server system for monitoring and controlling local AI coding agents. The daemon runs on your machine, manages agent processes, and streams their output in real time over WebSocket. Clients (web app, CLI, desktop app) connect to the daemon to observe and interact with agents.
+PolyHive is a client-server system for monitoring and controlling local AI coding agents. The daemon runs on your machine, manages agent processes, and streams their output in real time over WebSocket. Clients (web app, CLI, desktop app) connect to the daemon to observe and interact with agents.
 
-Your code never leaves your machine. Paseo is local-first.
+Your code never leaves your machine. PolyHive is local-first.
 
 ## System overview
 
@@ -43,7 +43,7 @@ Your code never leaves your machine. Paseo is local-first.
 
 ### `packages/server` — The daemon
 
-The heart of Paseo. A Node.js process that:
+The heart of PolyHive. A Node.js process that:
 
 - Listens for WebSocket connections from clients
 - Manages agent lifecycle (create, run, stop, resume, archive)
@@ -59,7 +59,7 @@ The heart of Paseo. A Node.js process that:
 | `websocket-server.ts` | WebSocket connection management, hello/welcome handshake, binary multiplexing |
 | `session.ts` | Per-client session state, timeline subscriptions, terminal operations |
 | `agent/agent-manager.ts` | Agent lifecycle state machine, timeline tracking, subscriber management |
-| `agent/agent-storage.ts` | File-backed JSON persistence at `$PASEO_HOME/agents/` |
+| `agent/agent-storage.ts` | File-backed JSON persistence at `$POLYHIVE_HOME/agents/` |
 | `agent/mcp-server.ts` | MCP server for sub-agent creation, permissions, timeouts |
 | `providers/` | Provider adapters: Claude (Agent SDK), Codex (AppServer), OpenCode |
 | `relay-transport.ts` | Outbound relay connection with E2E encryption |
@@ -79,11 +79,11 @@ Expo/React Native web app (browser-targeted) that connects to one or more daemon
 
 Commander.js CLI with Docker-style commands:
 
-- `paseo agent ls/run/stop/logs/inspect/wait/send/attach`
-- `paseo daemon start/stop/restart/status/pair`
-- `paseo permit allow/deny/ls`
-- `paseo provider ls/models`
-- `paseo worktree ls/archive`
+- `polyhive agent ls/run/stop/logs/inspect/wait/send/attach`
+- `polyhive daemon start/stop/restart/status/pair`
+- `polyhive permit allow/deny/ls`
+- `polyhive provider ls/models`
+- `polyhive worktree ls/archive`
 
 Communicates with the daemon via the same WebSocket protocol as the app.
 
@@ -108,7 +108,7 @@ Electron wrapper for macOS.
 
 ### `packages/website` — Marketing site
 
-TanStack Router + Vercel. URLs parameterized via `VITE_PASEO_*` env vars (see `packages/website/src/fork-identity.ts`).
+TanStack Router + Vercel. URLs parameterized via `VITE_POLYHIVE_*` env vars (see `packages/website/src/fork-identity.ts`).
 
 ## WebSocket protocol
 
@@ -147,7 +147,7 @@ initializing → idle → running → idle (or error → closed)
 - **AgentManager** tracks up to 200 timeline items per agent
 - Timeline is append-only with epochs (each run starts a new epoch)
 - Events stream to all subscribed clients in real time
-- Agent state persists to `$PASEO_HOME/agents/{cwd-with-dashes}/{agent-id}.json`
+- Agent state persists to `$POLYHIVE_HOME/agents/{cwd-with-dashes}/{agent-id}.json`
 
 ## Agent providers
 
@@ -160,7 +160,7 @@ Each provider implements a common `AgentClient` interface:
 | OpenCode | OpenCode CLI | Provider-managed |
 
 All providers:
-- Handle their own authentication (Paseo does not manage API keys)
+- Handle their own authentication (PolyHive does not manage API keys)
 - Support session resume via persistence handles
 - Map tool calls to a normalized `ToolCallDetail` type
 - Expose provider-specific modes (plan, default, full-access)
@@ -178,7 +178,7 @@ All providers:
 ## Storage
 
 ```
-$PASEO_HOME/
+$POLYHIVE_HOME/
 ├── agents/{cwd-with-dashes}/{agent-id}.json   # Agent state + config
 ├── projects/projects.json                      # Project registry
 ├── projects/workspaces.json                    # Workspace registry
@@ -187,6 +187,6 @@ $PASEO_HOME/
 
 ## Deployment models
 
-1. **Local daemon** (default): `paseo daemon start` on `127.0.0.1:6767`
+1. **Local daemon** (default): `polyhive daemon start` on `127.0.0.1:6767`
 2. **Managed desktop**: Electron app spawns daemon as subprocess
 3. **Remote + relay**: Daemon behind firewall, relay bridges with E2E encryption

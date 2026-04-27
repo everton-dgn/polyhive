@@ -189,13 +189,13 @@ describe("Terminal", () => {
       const resolvedEnv = buildTerminalEnvironment({
         shell: "/bin/zsh",
         env: {
-          HOME: "/tmp/paseo-home",
-          ZDOTDIR: "/tmp/paseo-zdotdir",
+          HOME: "/tmp/polyhive-home",
+          ZDOTDIR: "/tmp/polyhive-zdotdir",
         },
       });
 
       expect(resolvedEnv.TERM).toBe("xterm-256color");
-      expect(resolvedEnv.PASEO_ZSH_ZDOTDIR).toBe("/tmp/paseo-zdotdir");
+      expect(resolvedEnv.POLYHIVE_ZSH_ZDOTDIR).toBe("/tmp/polyhive-zdotdir");
       expect(resolvedEnv.ZDOTDIR).toBe(resolveZshShellIntegrationDir());
     });
 
@@ -355,13 +355,13 @@ describe("Terminal", () => {
       temporaryDirs.push(homeDir);
       const realZdotdir = join(homeDir, ".config", "zsh");
       mkdirSync(realZdotdir, { recursive: true });
-      writeFileSync(join(realZdotdir, ".zshenv"), "export PASEO_TEST_REAL_ZDOTDIR=1\n");
+      writeFileSync(join(realZdotdir, ".zshenv"), "export POLYHIVE_TEST_REAL_ZDOTDIR=1\n");
 
       const session = trackSession(
         await createTerminal({
           cwd: homeDir,
           command: "/bin/zsh",
-          args: ["-c", 'printf \'%s\\n%s\\n\' "${ZDOTDIR-}" "${PASEO_TEST_REAL_ZDOTDIR-}"'],
+          args: ["-c", 'printf \'%s\\n%s\\n\' "${ZDOTDIR-}" "${POLYHIVE_TEST_REAL_ZDOTDIR-}"'],
           env: {
             HOME: homeDir,
             ZDOTDIR: realZdotdir,

@@ -1,7 +1,7 @@
 import path from "node:path";
 import { z } from "zod";
 
-import type { PaseoDaemonConfig } from "./bootstrap.js";
+import type { PolyHiveDaemonConfig } from "./bootstrap.js";
 import { loadPersistedConfig } from "./persisted-config.js";
 import type { AgentProvider } from "./agent/agent-sdk-types.js";
 import type {
@@ -14,8 +14,8 @@ import { resolveSpeechConfig } from "./speech/speech-config-resolver.js";
 import { mergeHostnames, parseHostnamesEnv, type HostnamesConfig } from "./hostnames.js";
 
 const DEFAULT_PORT = 6767;
-const DEFAULT_RELAY_ENDPOINT = "relay.paseo.sh:443";
-const DEFAULT_APP_BASE_URL = "https://app.paseo.sh";
+const DEFAULT_RELAY_ENDPOINT = "relay.polyhive.sh:443";
+const DEFAULT_APP_BASE_URL = "https://app.polyhive.sh";
 
 function parseBooleanEnv(value: string | undefined): boolean | undefined {
   if (value === undefined) {
@@ -103,35 +103,35 @@ function extractAgentProviderSettings(
 }
 
 export function loadConfig(
-  paseoHome: string,
+  polyhiveHome: string,
   options?: {
     env?: NodeJS.ProcessEnv;
     cli?: CliConfigOverrides;
   },
-): PaseoDaemonConfig {
+): PolyHiveDaemonConfig {
   const env = options?.env ?? process.env;
-  const persisted = loadPersistedConfig(paseoHome);
+  const persisted = loadPersistedConfig(polyhiveHome);
 
-  // PASEO_LISTEN can be:
+  // POLYHIVE_LISTEN can be:
   // - host:port (TCP)
   // - /path/to/socket (Unix socket)
   // - unix:///path/to/socket (Unix socket)
   // Default is TCP at 127.0.0.1:6767
   const listen =
     options?.cli?.listen ??
-    env.PASEO_LISTEN ??
+    env.POLYHIVE_LISTEN ??
     persisted.daemon?.listen ??
     `127.0.0.1:${env.PORT ?? DEFAULT_PORT}`;
 
-  const envCorsOrigins = env.PASEO_CORS_ORIGINS
-    ? env.PASEO_CORS_ORIGINS.split(",").map((s) => s.trim())
+  const envCorsOrigins = env.POLYHIVE_CORS_ORIGINS
+    ? env.POLYHIVE_CORS_ORIGINS.split(",").map((s) => s.trim())
     : [];
 
   const persistedCorsOrigins = persisted.daemon?.cors?.allowedOrigins ?? [];
 
   const hostnames = mergeHostnames([
     persisted.daemon?.hostnames,
-    parseHostnamesEnv(env.PASEO_HOSTNAMES ?? env.PASEO_ALLOWED_HOSTS),
+    parseHostnamesEnv(env.POLYHIVE_HOSTNAMES ?? env.POLYHIVE_ALLOWED_HOSTS),
     options?.cli?.hostnames,
   ]);
 
@@ -141,25 +141,25 @@ export function loadConfig(
 
   const relayEnabled =
     options?.cli?.relayEnabled ??
-    parseBooleanEnv(env.PASEO_RELAY_ENABLED) ??
+    parseBooleanEnv(env.POLYHIVE_RELAY_ENABLED) ??
     persisted.daemon?.relay?.enabled ??
     true;
 
   const relayEndpoint =
-    env.PASEO_RELAY_ENDPOINT ?? persisted.daemon?.relay?.endpoint ?? DEFAULT_RELAY_ENDPOINT;
+    env.POLYHIVE_RELAY_ENDPOINT ?? persisted.daemon?.relay?.endpoint ?? DEFAULT_RELAY_ENDPOINT;
 
   const relayPublicEndpoint =
-    env.PASEO_RELAY_PUBLIC_ENDPOINT ?? persisted.daemon?.relay?.publicEndpoint ?? relayEndpoint;
+    env.POLYHIVE_RELAY_PUBLIC_ENDPOINT ?? persisted.daemon?.relay?.publicEndpoint ?? relayEndpoint;
 
-  const appBaseUrl = env.PASEO_APP_BASE_URL ?? persisted.app?.baseUrl ?? DEFAULT_APP_BASE_URL;
+  const appBaseUrl = env.POLYHIVE_APP_BASE_URL ?? persisted.app?.baseUrl ?? DEFAULT_APP_BASE_URL;
 
   const { openai, speech } = resolveSpeechConfig({
-    paseoHome,
+    polyhiveHome,
     env,
     persisted,
   });
 
-  const envVoiceLlmProvider = parseOptionalVoiceLlmProvider(env.PASEO_VOICE_LLM_PROVIDER);
+  const envVoiceLlmProvider = parseOptionalVoiceLlmProvider(env.POLYHIVE_VOICE_LLM_PROVIDER);
   const persistedVoiceLlmProvider = parseOptionalVoiceLlmProvider(
     persisted.features?.voiceMode?.llm?.provider,
   );
@@ -173,7 +173,7 @@ export function loadConfig(
 
   return {
     listen,
-    paseoHome,
+    polyhiveHome,
     corsAllowedOrigins: Array.from(
       new Set([...persistedCorsOrigins, ...envCorsOrigins].filter((s) => s.length > 0)),
     ),
@@ -182,7 +182,7 @@ export function loadConfig(
     mcpInjectIntoAgents,
     mcpDebug: env.MCP_DEBUG === "1",
     isDev: env.NODE_ENV === "development",
-    agentStoragePath: path.join(paseoHome, "agents"),
+    agentStoragePath: path.join(polyhiveHome, "agents"),
     staticDir: "public",
     agentClients: {},
     relayEnabled,

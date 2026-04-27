@@ -29,7 +29,7 @@ export async function connectScheduleClient(
     throw {
       code: "DAEMON_NOT_RUNNING",
       message: `Cannot connect to daemon at ${resolvedHost}: ${message}`,
-      details: "Start the daemon with: paseo daemon start",
+      details: "Start the daemon with: polyhive daemon start",
     } satisfies CommandError;
   }
 }
@@ -129,7 +129,7 @@ export function parseScheduleCreateInput(options: {
   };
   let target: ScheduleTarget;
   if (!targetValue) {
-    const currentAgentId = process.env.PASEO_AGENT_ID?.trim();
+    const currentAgentId = process.env.POLYHIVE_AGENT_ID?.trim();
     if (currentAgentId && !hasExplicitProviderSelection) {
       target = { type: "self", agentId: currentAgentId };
     } else {
@@ -143,11 +143,11 @@ export function parseScheduleCreateInput(options: {
         details: "Use --target new-agent or omit --target to create a new agent schedule",
       } satisfies CommandError;
     }
-    const currentAgentId = process.env.PASEO_AGENT_ID?.trim();
+    const currentAgentId = process.env.POLYHIVE_AGENT_ID?.trim();
     if (!currentAgentId) {
       throw {
         code: "INVALID_TARGET",
-        message: "--target self requires running inside a Paseo agent",
+        message: "--target self requires running inside a PolyHive agent",
       } satisfies CommandError;
     }
     target = { type: "self", agentId: currentAgentId };

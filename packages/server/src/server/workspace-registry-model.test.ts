@@ -66,7 +66,7 @@ describe("deriveWorkspaceId", () => {
         currentBranch: "main",
         remoteUrl: "https://github.com/acme/repo.git",
         worktreeRoot: "/tmp/repo",
-        isPaseoOwnedWorktree: false,
+        isPolyHiveOwnedWorktree: false,
         mainRepoRoot: null,
       }),
     ).toBe("/tmp/repo");
@@ -82,7 +82,7 @@ describe("deriveWorkspaceId", () => {
         currentBranch: "main",
         remoteUrl: null,
         worktreeRoot: `--path-format=absolute\n${cwd}`,
-        isPaseoOwnedWorktree: false,
+        isPolyHiveOwnedWorktree: false,
         mainRepoRoot: null,
       }),
     ).toBe(normalizeWorkspaceId(cwd));
@@ -98,7 +98,7 @@ describe("deriveWorkspaceId", () => {
         currentBranch: null,
         remoteUrl: null,
         worktreeRoot: null,
-        isPaseoOwnedWorktree: false,
+        isPolyHiveOwnedWorktree: false,
         mainRepoRoot: null,
       }),
     ).toBe(normalizeWorkspaceId("/tmp/repo/scratch"));

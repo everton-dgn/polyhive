@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
-import { createTestPaseoDaemon, type TestPaseoDaemon } from "./test-utils/paseo-daemon.js";
+import { createTestPolyHiveDaemon, type TestPolyHiveDaemon } from "./test-utils/polyhive-daemon.js";
 import { DaemonClient } from "./test-utils/daemon-client.js";
 import type { AgentStreamEventPayload } from "../shared/messages.js";
 import type { AgentSnapshotPayload } from "./messages.js";
@@ -26,12 +26,12 @@ describe("client activity tracking", () => {
   const TEST_PROVIDER = "claude";
   const TEST_MODEL = "haiku";
   const TEST_CWD = "/tmp";
-  let daemon: TestPaseoDaemon;
+  let daemon: TestPolyHiveDaemon;
   let client1: DaemonClient;
   let client2: DaemonClient;
 
   beforeEach(async () => {
-    daemon = await createTestPaseoDaemon();
+    daemon = await createTestPolyHiveDaemon();
   });
 
   afterEach(async () => {

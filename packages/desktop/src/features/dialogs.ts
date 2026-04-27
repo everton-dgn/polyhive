@@ -16,7 +16,7 @@ type OpenOptions = {
 };
 
 export function registerDialogHandlers(): void {
-  ipcMain.handle("paseo:dialog:ask", async (event, message: string, options?: AskOptions) => {
+  ipcMain.handle("polyhive:dialog:ask", async (event, message: string, options?: AskOptions) => {
     const win = BrowserWindow.fromWebContents(event.sender);
     const result = await dialog.showMessageBox(win ?? BrowserWindow.getFocusedWindow()!, {
       type:
@@ -30,7 +30,7 @@ export function registerDialogHandlers(): void {
     return result.response === 1;
   });
 
-  ipcMain.handle("paseo:dialog:open", async (event, options?: OpenOptions) => {
+  ipcMain.handle("polyhive:dialog:open", async (event, options?: OpenOptions) => {
     const win = BrowserWindow.fromWebContents(event.sender);
     const properties: Electron.OpenDialogOptions["properties"] = [];
     if (options?.directory) properties.push("openDirectory");

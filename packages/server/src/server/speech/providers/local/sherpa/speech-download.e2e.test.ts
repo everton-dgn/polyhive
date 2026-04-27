@@ -15,16 +15,16 @@ import { SherpaOnnxSTT } from "./sherpa-stt.js";
 import { SherpaOfflineRecognizerEngine } from "./sherpa-offline-recognizer.js";
 import { SherpaOnnxParakeetSTT } from "./sherpa-parakeet-stt.js";
 
-const RUN = process.env.PASEO_SPEECH_E2E_DOWNLOAD === "1";
+const RUN = process.env.POLYHIVE_SPEECH_E2E_DOWNLOAD === "1";
 const downloadTest = RUN ? test : test.skip;
 
 type ModelSet = "zipformer-kitten" | "parakeet-pocket";
 
 function getModelSet(): ModelSet {
-  const raw = (process.env.PASEO_SPEECH_E2E_MODEL_SET ?? "parakeet-pocket").trim().toLowerCase();
+  const raw = (process.env.POLYHIVE_SPEECH_E2E_MODEL_SET ?? "parakeet-pocket").trim().toLowerCase();
   if (raw === "zipformer-kitten" || raw === "zipformer") return "zipformer-kitten";
   if (raw === "parakeet-pocket" || raw === "parakeet") return "parakeet-pocket";
-  throw new Error(`Unknown PASEO_SPEECH_E2E_MODEL_SET: ${raw}`);
+  throw new Error(`Unknown POLYHIVE_SPEECH_E2E_MODEL_SET: ${raw}`);
 }
 
 async function readFixtureWav(): Promise<Buffer> {
@@ -103,8 +103,8 @@ describe("speech models (download E2E)", () => {
       const logger = pino({ level: "silent" });
       const set = getModelSet();
 
-      const paseoHomeRoot = mkdtempSync(path.join(tmpdir(), "paseo-speech-download-"));
-      const modelsDir = path.join(paseoHomeRoot, ".paseo", "models", "local-speech");
+      const polyhiveHomeRoot = mkdtempSync(path.join(tmpdir(), "polyhive-speech-download-"));
+      const modelsDir = path.join(polyhiveHomeRoot, ".polyhive", "models", "local-speech");
 
       const modelIds: SherpaOnnxModelId[] =
         set === "parakeet-pocket"
@@ -118,7 +118,7 @@ describe("speech models (download E2E)", () => {
       });
 
       const ctx = await createDaemonTestContext({
-        paseoHomeRoot,
+        polyhiveHomeRoot,
         dictationFinalTimeoutMs: 8000,
         speech: {
           providers: {

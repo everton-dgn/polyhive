@@ -21,7 +21,7 @@ function createNoopWorkspaceGitService(): WorkspaceGitService {
           mainRepoRoot: null,
           currentBranch: null,
           remoteUrl: null,
-          isPaseoOwnedWorktree: false,
+          isPolyHiveOwnedWorktree: false,
           isDirty: null,
           aheadBehind: null,
           aheadOfOrigin: null,
@@ -46,7 +46,7 @@ function createNoopWorkspaceGitService(): WorkspaceGitService {
         mainRepoRoot: null,
         currentBranch: null,
         remoteUrl: null,
-        isPaseoOwnedWorktree: false,
+        isPolyHiveOwnedWorktree: false,
         isDirty: null,
         aheadBehind: null,
         aheadOfOrigin: null,
@@ -73,7 +73,7 @@ function createNoopWorkspaceGitService(): WorkspaceGitService {
 
 describe("bootstrapWorkspaceRegistries", () => {
   let tmpDir: string;
-  let paseoHome: string;
+  let polyhiveHome: string;
   let agentStorage: AgentStorage;
   let projectRegistry: FileBackedProjectRegistry;
   let workspaceRegistry: FileBackedWorkspaceRegistry;
@@ -82,14 +82,14 @@ describe("bootstrapWorkspaceRegistries", () => {
 
   beforeEach(() => {
     tmpDir = mkdtempSync(path.join(os.tmpdir(), "workspace-bootstrap-"));
-    paseoHome = path.join(tmpDir, ".paseo");
-    agentStorage = new AgentStorage(path.join(paseoHome, "agents"), logger);
+    polyhiveHome = path.join(tmpDir, ".polyhive");
+    agentStorage = new AgentStorage(path.join(polyhiveHome, "agents"), logger);
     projectRegistry = new FileBackedProjectRegistry(
-      path.join(paseoHome, "projects", "projects.json"),
+      path.join(polyhiveHome, "projects", "projects.json"),
       logger,
     );
     workspaceRegistry = new FileBackedWorkspaceRegistry(
-      path.join(paseoHome, "projects", "workspaces.json"),
+      path.join(polyhiveHome, "projects", "workspaces.json"),
       logger,
     );
     workspaceGitService = createNoopWorkspaceGitService();
@@ -154,7 +154,7 @@ describe("bootstrapWorkspaceRegistries", () => {
     });
 
     await bootstrapWorkspaceRegistries({
-      paseoHome,
+      polyhiveHome,
       agentStorage,
       projectRegistry,
       workspaceRegistry,
@@ -218,7 +218,7 @@ describe("bootstrapWorkspaceRegistries", () => {
     });
 
     await bootstrapWorkspaceRegistries({
-      paseoHome,
+      polyhiveHome,
       agentStorage,
       projectRegistry,
       workspaceRegistry,

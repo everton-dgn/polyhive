@@ -4,7 +4,7 @@ import { pageMeta } from "~/meta";
 export const Route = createFileRoute("/docs/worktrees")({
   head: () => ({
     meta: pageMeta(
-      "Git Worktrees - Paseo Docs",
+      "Git Worktrees - PolyHive Docs",
       "Run agents in isolated git worktrees with setup hooks, scripts, and long-running services.",
     ),
   }),
@@ -27,7 +27,8 @@ function Worktrees() {
         <p className="text-white/60 leading-relaxed">
           Each agent runs in its own git worktree — a separate directory on a separate branch — so
           parallel agents never step on each other. You configure setup, scripts, and long-running
-          services through a <code className="font-mono">paseo.json</code> file at your repo root.
+          services through a <code className="font-mono">polyhive.json</code> file at your repo
+          root.
         </p>
       </div>
 
@@ -35,31 +36,31 @@ function Worktrees() {
       <section className="space-y-4">
         <h2 className="text-xl font-medium">Layout and workflow</h2>
         <p className="text-white/60 leading-relaxed">
-          Worktrees live under <code className="font-mono">$PASEO_HOME/worktrees/</code>, grouped by
-          a hash of the source checkout path. Each worktree gets a random slug; the branch name is
-          chosen when you first launch an agent.
+          Worktrees live under <code className="font-mono">$POLYHIVE_HOME/worktrees/</code>, grouped
+          by a hash of the source checkout path. Each worktree gets a random slug; the branch name
+          is chosen when you first launch an agent.
         </p>
         <Code>
-          <pre className="text-white/80">{`~/.paseo/worktrees/
+          <pre className="text-white/80">{`~/.polyhive/worktrees/
 └── 1vnnm9k3/               # hash of source checkout path
     ├── tidy-fox/           # worktree slug (branch set on first agent)
     └── bold-owl/`}</pre>
         </Code>
         <ol className="text-white/60 space-y-2 list-decimal list-inside">
-          <li>Create a worktree — Paseo runs your setup hooks</li>
+          <li>Create a worktree — PolyHive runs your setup hooks</li>
           <li>Launch an agent — a branch is created or assigned</li>
           <li>Review the diff against the base branch</li>
           <li>Merge or archive — archive runs teardown and removes the directory</li>
         </ol>
       </section>
 
-      {/* paseo.json */}
+      {/* polyhive.json */}
       <section className="space-y-4">
-        <h2 className="text-xl font-medium">paseo.json</h2>
+        <h2 className="text-xl font-medium">polyhive.json</h2>
         <p className="text-white/60 leading-relaxed">
-          Drop a <code className="font-mono">paseo.json</code> in your repo root. Paseo reads it
-          from the committed version of the base branch you picked, so uncommitted changes in other
-          branches don't apply.
+          Drop a <code className="font-mono">polyhive.json</code> in your repo root. PolyHive reads
+          it from the committed version of the base branch you picked, so uncommitted changes in
+          other branches don't apply.
         </p>
         <Code>
           <pre className="text-white/80">{`{
@@ -90,7 +91,7 @@ function Worktrees() {
   "worktree": {
     "setup": [
       "npm ci",
-      "cp \\"$PASEO_SOURCE_CHECKOUT_PATH/.env\\" .env",
+      "cp \\"$POLYHIVE_SOURCE_CHECKOUT_PATH/.env\\" .env",
       "npm run db:migrate"
     ],
     "teardown": [
@@ -101,7 +102,7 @@ function Worktrees() {
         </Code>
         <p className="text-white/60 leading-relaxed">
           Commands run with the worktree as <code className="font-mono">cwd</code>. Use{" "}
-          <code className="font-mono">$PASEO_SOURCE_CHECKOUT_PATH</code> to reach files in the
+          <code className="font-mono">$POLYHIVE_SOURCE_CHECKOUT_PATH</code> to reach files in the
           original checkout (untracked config, local caches, etc).
         </p>
       </section>
@@ -111,7 +112,7 @@ function Worktrees() {
         <h2 className="text-xl font-medium">Scripts and services</h2>
         <p className="text-white/60 leading-relaxed">
           <code className="font-mono">scripts</code> are named commands you can run inside a
-          worktree on demand. Mark one as a <em>service</em> and Paseo supervises it as a
+          worktree on demand. Mark one as a <em>service</em> and PolyHive supervises it as a
           long-running process, assigns it a port, and routes HTTP traffic to it through the
           daemon's reverse proxy.
         </p>
@@ -133,20 +134,20 @@ function Worktrees() {
   "scripts": {
     "web": {
       "type": "service",
-      "command": "npm run dev -- --port $PASEO_PORT",
+      "command": "npm run dev -- --port $POLYHIVE_PORT",
       "port": 3000
     },
     "api": {
       "type": "service",
-      "command": "npm run api -- --port $PASEO_PORT"
+      "command": "npm run api -- --port $POLYHIVE_PORT"
     }
   }
 }`}</pre>
         </Code>
         <p className="text-white/60 leading-relaxed">
-          Omit <code className="font-mono">port</code> to let Paseo auto-assign one. Bind your
-          process to <code className="font-mono">$PASEO_PORT</code> rather than hard-coding — each
-          worktree gets a distinct port so multiple copies of the same service coexist.
+          Omit <code className="font-mono">port</code> to let PolyHive auto-assign one. Bind your
+          process to <code className="font-mono">$POLYHIVE_PORT</code> rather than hard-coding —
+          each worktree gets a distinct port so multiple copies of the same service coexist.
         </p>
 
         <h3 className="text-lg font-medium mt-6">Reverse proxy</h3>
@@ -172,17 +173,18 @@ http://<script>.<project>.localhost:<daemon-port>`}</pre>
           each process gets:
         </p>
         <Code>
-          <pre className="text-white/80">{`PASEO_PORT=3000                         # this service's port
-PASEO_URL=http://web.my-app.localhost:6767  # this service's proxy URL
-PASEO_SERVICE_API_PORT=51732
-PASEO_SERVICE_API_URL=http://api.my-app.localhost:6767
-PASEO_SERVICE_WEB_PORT=3000
-PASEO_SERVICE_WEB_URL=http://web.my-app.localhost:6767`}</pre>
+          <pre className="text-white/80">{`POLYHIVE_PORT=3000                         # this service's port
+POLYHIVE_URL=http://web.my-app.localhost:6767  # this service's proxy URL
+POLYHIVE_SERVICE_API_PORT=51732
+POLYHIVE_SERVICE_API_URL=http://api.my-app.localhost:6767
+POLYHIVE_SERVICE_WEB_PORT=3000
+POLYHIVE_SERVICE_WEB_URL=http://web.my-app.localhost:6767`}</pre>
         </Code>
         <p className="text-white/60 leading-relaxed">
           Script names are upper-cased and non-alphanumerics become{" "}
           <code className="font-mono">_</code>. Point your frontend at{" "}
-          <code className="font-mono">$PASEO_SERVICE_API_URL</code> instead of hard-coding a port.
+          <code className="font-mono">$POLYHIVE_SERVICE_API_URL</code> instead of hard-coding a
+          port.
         </p>
       </section>
 
@@ -213,29 +215,30 @@ PASEO_SERVICE_WEB_URL=http://web.my-app.localhost:6767`}</pre>
         </p>
         <ul className="text-white/60 space-y-2 list-disc list-inside">
           <li>
-            <code className="font-mono">$PASEO_SOURCE_CHECKOUT_PATH</code> — the original repo root
+            <code className="font-mono">$POLYHIVE_SOURCE_CHECKOUT_PATH</code> — the original repo
+            root
           </li>
           <li>
-            <code className="font-mono">$PASEO_WORKTREE_PATH</code> — the worktree directory
+            <code className="font-mono">$POLYHIVE_WORKTREE_PATH</code> — the worktree directory
           </li>
           <li>
-            <code className="font-mono">$PASEO_BRANCH_NAME</code> — the worktree's branch
+            <code className="font-mono">$POLYHIVE_BRANCH_NAME</code> — the worktree's branch
           </li>
           <li>
-            <code className="font-mono">$PASEO_WORKTREE_PORT</code> — legacy per-worktree port
-            (prefer <code className="font-mono">$PASEO_PORT</code> inside services)
+            <code className="font-mono">$POLYHIVE_WORKTREE_PORT</code> — legacy per-worktree port
+            (prefer <code className="font-mono">$POLYHIVE_PORT</code> inside services)
           </li>
         </ul>
         <p className="text-white/60 leading-relaxed">Services additionally get:</p>
         <ul className="text-white/60 space-y-2 list-disc list-inside">
           <li>
-            <code className="font-mono">$PASEO_PORT</code> — this service's assigned port
+            <code className="font-mono">$POLYHIVE_PORT</code> — this service's assigned port
           </li>
           <li>
-            <code className="font-mono">$PASEO_URL</code> — this service's proxy URL
+            <code className="font-mono">$POLYHIVE_URL</code> — this service's proxy URL
           </li>
           <li>
-            <code className="font-mono">$PASEO_SERVICE_&lt;NAME&gt;_PORT</code> /{" "}
+            <code className="font-mono">$POLYHIVE_SERVICE_&lt;NAME&gt;_PORT</code> /{" "}
             <code className="font-mono">_URL</code> — peer service ports and URLs
           </li>
           <li>
@@ -250,9 +253,9 @@ PASEO_SERVICE_WEB_URL=http://web.my-app.localhost:6767`}</pre>
       <section className="space-y-4">
         <h2 className="text-xl font-medium">CLI</h2>
         <Code>
-          <pre className="text-white/80">{`paseo run --worktree feature-auth --base main "implement auth"
-paseo worktree ls
-paseo worktree archive feature-auth`}</pre>
+          <pre className="text-white/80">{`polyhive run --worktree feature-auth --base main "implement auth"
+polyhive worktree ls
+polyhive worktree archive feature-auth`}</pre>
         </Code>
       </section>
     </div>

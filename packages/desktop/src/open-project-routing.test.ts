@@ -6,23 +6,23 @@ import { parseOpenProjectPathFromArgv } from "./open-project-routing";
 
 describe("open-project-routing", () => {
   it("returns a bare absolute path argument", () => {
-    const projectPath = mkdtempSync(path.join(tmpdir(), "paseo-open-project-"));
+    const projectPath = mkdtempSync(path.join(tmpdir(), "polyhive-open-project-"));
 
     expect(
       parseOpenProjectPathFromArgv({
-        argv: ["/Applications/Paseo.app/Contents/MacOS/Paseo", projectPath],
+        argv: ["/Applications/PolyHive.app/Contents/MacOS/PolyHive", projectPath],
         isDefaultApp: false,
       }),
     ).toBe(projectPath);
   });
 
   it("finds a bare absolute path even when Chromium noise args appear first", () => {
-    const projectPath = mkdtempSync(path.join(tmpdir(), "paseo-open-project-"));
+    const projectPath = mkdtempSync(path.join(tmpdir(), "polyhive-open-project-"));
 
     expect(
       parseOpenProjectPathFromArgv({
         argv: [
-          "/Applications/Paseo.app/Contents/MacOS/Paseo",
+          "/Applications/PolyHive.app/Contents/MacOS/PolyHive",
           "--allow-file-access-from-files",
           "--no-sandbox",
           projectPath,
@@ -33,31 +33,35 @@ describe("open-project-routing", () => {
   });
 
   it("does not treat flags as project paths", () => {
-    const projectPath = mkdtempSync(path.join(tmpdir(), "paseo-open-project-"));
+    const projectPath = mkdtempSync(path.join(tmpdir(), "polyhive-open-project-"));
     const flagLikeDirectory = path.join(projectPath, "--version");
     mkdirSync(flagLikeDirectory);
 
     expect(
       parseOpenProjectPathFromArgv({
-        argv: ["/Applications/Paseo.app/Contents/MacOS/Paseo", "--version", flagLikeDirectory],
+        argv: [
+          "/Applications/PolyHive.app/Contents/MacOS/PolyHive",
+          "--version",
+          flagLikeDirectory,
+        ],
         isDefaultApp: false,
       }),
     ).toBe(flagLikeDirectory);
 
     expect(
       parseOpenProjectPathFromArgv({
-        argv: ["/Applications/Paseo.app/Contents/MacOS/Paseo", "--version"],
+        argv: ["/Applications/PolyHive.app/Contents/MacOS/PolyHive", "--version"],
         isDefaultApp: false,
       }),
     ).toBeNull();
   });
 
   it("returns the path from an explicit --open-project flag for backward compatibility", () => {
-    const projectPath = mkdtempSync(path.join(tmpdir(), "paseo-open-project-"));
+    const projectPath = mkdtempSync(path.join(tmpdir(), "polyhive-open-project-"));
 
     expect(
       parseOpenProjectPathFromArgv({
-        argv: ["/Applications/Paseo.app/Contents/MacOS/Paseo", "--open-project", projectPath],
+        argv: ["/Applications/PolyHive.app/Contents/MacOS/PolyHive", "--open-project", projectPath],
         isDefaultApp: false,
       }),
     ).toBe(projectPath);

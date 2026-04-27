@@ -31,7 +31,7 @@ function createSnapshot(
       mainRepoRoot: null,
       currentBranch: "main",
       remoteUrl: "https://github.com/acme/repo.git",
-      isPaseoOwnedWorktree: false,
+      isPolyHiveOwnedWorktree: false,
       isDirty: false,
       baseRef: "main",
       aheadBehind: { ahead: 0, behind: 0 },
@@ -91,7 +91,7 @@ function createCheckoutStatus(
     behindOfOrigin: 0,
     hasRemote: true,
     remoteUrl: "https://github.com/acme/repo.git",
-    isPaseoOwnedWorktree: false,
+    isPolyHiveOwnedWorktree: false,
     ...overrides,
   };
 }
@@ -176,7 +176,7 @@ function createService(options?: {
 }) {
   return new WorkspaceGitServiceImpl({
     logger: createLogger() as any,
-    paseoHome: "/tmp/paseo-test",
+    polyhiveHome: "/tmp/polyhive-test",
     deps: {
       watch: options?.watch ?? ((() => createWatcher()) as unknown as any),
       readdir: options?.readdir ?? vi.fn(async () => []),
@@ -691,7 +691,7 @@ describe("WorkspaceGitServiceImpl", () => {
 
     expect(getCheckoutShortstat).toHaveBeenLastCalledWith(
       "/tmp/repo",
-      { paseoHome: "/tmp/paseo-test" },
+      { polyhiveHome: "/tmp/polyhive-test" },
       { force: true },
     );
     expect(workspaceListener).toHaveBeenCalledWith(

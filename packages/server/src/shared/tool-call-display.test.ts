@@ -66,19 +66,19 @@ describe("shared tool-call display mapping", () => {
 
   it("builds display model for worktree setup detail", () => {
     const display = buildToolCallDisplayModel({
-      name: "paseo_worktree_setup",
+      name: "polyhive_worktree_setup",
       status: "running",
       error: null,
       detail: {
         type: "worktree_setup",
-        worktreePath: "/tmp/repo/.paseo/worktrees/repo/branch",
+        worktreePath: "/tmp/repo/.polyhive/worktrees/repo/branch",
         branchName: "feature-branch",
         log: "==> [1/1] Running: npm install\n",
         commands: [
           {
             index: 1,
             command: "npm install",
-            cwd: "/tmp/repo/.paseo/worktrees/repo/branch",
+            cwd: "/tmp/repo/.polyhive/worktrees/repo/branch",
             log: "==> [1/1] Running: npm install\n",
             status: "running",
             exitCode: null,
@@ -142,9 +142,9 @@ describe("shared tool-call display mapping", () => {
     });
   });
 
-  it("humanizes Paseo MCP tool names (Claude Code format)", () => {
+  it("humanizes PolyHive MCP tool names (Claude Code format)", () => {
     const display = buildToolCallDisplayModel({
-      name: "mcp__paseo__create_agent",
+      name: "mcp__polyhive__create_agent",
       status: "running",
       error: null,
       detail: { type: "unknown", input: null, output: null },
@@ -152,9 +152,9 @@ describe("shared tool-call display mapping", () => {
     expect(display.displayName).toBe("Create Agent");
   });
 
-  it("humanizes Paseo MCP tool names (Codex format)", () => {
+  it("humanizes PolyHive MCP tool names (Codex format)", () => {
     const display = buildToolCallDisplayModel({
-      name: "paseo.create_agent",
+      name: "polyhive.create_agent",
       status: "running",
       error: null,
       detail: { type: "unknown", input: null, output: null },
@@ -162,9 +162,9 @@ describe("shared tool-call display mapping", () => {
     expect(display.displayName).toBe("Create Agent");
   });
 
-  it("humanizes list_agents Paseo tool", () => {
+  it("humanizes list_agents PolyHive tool", () => {
     const display = buildToolCallDisplayModel({
-      name: "mcp__paseo__list_agents",
+      name: "mcp__polyhive__list_agents",
       status: "running",
       error: null,
       detail: { type: "unknown", input: null, output: null },

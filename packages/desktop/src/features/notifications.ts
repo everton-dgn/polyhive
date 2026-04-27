@@ -73,11 +73,11 @@ export function ensureNotificationCenterRegistration(): void {
 }
 
 export function registerNotificationHandlers(): void {
-  ipcMain.handle("paseo:notification:isSupported", () => {
+  ipcMain.handle("polyhive:notification:isSupported", () => {
     return Notification.isSupported();
   });
 
-  ipcMain.handle("paseo:notification:send", async (event, rawInput?: NotificationInput) => {
+  ipcMain.handle("polyhive:notification:send", async (event, rawInput?: NotificationInput) => {
     if (!Notification.isSupported()) {
       return false;
     }
@@ -103,7 +103,7 @@ export function registerNotificationHandlers(): void {
       const win = focusSenderWindow(event.sender);
       if (win && data && Object.keys(data).length > 0) {
         const payload: NotificationClickPayload = { data };
-        win.webContents.send("paseo:event:notification-click", payload);
+        win.webContents.send("polyhive:event:notification-click", payload);
       }
       activeNotifications.delete(notification);
     });

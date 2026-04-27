@@ -1,5 +1,5 @@
 import { existsSync, readFileSync } from "node:fs";
-import { loadConfig, resolvePaseoHome, DaemonClient } from "@getpaseo/server";
+import { loadConfig, resolvePolyHiveHome, DaemonClient } from "polyhive-server";
 import path from "node:path";
 import WebSocket from "ws";
 import { getOrCreateCliClientId } from "./client-id.js";
@@ -12,7 +12,7 @@ export interface ConnectOptions {
 
 const DEFAULT_HOST = "localhost:6767";
 const DEFAULT_TIMEOUT = 15000;
-const PID_FILENAME = "paseo.pid";
+const PID_FILENAME = "polyhive.pid";
 
 type DaemonTarget =
   | {
@@ -65,8 +65,8 @@ function isTcpDaemonHost(host: string | null): host is string {
   return host !== null && !isIpcDaemonHost(host);
 }
 
-function readPidSocketTarget(paseoHome: string): string | null {
-  const pidPath = path.join(paseoHome, PID_FILENAME);
+function readPidSocketTarget(polyhiveHome: string): string | null {
+  const pidPath = path.join(polyhiveHome, PID_FILENAME);
   if (!existsSync(pidPath)) {
     return null;
   }
@@ -86,24 +86,30 @@ function readPidSocketTarget(paseoHome: string): string | null {
   }
 }
 
-function resolveConfiguredIpcDaemonHost(env: NodeJS.ProcessEnv, paseoHome: string): string | null {
-  const directEnvHost = normalizeDaemonHost(env.PASEO_LISTEN ?? "");
+function resolveConfiguredIpcDaemonHost(
+  env: NodeJS.ProcessEnv,
+  polyhiveHome: string,
+): string | null {
+  const directEnvHost = normalizeDaemonHost(env.POLYHIVE_LISTEN ?? "");
   if (isIpcDaemonHost(directEnvHost)) {
     return directEnvHost;
   }
 
-  const pidHost = normalizeDaemonHost(readPidSocketTarget(paseoHome) ?? "");
+  const pidHost = normalizeDaemonHost(readPidSocketTarget(polyhiveHome) ?? "");
   if (isIpcDaemonHost(pidHost)) {
     return pidHost;
   }
 
-  const config = loadConfig(paseoHome, { env });
+  const config = loadConfig(polyhiveHome, { env });
   const configuredHost = normalizeDaemonHost(config.listen);
   return isIpcDaemonHost(configuredHost) ? configuredHost : null;
 }
 
-function resolveConfiguredTcpDaemonHost(env: NodeJS.ProcessEnv, paseoHome: string): string | null {
-  const configuredHost = normalizeDaemonHost(loadConfig(paseoHome, { env }).listen);
+function resolveConfiguredTcpDaemonHost(
+  env: NodeJS.ProcessEnv,
+  polyhiveHome: string,
+): string | null {
+  const configuredHost = normalizeDaemonHost(loadConfig(polyhiveHome, { env }).listen);
   if (!isTcpDaemonHost(configuredHost)) {
     return null;
   }
@@ -111,13 +117,13 @@ function resolveConfiguredTcpDaemonHost(env: NodeJS.ProcessEnv, paseoHome: strin
 }
 
 export function resolveDefaultDaemonHosts(env: NodeJS.ProcessEnv = process.env): string[] {
-  const paseoHome = resolvePaseoHome(env);
+  const polyhiveHome = resolvePolyHiveHome(env);
   const candidates: string[] = [];
-  const configuredIpcHost = resolveConfiguredIpcDaemonHost(env, paseoHome);
+  const configuredIpcHost = resolveConfiguredIpcDaemonHost(env, polyhiveHome);
   if (configuredIpcHost) {
     candidates.push(configuredIpcHost);
   }
-  const configuredTcpHost = resolveConfiguredTcpDaemonHost(env, paseoHome);
+  const configuredTcpHost = resolveConfiguredTcpDaemonHost(env, polyhiveHome);
   if (configuredTcpHost) {
     candidates.push(configuredTcpHost);
   }
@@ -126,7 +132,7 @@ export function resolveDefaultDaemonHosts(env: NodeJS.ProcessEnv = process.env):
 }
 
 function resolveDaemonHostCandidates(options?: ConnectOptions): string[] {
-  const explicitHost = options?.host ?? process.env.PASEO_HOST;
+  const explicitHost = options?.host ?? process.env.POLYHIVE_HOST;
   if (explicitHost) {
     return [explicitHost];
   }
@@ -216,7 +222,7 @@ export async function connectToDaemon(options?: ConnectOptions): Promise<DaemonC
     throw lastError;
   }
 
-  throw new Error(`Unable to connect to Paseo daemon via ${hosts.join(", ")}`);
+  throw new Error(`Unable to connect to PolyHive daemon via ${hosts.join(", ")}`);
 }
 
 /**

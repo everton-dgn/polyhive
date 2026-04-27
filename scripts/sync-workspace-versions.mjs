@@ -26,6 +26,18 @@ const dependencySections = [
   "peerDependencies",
   "optionalDependencies",
 ];
+const internalPackageNames = new Set();
+
+for (const workspacePath of workspacePaths) {
+  const packagePath = path.join(rootDir, workspacePath, "package.json");
+  if (!existsSync(packagePath)) {
+    continue;
+  }
+  const pkg = JSON.parse(readFileSync(packagePath, "utf8"));
+  if (typeof pkg.name === "string" && pkg.name.length > 0) {
+    internalPackageNames.add(pkg.name);
+  }
+}
 
 const touched = [];
 
@@ -43,7 +55,7 @@ for (const workspacePath of workspacePaths) {
     changed = true;
   }
 
-  if (pkg.name === "@getpaseo/desktop") {
+  if (pkg.name === "polyhive-desktop") {
     for (const [field, value] of Object.entries(sharedMetadata)) {
       const currentValue = JSON.stringify(pkg[field]);
       const nextValue = JSON.stringify(value);
@@ -61,7 +73,7 @@ for (const workspacePath of workspacePaths) {
     }
 
     for (const name of Object.keys(deps)) {
-      if (!name.startsWith("@getpaseo/")) {
+      if (!internalPackageNames.has(name)) {
         continue;
       }
       if (name === pkg.name) {

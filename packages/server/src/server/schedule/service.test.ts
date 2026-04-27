@@ -27,7 +27,7 @@ describe("ScheduleService", () => {
 
   test("ticks due schedules and records run history on disk", async () => {
     const service = new ScheduleService({
-      paseoHome: tempDir,
+      polyhiveHome: tempDir,
       logger: createTestLogger(),
       agentManager: new AgentManager({ logger: createTestLogger() }),
       agentStorage,
@@ -65,7 +65,7 @@ describe("ScheduleService", () => {
 
   test("pause and resume update persisted schedule state", async () => {
     const service = new ScheduleService({
-      paseoHome: tempDir,
+      polyhiveHome: tempDir,
       logger: createTestLogger(),
       agentManager: new AgentManager({ logger: createTestLogger() }),
       agentStorage,
@@ -100,7 +100,7 @@ describe("ScheduleService", () => {
 
   test("completes schedules when max runs is reached", async () => {
     const service = new ScheduleService({
-      paseoHome: tempDir,
+      polyhiveHome: tempDir,
       logger: createTestLogger(),
       agentManager: new AgentManager({ logger: createTestLogger() }),
       agentStorage,
@@ -139,7 +139,7 @@ describe("ScheduleService", () => {
       registry: agentStorage,
     });
     const service = new ScheduleService({
-      paseoHome: tempDir,
+      polyhiveHome: tempDir,
       logger: createTestLogger(),
       agentManager: manager,
       agentStorage,
@@ -173,7 +173,7 @@ describe("ScheduleService", () => {
 
   test("advances stale nextRunAt on daemon restart", async () => {
     const service1 = new ScheduleService({
-      paseoHome: tempDir,
+      polyhiveHome: tempDir,
       logger: createTestLogger(),
       agentManager: new AgentManager({ logger: createTestLogger() }),
       agentStorage,
@@ -196,7 +196,7 @@ describe("ScheduleService", () => {
     // Simulate daemon restart 10 minutes later
     now = new Date("2026-01-01T00:10:00.000Z");
     const service2 = new ScheduleService({
-      paseoHome: tempDir,
+      polyhiveHome: tempDir,
       logger: createTestLogger(),
       agentManager: new AgentManager({ logger: createTestLogger() }),
       agentStorage,
@@ -221,7 +221,7 @@ describe("ScheduleService", () => {
     });
 
     const service = new ScheduleService({
-      paseoHome: tempDir,
+      polyhiveHome: tempDir,
       logger: createTestLogger(),
       agentManager: new AgentManager({ logger: createTestLogger() }),
       agentStorage,
@@ -269,7 +269,7 @@ describe("ScheduleService", () => {
   test("rejects archived target agents before loading them", async () => {
     const manager = new AgentManager({ logger: createTestLogger() });
     const service = new ScheduleService({
-      paseoHome: tempDir,
+      polyhiveHome: tempDir,
       logger: createTestLogger(),
       agentManager: manager,
       agentStorage,

@@ -59,13 +59,13 @@ function isEqualValue(a: unknown, b: unknown): boolean {
 
 export class DaemonConfigStore {
   private current: MutableDaemonConfig;
-  private readonly paseoHome: string;
+  private readonly polyhiveHome: string;
   private readonly logger: LoggerLike | undefined;
   private readonly changeListeners = new Set<ConfigListener>();
   private readonly fieldChangeHandlers = new Map<string, Set<FieldChangeHandler>>();
 
-  constructor(paseoHome: string, initial: MutableDaemonConfig, logger?: LoggerLike) {
-    this.paseoHome = paseoHome;
+  constructor(polyhiveHome: string, initial: MutableDaemonConfig, logger?: LoggerLike) {
+    this.polyhiveHome = polyhiveHome;
     this.logger = getLogger(logger);
     this.current = MutableDaemonConfigSchema.parse(initial);
   }
@@ -134,12 +134,12 @@ export class DaemonConfigStore {
   }
 
   private persistConfig(config: MutableDaemonConfig): void {
-    const persisted = loadPersistedConfig(this.paseoHome, this.logger);
+    const persisted = loadPersistedConfig(this.polyhiveHome, this.logger);
     const nextPersisted = mergeMutableConfigIntoPersistedConfig({
       persisted,
       mutable: config,
     });
-    savePersistedConfig(this.paseoHome, nextPersisted, this.logger);
+    savePersistedConfig(this.polyhiveHome, nextPersisted, this.logger);
   }
 }
 

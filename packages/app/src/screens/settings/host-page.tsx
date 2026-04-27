@@ -402,7 +402,7 @@ function DaemonSection({ host, isLocalDaemon }: { host: HostProfile; isLocalDaem
     <>
       <SettingsSection title="Operations">
         <RestartDaemonCard host={host} />
-        <InjectPaseoToolsCard serverId={host.serverId} />
+        <InjectPolyHiveToolsCard serverId={host.serverId} />
       </SettingsSection>
       {isLocalDaemon ? (
         <SettingsSection title="Pair devices">
@@ -483,7 +483,7 @@ function RestartDaemonCard({ host }: { host: HostProfile }) {
     if (!isHostConnected()) {
       Alert.alert(
         "Host offline",
-        "This host is offline. Paseo reconnects automatically—wait until it's back online before restarting.",
+        "This host is offline. PolyHive reconnects automatically—wait until it's back online before restarting.",
       );
       return;
     }
@@ -506,7 +506,7 @@ function RestartDaemonCard({ host }: { host: HostProfile }) {
             setIsRestarting(false);
             Alert.alert(
               "Error",
-              "Failed to send the restart request. Paseo reconnects automatically—try again once the host shows as online.",
+              "Failed to send the restart request. PolyHive reconnects automatically—try again once the host shows as online.",
             );
           });
         void waitForDaemonRestart();
@@ -541,7 +541,7 @@ function RestartDaemonCard({ host }: { host: HostProfile }) {
   );
 }
 
-function InjectPaseoToolsCard({ serverId }: { serverId: string }) {
+function InjectPolyHiveToolsCard({ serverId }: { serverId: string }) {
   const isConnected = useHostRuntimeIsConnected(serverId);
   const { config, patchConfig } = useDaemonConfig(serverId);
 
@@ -551,9 +551,9 @@ function InjectPaseoToolsCard({ serverId }: { serverId: string }) {
     <View style={settingsStyles.card} testID="host-page-inject-mcp-card">
       <View style={settingsStyles.row}>
         <View style={settingsStyles.rowContent}>
-          <Text style={settingsStyles.rowTitle}>Inject Paseo tools</Text>
+          <Text style={settingsStyles.rowTitle}>Inject PolyHive tools</Text>
           <Text style={settingsStyles.rowHint}>
-            Automatically inject Paseo MCP tools into new agents
+            Automatically inject PolyHive MCP tools into new agents
           </Text>
         </View>
         <SegmentedControl

@@ -16,10 +16,10 @@ export EXPO_PORT
 # Allow any origin in dev so Electron on random localhost ports can reach
 # the daemon websocket. Safe here because this script is development-only
 # and the daemon still binds to localhost.
-export PASEO_CORS_ORIGINS="*"
+export POLYHIVE_CORS_ORIGINS="*"
 
 echo "══════════════════════════════════════════════════════"
-echo "  Paseo Desktop Dev"
+echo "  PolyHive Desktop Dev"
 echo "══════════════════════════════════════════════════════"
 echo "  Metro:     http://localhost:${EXPO_PORT}"
 echo "══════════════════════════════════════════════════════"

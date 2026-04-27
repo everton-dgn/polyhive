@@ -1,7 +1,7 @@
 {
-  "name": "@getpaseo/cli",
+  "name": "polyhive",
   "version": "0.1.60-beta.1",
-  "description": "Paseo CLI - control your AI coding agents from the command line",
+  "description": "PolyHive CLI - control your AI coding agents from the command line",
   "type": "module",
   "files": [
     "bin",
@@ -11,7 +11,7 @@
     "access": "public"
   },
   "bin": {
-    "paseo": "bin/paseo"
+    "polyhive": "bin/polyhive"
   },
   "scripts": {
     "build": "node -e \"require('node:fs').rmSync('dist',{ recursive: true, force: true })\" && tsc -p tsconfig.json --incremental false",
@@ -24,8 +24,8 @@
   },
   "dependencies": {
     "@clack/prompts": "1.1.0",
-    "@getpaseo/relay": "0.1.60-beta.1",
-    "@getpaseo/server": "0.1.60-beta.1",
+    "polyhive-relay": "0.1.60-beta.1",
+    "polyhive-server": "0.1.60-beta.1",
     "chalk": "5.6.2",
     "commander": "12.1.0",
     "mime-types": "2.1.35",

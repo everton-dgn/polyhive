@@ -7,7 +7,7 @@
 }:
 
 buildNpmPackage rec {
-  pname = "paseo";
+  pname = "polyhive";
   version = (builtins.fromJSON (builtins.readFile ../package.json)).version;
 
   src = lib.cleanSourceWith {
@@ -29,7 +29,7 @@ buildNpmPackage rec {
       && !(lib.hasSuffix ".e2e.test.ts" baseName)
       && baseName != "node_modules"
       && baseName != ".git"
-      && baseName != ".paseo"
+      && baseName != ".polyhive"
       && baseName != ".DS_Store";
   };
 
@@ -70,24 +70,31 @@ buildNpmPackage rec {
   installPhase = ''
     runHook preInstall
 
-    mkdir -p $out/lib/paseo
+    mkdir -p $out/lib/polyhive
 
     # Copy root package metadata
-    cp package.json $out/lib/paseo/
+    cp package.json $out/lib/polyhive/
 
     # Copy node_modules (preserving workspace symlinks)
-    cp -a node_modules $out/lib/paseo/
+    cp -a node_modules $out/lib/polyhive/
 
-    # Auto-detect which @getpaseo/* packages were built by build:daemon
+    # Auto-detect which PolyHive workspace packages were built by build:daemon
     # (they'll have a dist/ directory). Copy those and remove the rest.
-    for link in $out/lib/paseo/node_modules/@getpaseo/*; do
-      name=$(basename "$link")
-      if [ -d "packages/$name/dist" ]; then
-        mkdir -p "$out/lib/paseo/packages/$name"
-        cp "packages/$name/package.json" "$out/lib/paseo/packages/$name/"
-        cp -a "packages/$name/dist" "$out/lib/paseo/packages/$name/"
-        if [ -d "packages/$name/node_modules" ]; then
-          cp -a "packages/$name/node_modules" "$out/lib/paseo/packages/$name/"
+    for spec in \
+      polyhive:cli \
+      polyhive-highlight:highlight \
+      polyhive-relay:relay \
+      polyhive-server:server; do
+      package_name=''${spec%%:*}
+      workspace_name=''${spec#*:}
+      link="$out/lib/polyhive/node_modules/$package_name"
+      [ -e "$link" ] || continue
+      if [ -d "packages/$workspace_name/dist" ]; then
+        mkdir -p "$out/lib/polyhive/packages/$workspace_name"
+        cp "packages/$workspace_name/package.json" "$out/lib/polyhive/packages/$workspace_name/"
+        cp -a "packages/$workspace_name/dist" "$out/lib/polyhive/packages/$workspace_name/"
+        if [ -d "packages/$workspace_name/node_modules" ]; then
+          cp -a "packages/$workspace_name/node_modules" "$out/lib/polyhive/packages/$workspace_name/"
         fi
       else
         rm -f "$link"
@@ -95,41 +102,41 @@ buildNpmPackage rec {
     done
 
     # Copy CLI bin entry
-    mkdir -p $out/lib/paseo/packages/cli/bin
-    cp packages/cli/bin/paseo $out/lib/paseo/packages/cli/bin/
+    mkdir -p $out/lib/polyhive/packages/cli/bin
+    cp packages/cli/bin/polyhive $out/lib/polyhive/packages/cli/bin/
 
     # Copy extra server files referenced at runtime
     for f in agent-prompt.md .env.example; do
       if [ -f packages/server/$f ]; then
-        cp packages/server/$f $out/lib/paseo/packages/server/
+        cp packages/server/$f $out/lib/polyhive/packages/server/
       fi
     done
 
     # Copy server scripts (including supervisor-entrypoint) needed by CLI
     if [ -d packages/server/dist/scripts ]; then
-      mkdir -p $out/lib/paseo/packages/server/dist/scripts
-      cp -a packages/server/dist/scripts/* $out/lib/paseo/packages/server/dist/scripts/
+      mkdir -p $out/lib/polyhive/packages/server/dist/scripts
+      cp -a packages/server/dist/scripts/* $out/lib/polyhive/packages/server/dist/scripts/
     fi
 
     # Create wrapper for the server entry point (for systemd / direct use)
     mkdir -p $out/bin
-    makeWrapper ${nodejs}/bin/node $out/bin/paseo-server \
-      --add-flags "$out/lib/paseo/packages/server/dist/server/server/index.js" \
+    makeWrapper ${nodejs}/bin/node $out/bin/polyhive-server \
+      --add-flags "$out/lib/polyhive/packages/server/dist/server/server/index.js" \
       --set NODE_ENV production
 
     # Create wrapper for the CLI
-    makeWrapper ${nodejs}/bin/node $out/bin/paseo \
-      --add-flags "$out/lib/paseo/packages/cli/dist/index.js" \
-      --set NODE_PATH "$out/lib/paseo/node_modules"
+    makeWrapper ${nodejs}/bin/node $out/bin/polyhive \
+      --add-flags "$out/lib/polyhive/packages/cli/dist/index.js" \
+      --set NODE_PATH "$out/lib/polyhive/node_modules"
 
     runHook postInstall
   '';
 
   meta = {
     description = "Self-hosted daemon for Claude Code, Codex, and OpenCode";
-    homepage = "https://github.com/everton-dgn/paseo-contrib";
+    homepage = "https://github.com/everton-dgn/polyhive";
     license = lib.licenses.agpl3Plus;
-    mainProgram = "paseo";
+    mainProgram = "polyhive";
     platforms = [ "aarch64-darwin" ];
   };
 }

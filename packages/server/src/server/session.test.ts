@@ -32,8 +32,8 @@ const spawnMocks = vi.hoisted(() => ({
   spawnWorkspaceScript: vi.fn(),
 }));
 
-const paseoWorktreeServiceMocks = vi.hoisted(() => ({
-  createPaseoWorktree: vi.fn(),
+const polyhiveWorktreeServiceMocks = vi.hoisted(() => ({
+  createPolyHiveWorktree: vi.fn(),
 }));
 
 vi.mock("../utils/checkout-git.js", async (importOriginal) => {
@@ -55,11 +55,11 @@ vi.mock("../utils/checkout-git.js", async (importOriginal) => {
   };
 });
 
-vi.mock("./paseo-worktree-service.js", async (importOriginal) => {
-  const actual = await importOriginal<typeof import("./paseo-worktree-service.js")>();
+vi.mock("./polyhive-worktree-service.js", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("./polyhive-worktree-service.js")>();
   return {
     ...actual,
-    createPaseoWorktree: paseoWorktreeServiceMocks.createPaseoWorktree,
+    createPolyHiveWorktree: polyhiveWorktreeServiceMocks.createPolyHiveWorktree,
   };
 });
 
@@ -143,7 +143,7 @@ function createSessionForTest(options?: {
     onMessage: (message) => messages.push(message),
     logger,
     downloadTokenStore: {} as any,
-    paseoHome: "/tmp/paseo-home",
+    polyhiveHome: "/tmp/polyhive-home",
     agentManager:
       options?.agentManager ??
       ({
@@ -189,8 +189,8 @@ function createWorkspaceGitSnapshot(
       repoRoot: cwd,
       mainRepoRoot: null,
       currentBranch: "feature/service",
-      remoteUrl: "https://github.com/getpaseo/paseo.git",
-      isPaseoOwnedWorktree: false,
+      remoteUrl: "https://github.com/polyhive/polyhive.git",
+      isPolyHiveOwnedWorktree: false,
       isDirty: true,
       baseRef: "main",
       aheadBehind: { ahead: 2, behind: 1 },
@@ -220,7 +220,7 @@ describe("session PR status payload normalization", () => {
       number: 123,
       repoOwner: "internal-owner",
       repoName: "internal-repo",
-      url: "https://github.com/getpaseo/paseo/pull/123",
+      url: "https://github.com/polyhive/polyhive/pull/123",
       title: "Ship PR pane",
       state: "open",
       baseRefName: "main",
@@ -231,7 +231,7 @@ describe("session PR status payload normalization", () => {
         {
           name: "typecheck",
           status: "success",
-          url: "https://github.com/getpaseo/paseo/actions/runs/1",
+          url: "https://github.com/polyhive/polyhive/actions/runs/1",
           workflow: "CI",
           duration: "1m 20s",
         },
@@ -286,7 +286,7 @@ describe("session checkout merge handling", () => {
         baseRef: "main",
         mode: "merge",
       },
-      { paseoHome: "/tmp/paseo-home" },
+      { polyhiveHome: "/tmp/polyhive-home" },
     );
     expect(workspaceGitService.getSnapshot).toHaveBeenCalledWith("/tmp/base-worktree", {
       force: true,
@@ -531,7 +531,7 @@ describe("session checkout pull request creation", () => {
       body: "Updates file.",
     });
     checkoutGitMocks.createPullRequest.mockResolvedValue({
-      url: "https://github.com/getpaseo/paseo/pull/1",
+      url: "https://github.com/polyhive/polyhive/pull/1",
       number: 1,
     });
     const session = createSessionForTest({ workspaceGitService, messages });
@@ -567,7 +567,7 @@ describe("session checkout pull request creation", () => {
       type: "checkout_pr_create_response",
       payload: {
         cwd: "/tmp/request-worktree",
-        url: "https://github.com/getpaseo/paseo/pull/1",
+        url: "https://github.com/polyhive/polyhive/pull/1",
         number: 1,
         error: null,
         requestId: "request-generated-pr",
@@ -582,7 +582,7 @@ describe("session checkout pull request creation", () => {
       getSnapshot: vi.fn().mockResolvedValue({}),
     };
     checkoutGitMocks.createPullRequest.mockResolvedValue({
-      url: "https://github.com/getpaseo/paseo/pull/2",
+      url: "https://github.com/polyhive/polyhive/pull/2",
       number: 2,
     });
     const session = createSessionForTest({ github, workspaceGitService, messages });
@@ -605,7 +605,7 @@ describe("session checkout pull request creation", () => {
       type: "checkout_pr_create_response",
       payload: {
         cwd: "/tmp/request-worktree",
-        url: "https://github.com/getpaseo/paseo/pull/2",
+        url: "https://github.com/polyhive/polyhive/pull/2",
         number: 2,
         error: null,
         requestId: "request-pr-create",
@@ -707,8 +707,8 @@ describe("session checkout status handling", () => {
         aheadOfOrigin: 2,
         behindOfOrigin: 1,
         hasRemote: true,
-        remoteUrl: "https://github.com/getpaseo/paseo.git",
-        isPaseoOwnedWorktree: false,
+        remoteUrl: "https://github.com/polyhive/polyhive.git",
+        isPolyHiveOwnedWorktree: false,
         error: null,
         requestId: "request-status",
       },
@@ -860,7 +860,7 @@ describe("session branch validation", () => {
   });
 
   test("does not validate tags as branches", async () => {
-    const tempDir = mkdtempSync(join(tmpdir(), "paseo-session-branch-validation-"));
+    const tempDir = mkdtempSync(join(tmpdir(), "polyhive-session-branch-validation-"));
     const repoDir = join(tempDir, "repo");
 
     try {
@@ -1194,9 +1194,9 @@ describe("session stash list handling", () => {
     const entries = [
       {
         index: 0,
-        message: "paseo-auto-stash: feature",
+        message: "polyhive-auto-stash: feature",
         branch: "feature",
-        isPaseo: true,
+        isPolyHive: true,
       },
     ];
     const workspaceGitService = {
@@ -1209,13 +1209,13 @@ describe("session stash list handling", () => {
     await (session as any).handleStashListRequest({
       type: "stash_list_request",
       cwd: "/tmp/repo",
-      paseoOnly: true,
+      polyhiveOnly: true,
       requestId: "request-stashes",
     });
 
     expect(workspaceGitService.listStashes).toHaveBeenCalledTimes(1);
     expect(workspaceGitService.listStashes).toHaveBeenCalledWith("/tmp/repo", {
-      paseoOnly: true,
+      polyhiveOnly: true,
     });
     expect(messages).toContainEqual({
       type: "stash_list_response",
@@ -1294,27 +1294,27 @@ describe("session stash mutation handling", () => {
   });
 });
 
-describe("session paseo worktree creation handling", () => {
+describe("session polyhive worktree creation handling", () => {
   test("forces workspace git refreshes for the source repo and created worktree", async () => {
     const workspaceGitService = { getSnapshot: vi.fn().mockResolvedValue({}) };
     const session = createSessionForTest({ workspaceGitService });
-    paseoWorktreeServiceMocks.createPaseoWorktree.mockResolvedValue({
+    polyhiveWorktreeServiceMocks.createPolyHiveWorktree.mockResolvedValue({
       repoRoot: "/tmp/repo",
       worktree: {
         branchName: "feature/new-worktree",
-        worktreePath: "/tmp/paseo/worktrees/new-worktree",
+        worktreePath: "/tmp/polyhive/worktrees/new-worktree",
       },
       workspace: {
         workspaceId: "workspace-new-worktree",
         projectId: "project-repo",
-        cwd: "/tmp/paseo/worktrees/new-worktree",
+        cwd: "/tmp/polyhive/worktrees/new-worktree",
         kind: "worktree",
         displayName: "feature/new-worktree",
       },
       created: true,
     });
 
-    await (session as any).createPaseoWorktree({
+    await (session as any).createPolyHiveWorktree({
       cwd: "/tmp/repo",
       worktreeSlug: "new-worktree",
       runSetup: false,
@@ -1325,7 +1325,7 @@ describe("session paseo worktree creation handling", () => {
       reason: "create-worktree",
     });
     expect(workspaceGitService.getSnapshot).toHaveBeenCalledWith(
-      "/tmp/paseo/worktrees/new-worktree",
+      "/tmp/polyhive/worktrees/new-worktree",
       {
         force: true,
         reason: "create-worktree",
@@ -1341,9 +1341,9 @@ describe("session workspace script handling", () => {
       peekSnapshot: vi.fn(() => null),
       getWorkspaceGitMetadata: vi.fn().mockResolvedValue({
         projectKind: "git",
-        projectDisplayName: "getpaseo/paseo",
+        projectDisplayName: "polyhive/polyhive",
         workspaceDisplayName: "feature/service-scripts",
-        projectSlug: "paseo",
+        projectSlug: "polyhive",
         currentBranch: "feature/service-scripts",
       }),
     };
@@ -1381,7 +1381,7 @@ describe("session workspace script handling", () => {
       expect.objectContaining({
         repoRoot: "/tmp/repo",
         workspaceId: "workspace-1",
-        projectSlug: "paseo",
+        projectSlug: "polyhive",
         branchName: "feature/service-scripts",
         scriptName: "api",
         daemonPort: 6767,
@@ -1413,7 +1413,7 @@ describe("session pull request timeline handling", () => {
             kind: "pr",
             number: 42,
             title: "Ship search",
-            url: "https://github.com/getpaseo/paseo/pull/42",
+            url: "https://github.com/polyhive/polyhive/pull/42",
             state: "OPEN",
             body: null,
             labels: [],
@@ -1449,7 +1449,7 @@ describe("session pull request timeline handling", () => {
             kind: "pr",
             number: 42,
             title: "Ship search",
-            url: "https://github.com/getpaseo/paseo/pull/42",
+            url: "https://github.com/polyhive/polyhive/pull/42",
             state: "OPEN",
             body: null,
             labels: [],
@@ -1472,8 +1472,8 @@ describe("session pull request timeline handling", () => {
       isAuthenticated: vi.fn().mockResolvedValue(true),
       getPullRequestTimeline: vi.fn().mockResolvedValue({
         prNumber: 42,
-        repoOwner: "getpaseo",
-        repoName: "paseo",
+        repoOwner: "polyhive",
+        repoName: "polyhive",
         items: [
           {
             id: "review-1",
@@ -1482,7 +1482,7 @@ describe("session pull request timeline handling", () => {
             authorUrl: "https://github.com/octocat",
             body: "Looks good",
             createdAt: 1710000000000,
-            url: "https://github.com/getpaseo/paseo/pull/42#pullrequestreview-1",
+            url: "https://github.com/polyhive/polyhive/pull/42#pullrequestreview-1",
             reviewState: "approved",
           },
         ],
@@ -1496,16 +1496,16 @@ describe("session pull request timeline handling", () => {
       type: "pull_request_timeline_request",
       cwd: "/tmp/repo",
       prNumber: 42,
-      repoOwner: "getpaseo",
-      repoName: "paseo",
+      repoOwner: "polyhive",
+      repoName: "polyhive",
       requestId: "request-1",
     });
 
     expect(github.getPullRequestTimeline).toHaveBeenCalledWith({
       cwd: "/tmp/repo",
       prNumber: 42,
-      repoOwner: "getpaseo",
-      repoName: "paseo",
+      repoOwner: "polyhive",
+      repoName: "polyhive",
     });
     expect(messages).toContainEqual({
       type: "pull_request_timeline_response",
@@ -1519,7 +1519,7 @@ describe("session pull request timeline handling", () => {
             author: "octocat",
             body: "Looks good",
             createdAt: 1710000000000,
-            url: "https://github.com/getpaseo/paseo/pull/42#pullrequestreview-1",
+            url: "https://github.com/polyhive/polyhive/pull/42#pullrequestreview-1",
             reviewState: "approved",
           },
         ],
@@ -1532,14 +1532,14 @@ describe("session pull request timeline handling", () => {
   });
 
   test.each([
-    { prNumber: 0, repoOwner: "getpaseo", repoName: "paseo" },
-    { prNumber: -1, repoOwner: "getpaseo", repoName: "paseo" },
-    { prNumber: 42, repoOwner: "get paseo", repoName: "paseo" },
-    { prNumber: 42, repoOwner: "getpaseo/cli", repoName: "paseo" },
-    { prNumber: 42, repoOwner: "get$paseo", repoName: "paseo" },
-    { prNumber: 42, repoOwner: "getpaseo", repoName: "pa seo" },
-    { prNumber: 42, repoOwner: "getpaseo", repoName: "paseo/app" },
-    { prNumber: 42, repoOwner: "getpaseo", repoName: "paseo!" },
+    { prNumber: 0, repoOwner: "polyhive", repoName: "polyhive" },
+    { prNumber: -1, repoOwner: "polyhive", repoName: "polyhive" },
+    { prNumber: 42, repoOwner: "get polyhive", repoName: "polyhive" },
+    { prNumber: 42, repoOwner: "polyhive/cli", repoName: "polyhive" },
+    { prNumber: 42, repoOwner: "get$polyhive", repoName: "polyhive" },
+    { prNumber: 42, repoOwner: "polyhive", repoName: "pa seo" },
+    { prNumber: 42, repoOwner: "polyhive", repoName: "polyhive/app" },
+    { prNumber: 42, repoOwner: "polyhive", repoName: "polyhive!" },
   ])("returns an unknown error when request identity is invalid: %j", async (identity) => {
     const messages: unknown[] = [];
     const github = {
@@ -1588,8 +1588,8 @@ describe("session pull request timeline handling", () => {
       type: "pull_request_timeline_request",
       cwd: "/tmp/repo",
       prNumber: 42,
-      repoOwner: "getpaseo",
-      repoName: "paseo",
+      repoOwner: "polyhive",
+      repoName: "polyhive",
       requestId: "request-3",
     });
 

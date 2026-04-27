@@ -31,8 +31,8 @@ function isPidRunning(pid: number): boolean {
   }
 }
 
-function getPidFilePath(paseoHome: string): string {
-  return join(paseoHome, "paseo.pid");
+function getPidFilePath(polyhiveHome: string): string {
+  return join(polyhiveHome, "polyhive.pid");
 }
 
 function resolveOwnerPid(ownerPid?: number): number {
@@ -43,15 +43,15 @@ function resolveOwnerPid(ownerPid?: number): number {
 }
 
 export async function acquirePidLock(
-  paseoHome: string,
+  polyhiveHome: string,
   listen: string | null,
   options?: { ownerPid?: number },
 ): Promise<void> {
-  const pidPath = getPidFilePath(paseoHome);
+  const pidPath = getPidFilePath(polyhiveHome);
 
-  // Ensure paseoHome directory exists
-  if (!existsSync(paseoHome)) {
-    await mkdir(paseoHome, { recursive: true });
+  // Ensure polyhiveHome directory exists
+  if (!existsSync(polyhiveHome)) {
+    await mkdir(polyhiveHome, { recursive: true });
   }
 
   // Try to read existing lock
@@ -72,7 +72,7 @@ export async function acquirePidLock(
       }
 
       throw new PidLockError(
-        `Another Paseo daemon is already running (PID ${existingLock.pid}, started ${existingLock.startedAt})`,
+        `Another PolyHive daemon is already running (PID ${existingLock.pid}, started ${existingLock.startedAt})`,
         existingLock,
       );
     }
@@ -87,7 +87,7 @@ export async function acquirePidLock(
     hostname: hostname(),
     uid: process.getuid?.() ?? 0,
     listen,
-    ...(process.env.PASEO_DESKTOP_MANAGED === "1" ? { desktopManaged: true } : {}),
+    ...(process.env.POLYHIVE_DESKTOP_MANAGED === "1" ? { desktopManaged: true } : {}),
   };
 
   let fd;
@@ -102,7 +102,7 @@ export async function acquirePidLock(
         const content = await readFile(pidPath, "utf-8");
         const raceLock = JSON.parse(content) as PidLockInfo;
         throw new PidLockError(
-          `Another Paseo daemon is already running (PID ${raceLock.pid})`,
+          `Another PolyHive daemon is already running (PID ${raceLock.pid})`,
           raceLock,
         );
       } catch (innerErr) {
@@ -117,11 +117,11 @@ export async function acquirePidLock(
 }
 
 export async function updatePidLock(
-  paseoHome: string,
+  polyhiveHome: string,
   patch: { listen: string },
   options?: { ownerPid?: number },
 ): Promise<void> {
-  const pidPath = getPidFilePath(paseoHome);
+  const pidPath = getPidFilePath(polyhiveHome);
   const lockOwnerPid = resolveOwnerPid(options?.ownerPid);
   const content = await readFile(pidPath, "utf-8");
   const existingLock = JSON.parse(content) as PidLockInfo;
@@ -145,10 +145,10 @@ export async function updatePidLock(
 }
 
 export async function releasePidLock(
-  paseoHome: string,
+  polyhiveHome: string,
   options?: { ownerPid?: number },
 ): Promise<void> {
-  const pidPath = getPidFilePath(paseoHome);
+  const pidPath = getPidFilePath(polyhiveHome);
   const lockOwnerPid = resolveOwnerPid(options?.ownerPid);
   try {
     // Only remove if it's our lock
@@ -162,8 +162,8 @@ export async function releasePidLock(
   }
 }
 
-export async function getPidLockInfo(paseoHome: string): Promise<PidLockInfo | null> {
-  const pidPath = getPidFilePath(paseoHome);
+export async function getPidLockInfo(polyhiveHome: string): Promise<PidLockInfo | null> {
+  const pidPath = getPidFilePath(polyhiveHome);
   try {
     const content = await readFile(pidPath, "utf-8");
     return JSON.parse(content) as PidLockInfo;
@@ -173,9 +173,9 @@ export async function getPidLockInfo(paseoHome: string): Promise<PidLockInfo | n
 }
 
 export async function isLocked(
-  paseoHome: string,
+  polyhiveHome: string,
 ): Promise<{ locked: boolean; info?: PidLockInfo }> {
-  const info = await getPidLockInfo(paseoHome);
+  const info = await getPidLockInfo(polyhiveHome);
   if (!info) {
     return { locked: false };
   }

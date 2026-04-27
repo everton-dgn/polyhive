@@ -8,7 +8,7 @@ import { experimental_createMCPClient } from "ai";
 import { StreamableHTTPClientTransport } from "@modelcontextprotocol/sdk/client/streamableHttp.js";
 import pino from "pino";
 
-import { createPaseoDaemon, type PaseoDaemonConfig } from "../bootstrap.js";
+import { createPolyHiveDaemon, type PolyHiveDaemonConfig } from "../bootstrap.js";
 import { createTestAgentClients } from "../test-utils/fake-agent-client.js";
 
 type StructuredContent = { [key: string]: unknown };
@@ -110,24 +110,24 @@ async function waitForAgentCompletion(options: {
 
 describe("agent MCP end-to-end (offline)", () => {
   test("create_agent runs initial prompt and affects filesystem", async () => {
-    const paseoHome = await mkdtemp(path.join(os.tmpdir(), "paseo-home-"));
-    const staticDir = await mkdtemp(path.join(os.tmpdir(), "paseo-static-"));
-    const agentCwd = await mkdtemp(path.join(os.tmpdir(), "paseo-agent-cwd-"));
+    const polyhiveHome = await mkdtemp(path.join(os.tmpdir(), "polyhive-home-"));
+    const staticDir = await mkdtemp(path.join(os.tmpdir(), "polyhive-static-"));
+    const agentCwd = await mkdtemp(path.join(os.tmpdir(), "polyhive-agent-cwd-"));
     const port = await getAvailablePort();
 
-    const daemonConfig: PaseoDaemonConfig = {
+    const daemonConfig: PolyHiveDaemonConfig = {
       listen: `127.0.0.1:${port}`,
-      paseoHome,
+      polyhiveHome,
       corsAllowedOrigins: [],
       hostnames: true,
       mcpEnabled: true,
       staticDir,
       mcpDebug: false,
       agentClients: createTestAgentClients(),
-      agentStoragePath: path.join(paseoHome, "agents"),
+      agentStoragePath: path.join(polyhiveHome, "agents"),
     };
 
-    const daemon = await createPaseoDaemon(daemonConfig, pino({ level: "silent" }));
+    const daemon = await createPolyHiveDaemon(daemonConfig, pino({ level: "silent" }));
     await daemon.start();
 
     const transport = new StreamableHTTPClientTransport(
@@ -176,31 +176,31 @@ describe("agent MCP end-to-end (offline)", () => {
       }
       await client.close();
       await daemon.stop();
-      await rm(paseoHome, { recursive: true, force: true });
+      await rm(polyhiveHome, { recursive: true, force: true });
       await rm(staticDir, { recursive: true, force: true });
       await rm(agentCwd, { recursive: true, force: true });
     }
   }, 30_000);
 
-  test("create_agent auto-injects paseo MCP by default and can be disabled", async () => {
-    const paseoHome = await mkdtemp(path.join(os.tmpdir(), "paseo-home-"));
-    const staticDir = await mkdtemp(path.join(os.tmpdir(), "paseo-static-"));
-    const agentCwd = await mkdtemp(path.join(os.tmpdir(), "paseo-agent-cwd-"));
+  test("create_agent auto-injects polyhive MCP by default and can be disabled", async () => {
+    const polyhiveHome = await mkdtemp(path.join(os.tmpdir(), "polyhive-home-"));
+    const staticDir = await mkdtemp(path.join(os.tmpdir(), "polyhive-static-"));
+    const agentCwd = await mkdtemp(path.join(os.tmpdir(), "polyhive-agent-cwd-"));
     const port = await getAvailablePort();
 
-    const daemonConfig: PaseoDaemonConfig = {
+    const daemonConfig: PolyHiveDaemonConfig = {
       listen: `127.0.0.1:${port}`,
-      paseoHome,
+      polyhiveHome,
       corsAllowedOrigins: [],
       hostnames: true,
       mcpEnabled: true,
       staticDir,
       mcpDebug: false,
       agentClients: createTestAgentClients(),
-      agentStoragePath: path.join(paseoHome, "agents"),
+      agentStoragePath: path.join(polyhiveHome, "agents"),
     };
 
-    const daemon = await createPaseoDaemon(daemonConfig, pino({ level: "silent" }));
+    const daemon = await createPolyHiveDaemon(daemonConfig, pino({ level: "silent" }));
     await daemon.start();
 
     const transport = new StreamableHTTPClientTransport(
@@ -208,13 +208,13 @@ describe("agent MCP end-to-end (offline)", () => {
     );
     const client = (await experimental_createMCPClient({ transport })) as McpClient;
 
-    const disabledPaseoHome = await mkdtemp(path.join(os.tmpdir(), "paseo-home-disabled-"));
-    const disabledStaticDir = await mkdtemp(path.join(os.tmpdir(), "paseo-static-disabled-"));
-    const disabledAgentCwd = await mkdtemp(path.join(os.tmpdir(), "paseo-agent-cwd-disabled-"));
+    const disabledPolyHiveHome = await mkdtemp(path.join(os.tmpdir(), "polyhive-home-disabled-"));
+    const disabledStaticDir = await mkdtemp(path.join(os.tmpdir(), "polyhive-static-disabled-"));
+    const disabledAgentCwd = await mkdtemp(path.join(os.tmpdir(), "polyhive-agent-cwd-disabled-"));
     const disabledPort = await getAvailablePort();
-    const disabledDaemonConfig: PaseoDaemonConfig = {
+    const disabledDaemonConfig: PolyHiveDaemonConfig = {
       listen: `127.0.0.1:${disabledPort}`,
-      paseoHome: disabledPaseoHome,
+      polyhiveHome: disabledPolyHiveHome,
       corsAllowedOrigins: [],
       hostnames: true,
       mcpEnabled: true,
@@ -222,9 +222,12 @@ describe("agent MCP end-to-end (offline)", () => {
       staticDir: disabledStaticDir,
       mcpDebug: false,
       agentClients: createTestAgentClients(),
-      agentStoragePath: path.join(disabledPaseoHome, "agents"),
+      agentStoragePath: path.join(disabledPolyHiveHome, "agents"),
     };
-    const disabledDaemon = await createPaseoDaemon(disabledDaemonConfig, pino({ level: "silent" }));
+    const disabledDaemon = await createPolyHiveDaemon(
+      disabledDaemonConfig,
+      pino({ level: "silent" }),
+    );
     await disabledDaemon.start();
 
     const disabledTransport = new StreamableHTTPClientTransport(
@@ -254,7 +257,7 @@ describe("agent MCP end-to-end (offline)", () => {
 
       const injectedAgent = daemon.agentManager.getAgent(agentId!);
       expect(injectedAgent?.config.mcpServers).toMatchObject({
-        paseo: {
+        polyhive: {
           type: "http",
           url: `http://127.0.0.1:${port}/mcp/agents?callerAgentId=${agentId!}`,
         },
@@ -276,7 +279,7 @@ describe("agent MCP end-to-end (offline)", () => {
       expect(disabledAgentId).toBeTruthy();
 
       const disabledAgent = disabledDaemon.agentManager.getAgent(disabledAgentId!);
-      expect(disabledAgent?.config.mcpServers?.paseo).toBeUndefined();
+      expect(disabledAgent?.config.mcpServers?.polyhive).toBeUndefined();
     } finally {
       if (agentId) {
         await client.callTool({ name: "kill_agent", args: { agentId } });
@@ -286,36 +289,36 @@ describe("agent MCP end-to-end (offline)", () => {
       }
       await disabledClient.close();
       await disabledDaemon.stop();
-      await rm(disabledPaseoHome, { recursive: true, force: true });
+      await rm(disabledPolyHiveHome, { recursive: true, force: true });
       await rm(disabledStaticDir, { recursive: true, force: true });
       await rm(disabledAgentCwd, { recursive: true, force: true });
       await client.close();
       await daemon.stop();
-      await rm(paseoHome, { recursive: true, force: true });
+      await rm(polyhiveHome, { recursive: true, force: true });
       await rm(staticDir, { recursive: true, force: true });
       await rm(agentCwd, { recursive: true, force: true });
     }
   }, 30_000);
 
   test("create_agent with worktree is async and boots terminals only after setup success", async () => {
-    const paseoHome = await mkdtemp(path.join(os.tmpdir(), "paseo-home-"));
-    const staticDir = await mkdtemp(path.join(os.tmpdir(), "paseo-static-"));
-    const repoRoot = await mkdtemp(path.join(os.tmpdir(), "paseo-worktree-repo-"));
+    const polyhiveHome = await mkdtemp(path.join(os.tmpdir(), "polyhive-home-"));
+    const staticDir = await mkdtemp(path.join(os.tmpdir(), "polyhive-static-"));
+    const repoRoot = await mkdtemp(path.join(os.tmpdir(), "polyhive-worktree-repo-"));
     const port = await getAvailablePort();
 
-    const daemonConfig: PaseoDaemonConfig = {
+    const daemonConfig: PolyHiveDaemonConfig = {
       listen: `127.0.0.1:${port}`,
-      paseoHome,
+      polyhiveHome,
       corsAllowedOrigins: [],
       hostnames: true,
       mcpEnabled: true,
       staticDir,
       mcpDebug: false,
       agentClients: createTestAgentClients(),
-      agentStoragePath: path.join(paseoHome, "agents"),
+      agentStoragePath: path.join(polyhiveHome, "agents"),
     };
 
-    const daemon = await createPaseoDaemon(daemonConfig, pino({ level: "silent" }));
+    const daemon = await createPolyHiveDaemon(daemonConfig, pino({ level: "silent" }));
     await daemon.start();
 
     const transport = new StreamableHTTPClientTransport(
@@ -334,9 +337,9 @@ describe("agent MCP end-to-end (offline)", () => {
       execSync("git -c commit.gpgsign=false commit -m 'initial'", { cwd: repoRoot, stdio: "pipe" });
 
       const setupCommand =
-        'while [ ! -f "$PASEO_WORKTREE_PATH/allow-setup" ]; do sleep 0.05; done; echo "done" > "$PASEO_WORKTREE_PATH/setup-done.txt"';
+        'while [ ! -f "$POLYHIVE_WORKTREE_PATH/allow-setup" ]; do sleep 0.05; done; echo "done" > "$POLYHIVE_WORKTREE_PATH/setup-done.txt"';
       await writeFile(
-        path.join(repoRoot, "paseo.json"),
+        path.join(repoRoot, "polyhive.json"),
         JSON.stringify({
           worktree: {
             setup: [setupCommand],
@@ -350,7 +353,7 @@ describe("agent MCP end-to-end (offline)", () => {
         }),
         "utf8",
       );
-      execSync("git add paseo.json", { cwd: repoRoot, stdio: "pipe" });
+      execSync("git add polyhive.json", { cwd: repoRoot, stdio: "pipe" });
       execSync("git -c commit.gpgsign=false commit -m 'add worktree config'", {
         cwd: repoRoot,
         stdio: "pipe",
@@ -398,7 +401,7 @@ describe("agent MCP end-to-end (offline)", () => {
       }
       await client.close();
       await daemon.stop();
-      await rm(paseoHome, { recursive: true, force: true });
+      await rm(polyhiveHome, { recursive: true, force: true });
       await rm(staticDir, { recursive: true, force: true });
       await rm(repoRoot, { recursive: true, force: true });
     }

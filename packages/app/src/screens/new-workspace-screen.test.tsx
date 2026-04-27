@@ -5,7 +5,7 @@ import { JSDOM } from "jsdom";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { ComposerAttachment } from "@/attachments/types";
-import type { CreatePaseoWorktreeInput } from "@server/client/daemon-client";
+import type { CreatePolyHiveWorktreeInput } from "@server/client/daemon-client";
 import type { GitHubSearchItem } from "@server/shared/messages";
 import { NewWorkspaceScreen } from "./new-workspace-screen";
 
@@ -85,7 +85,7 @@ const {
 
   const createdWorkspace = {
     id: "workspace-1",
-    workspaceDirectory: "/repo/.paseo/worktrees/workspace-1",
+    workspaceDirectory: "/repo/.polyhive/worktrees/workspace-1",
   };
 
   const createdAgent = {
@@ -102,7 +102,7 @@ const {
       githubFeaturesEnabled: true,
       error: null,
     })),
-    createPaseoWorktree: vi.fn(async (_input: CreatePaseoWorktreeInput) => ({
+    createPolyHiveWorktree: vi.fn(async (_input: CreatePolyHiveWorktreeInput) => ({
       workspace: createdWorkspace,
       error: null,
     })),
@@ -437,7 +437,7 @@ beforeEach(() => {
     githubFeaturesEnabled: true,
     error: null,
   });
-  mockClient.createPaseoWorktree.mockClear();
+  mockClient.createPolyHiveWorktree.mockClear();
   mockClient.createAgent.mockClear();
   initialAttachments.length = 0;
   initialDraftState.text = "";
@@ -497,7 +497,7 @@ function queryAllByTestId(testID: string): HTMLElement[] {
   return Array.from(document.querySelectorAll(`[data-testid="${testID}"]`)) as HTMLElement[];
 }
 
-type CreatePaseoWorktreeArg = Parameters<typeof mockClient.createPaseoWorktree>[0];
+type CreatePolyHiveWorktreeArg = Parameters<typeof mockClient.createPolyHiveWorktree>[0];
 
 function createDeferredPromise<T>() {
   let resolve!: (value: T | PromiseLike<T>) => void;
@@ -509,10 +509,10 @@ function createDeferredPromise<T>() {
   return { promise, resolve, reject };
 }
 
-function firstCreateWorktreeCall(): CreatePaseoWorktreeArg {
-  const calls = mockClient.createPaseoWorktree.mock.calls;
+function firstCreateWorktreeCall(): CreatePolyHiveWorktreeArg {
+  const calls = mockClient.createPolyHiveWorktree.mock.calls;
   const firstCall = calls[0];
-  if (!firstCall) throw new Error("createPaseoWorktree not called");
+  if (!firstCall) throw new Error("createPolyHiveWorktree not called");
   return firstCall[0];
 }
 
@@ -536,7 +536,7 @@ describe("NewWorkspaceScreen picker payload", () => {
     click(await findByTestId("test-composer-submit"));
     await flush();
 
-    expect(mockClient.createPaseoWorktree).toHaveBeenCalledTimes(1);
+    expect(mockClient.createPolyHiveWorktree).toHaveBeenCalledTimes(1);
     const call = firstCreateWorktreeCall();
     expect(call).toMatchObject({
       cwd: "/repo",
@@ -640,7 +640,7 @@ describe("NewWorkspaceScreen picker payload", () => {
     click(await findByTestId("test-composer-submit"));
     await flush();
 
-    expect(mockClient.createPaseoWorktree).toHaveBeenCalledTimes(1);
+    expect(mockClient.createPolyHiveWorktree).toHaveBeenCalledTimes(1);
     const call = firstCreateWorktreeCall();
     expect(call).toMatchObject({
       cwd: "/repo",
@@ -664,7 +664,7 @@ describe("NewWorkspaceScreen picker payload", () => {
     click(await findByTestId("test-composer-submit"));
     await flush();
 
-    expect(mockClient.createPaseoWorktree).toHaveBeenCalledTimes(1);
+    expect(mockClient.createPolyHiveWorktree).toHaveBeenCalledTimes(1);
     const call = firstCreateWorktreeCall();
     expect(call).toMatchObject({
       cwd: "/repo",

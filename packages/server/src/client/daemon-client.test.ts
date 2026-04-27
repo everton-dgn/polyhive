@@ -135,7 +135,7 @@ describe("DaemonClient", () => {
           error: null,
           requestId: request.message.requestId,
           isGit: false,
-          isPaseoOwnedWorktree: false,
+          isPolyHiveOwnedWorktree: false,
           repoRoot: null,
           currentBranch: null,
           isDirty: null,
@@ -243,14 +243,14 @@ describe("DaemonClient", () => {
           status: "running",
           detail: {
             type: "worktree_setup",
-            worktreePath: "/tmp/project/.paseo/worktrees/feature-a",
+            worktreePath: "/tmp/project/.polyhive/worktrees/feature-a",
             branchName: "feature-a",
             log: "phase-one\n",
             commands: [
               {
                 index: 1,
                 command: "npm install",
-                cwd: "/tmp/project/.paseo/worktrees/feature-a",
+                cwd: "/tmp/project/.polyhive/worktrees/feature-a",
                 log: "phase-one\n",
                 status: "running",
                 exitCode: null,
@@ -270,14 +270,14 @@ describe("DaemonClient", () => {
         status: "running",
         detail: {
           type: "worktree_setup",
-          worktreePath: "/tmp/project/.paseo/worktrees/feature-a",
+          worktreePath: "/tmp/project/.polyhive/worktrees/feature-a",
           branchName: "feature-a",
           log: "phase-one\n",
           commands: [
             {
               index: 1,
               command: "npm install",
-              cwd: "/tmp/project/.paseo/worktrees/feature-a",
+              cwd: "/tmp/project/.polyhive/worktrees/feature-a",
               log: "phase-one\n",
               status: "running",
               exitCode: null,
@@ -308,7 +308,7 @@ describe("DaemonClient", () => {
 
     const createPromise = client.createAgent({
       provider: "codex",
-      cwd: "/tmp/project/.paseo/worktrees/feature-a",
+      cwd: "/tmp/project/.polyhive/worktrees/feature-a",
       workspaceId: "ws-feature-a",
       title: "Compat agent",
       modeId: "default",
@@ -371,7 +371,7 @@ describe("DaemonClient", () => {
           mimeType: "application/github-pr",
           number: 123,
           title: "Fix race in worktree setup",
-          url: "https://github.com/getpaseo/paseo/pull/123",
+          url: "https://github.com/polyhive/polyhive/pull/123",
           baseRefName: "main",
           headRefName: "fix/worktree-race",
         },
@@ -393,7 +393,7 @@ describe("DaemonClient", () => {
         mimeType: "application/github-pr",
         number: 123,
         title: "Fix race in worktree setup",
-        url: "https://github.com/getpaseo/paseo/pull/123",
+        url: "https://github.com/polyhive/polyhive/pull/123",
         baseRefName: "main",
         headRefName: "fix/worktree-race",
       },
@@ -540,7 +540,7 @@ describe("DaemonClient", () => {
     await expect(createPromise).rejects.toThrow("legacy git shape sentinel");
   });
 
-  test("sends structured attachments with create_paseo_worktree_request", async () => {
+  test("sends structured attachments with create_polyhive_worktree_request", async () => {
     const logger = createMockLogger();
     const mock = createMockTransport();
 
@@ -557,7 +557,7 @@ describe("DaemonClient", () => {
     mock.triggerOpen();
     await connectPromise;
 
-    const createPromise = client.createPaseoWorktree({
+    const createPromise = client.createPolyHiveWorktree({
       cwd: "/tmp/project",
       worktreeSlug: "review-pr-123",
       attachments: [
@@ -566,7 +566,7 @@ describe("DaemonClient", () => {
           mimeType: "application/github-pr",
           number: 123,
           title: "Fix race in worktree setup",
-          url: "https://github.com/getpaseo/paseo/pull/123",
+          url: "https://github.com/polyhive/polyhive/pull/123",
         },
       ],
     });
@@ -575,7 +575,7 @@ describe("DaemonClient", () => {
     const request = JSON.parse(String(mock.sent[0])) as {
       type: "session";
       message: {
-        type: "create_paseo_worktree_request";
+        type: "create_polyhive_worktree_request";
         requestId: string;
         attachments: Array<{ type: string; mimeType: string; number: number }>;
       };
@@ -586,13 +586,13 @@ describe("DaemonClient", () => {
         mimeType: "application/github-pr",
         number: 123,
         title: "Fix race in worktree setup",
-        url: "https://github.com/getpaseo/paseo/pull/123",
+        url: "https://github.com/polyhive/polyhive/pull/123",
       },
     ]);
 
     mock.triggerMessage(
       wrapSessionMessage({
-        type: "create_paseo_worktree_response",
+        type: "create_polyhive_worktree_response",
         payload: {
           requestId: request.message.requestId,
           workspace: null,
@@ -610,7 +610,7 @@ describe("DaemonClient", () => {
     });
   });
 
-  test("sends worktree base-ref fields in create_paseo_worktree_request", async () => {
+  test("sends worktree base-ref fields in create_polyhive_worktree_request", async () => {
     const logger = createMockLogger();
     const mock = createMockTransport();
 
@@ -627,7 +627,7 @@ describe("DaemonClient", () => {
     mock.triggerOpen();
     await connectPromise;
 
-    const createPromise = client.createPaseoWorktree(
+    const createPromise = client.createPolyHiveWorktree(
       {
         cwd: "/tmp/project",
         worktreeSlug: "review-pr-123",
@@ -642,7 +642,7 @@ describe("DaemonClient", () => {
     const request = JSON.parse(String(mock.sent[0])) as {
       type: "session";
       message: {
-        type: "create_paseo_worktree_request";
+        type: "create_polyhive_worktree_request";
         requestId: string;
         cwd: string;
         worktreeSlug: string;
@@ -652,7 +652,7 @@ describe("DaemonClient", () => {
       };
     };
     expect(request.message).toEqual({
-      type: "create_paseo_worktree_request",
+      type: "create_polyhive_worktree_request",
       cwd: "/tmp/project",
       worktreeSlug: "review-pr-123",
       refName: "feature/worktree-base-ref",
@@ -663,7 +663,7 @@ describe("DaemonClient", () => {
 
     mock.triggerMessage(
       wrapSessionMessage({
-        type: "create_paseo_worktree_response",
+        type: "create_polyhive_worktree_response",
         payload: {
           requestId: request.message.requestId,
           workspace: null,
@@ -681,7 +681,7 @@ describe("DaemonClient", () => {
     });
   });
 
-  test("omitting create_paseo_worktree_request worktree base-ref fields preserves legacy wire shape", async () => {
+  test("omitting create_polyhive_worktree_request worktree base-ref fields preserves legacy wire shape", async () => {
     const logger = createMockLogger();
     const mock = createMockTransport();
 
@@ -698,7 +698,7 @@ describe("DaemonClient", () => {
     mock.triggerOpen();
     await connectPromise;
 
-    const createPromise = client.createPaseoWorktree(
+    const createPromise = client.createPolyHiveWorktree(
       {
         cwd: "/tmp/project",
         worktreeSlug: "feature-a",
@@ -710,7 +710,7 @@ describe("DaemonClient", () => {
       JSON.stringify({
         type: "session",
         message: {
-          type: "create_paseo_worktree_request",
+          type: "create_polyhive_worktree_request",
           cwd: "/tmp/project",
           worktreeSlug: "feature-a",
           requestId: "req-worktree-legacy",
@@ -720,7 +720,7 @@ describe("DaemonClient", () => {
 
     mock.triggerMessage(
       wrapSessionMessage({
-        type: "create_paseo_worktree_response",
+        type: "create_polyhive_worktree_response",
         payload: {
           requestId: "req-worktree-legacy",
           workspace: null,
@@ -1228,7 +1228,7 @@ describe("DaemonClient", () => {
         message: {
           type: "directory_suggestions_response",
           payload: {
-            directories: ["/Users/test/projects/paseo"],
+            directories: ["/Users/test/projects/polyhive"],
             entries: [{ path: "README.md", kind: "file" }],
             error: null,
             requestId: "req-directories",
@@ -1238,7 +1238,7 @@ describe("DaemonClient", () => {
     );
 
     await expect(promise).resolves.toEqual({
-      directories: ["/Users/test/projects/paseo"],
+      directories: ["/Users/test/projects/polyhive"],
       entries: [{ path: "README.md", kind: "file" }],
       error: null,
       requestId: "req-directories",

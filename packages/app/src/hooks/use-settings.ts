@@ -2,8 +2,8 @@ import { useCallback } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 
-export const APP_SETTINGS_KEY = "@paseo:app-settings";
-const LEGACY_SETTINGS_KEY = "@paseo:settings";
+export const APP_SETTINGS_KEY = "@polyhive:app-settings";
+const LEGACY_SETTINGS_KEY = "@polyhive:settings";
 const APP_SETTINGS_QUERY_KEY = ["app-settings"];
 
 import { THEME_TO_UNISTYLES, type ThemeName } from "@/styles/theme";

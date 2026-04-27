@@ -17,7 +17,7 @@ import { Button } from "@/components/ui/button";
 import { resolveAppVersion } from "@/utils/app-version";
 import { formatVersionWithPrefix } from "@/desktop/updates/desktop-updates";
 import { buildHostRootRoute } from "@/utils/host-routes";
-import { PaseoLogo } from "@/components/icons/paseo-logo";
+import { PolyHiveLogo } from "@/components/icons/polyhive-logo";
 import { openExternalUrl } from "@/utils/open-external-url";
 
 type WelcomeAction = {
@@ -292,9 +292,9 @@ export function WelcomeScreen({ onHostAdded }: WelcomeScreenProps) {
         testID="welcome-screen"
       >
         <View style={styles.content}>
-          <PaseoLogo size={96} />
+          <PolyHiveLogo size={96} />
           <View style={styles.copyBlock}>
-            <Text style={styles.title}>Welcome to Paseo</Text>
+            <Text style={styles.title}>Welcome to PolyHive</Text>
             {showHostList ? (
               <Text style={styles.subtitle}>Connecting to your hosts…</Text>
             ) : (

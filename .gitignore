@@ -61,7 +61,7 @@ CLAUDE.local.md
 
 .debug.conversations/
 .debug/
-.paseo/
+.polyhive/
 .wrangler/
 **/.wrangler/
 
@@ -74,7 +74,7 @@ ONBOARDING.md
 valknut-report.html/
 valknut-report.json/
 **/.playwright-mcp/
-**/.paseo-provider-history/
+**/.polyhive-provider-history/
 .claude/settings.local.json
 **/.claude/settings.local.json
 .claude/scheduled_tasks.lock

@@ -52,7 +52,7 @@ function checkoutStatus(overrides: Partial<CheckoutStatusPayload> = {}): Checkou
     error: null,
     requestId: "checkout-status-1",
     isGit: true,
-    isPaseoOwnedWorktree: false,
+    isPolyHiveOwnedWorktree: false,
     repoRoot: cwd,
     currentBranch: "main",
     isDirty: false,
@@ -61,7 +61,7 @@ function checkoutStatus(overrides: Partial<CheckoutStatusPayload> = {}): Checkou
     aheadOfOrigin: 0,
     behindOfOrigin: 0,
     hasRemote: true,
-    remoteUrl: "git@github.com:getpaseo/paseo.git",
+    remoteUrl: "git@github.com:polyhive/polyhive.git",
     ...overrides,
   } as CheckoutStatusPayload;
 }

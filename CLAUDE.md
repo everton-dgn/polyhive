@@ -1,6 +1,6 @@
 # CLAUDE.md
 
-Paseo is a web app for monitoring and controlling your local AI coding agents from anywhere. This fork supports **macOS (Electron) and any browser (including mobile)**. Connects directly to your actual development environment — your code stays on your machine.
+PolyHive is a web app for monitoring and controlling your local AI coding agents from anywhere. This fork supports **macOS (Electron) and any browser (including mobile)**. Connects directly to your actual development environment — your code stays on your machine.
 
 **Supported agents:** Claude Code, Codex, and OpenCode.
 
@@ -10,10 +10,10 @@ This is an npm workspace monorepo:
 
 - `packages/server` — Daemon: agent lifecycle, WebSocket API, MCP server
 - `packages/app` — Web client (Expo, browser-targeted)
-- `packages/cli` — Docker-style CLI (`paseo run/ls/logs/wait`)
+- `packages/cli` — Docker-style CLI (`polyhive run/ls/logs/wait`)
 - `packages/relay` — E2E encrypted relay for remote access
 - `packages/desktop` — Electron desktop wrapper (macOS only)
-- `packages/website` — Marketing site (Vercel; URLs via `VITE_PASEO_*` env vars)
+- `packages/website` — Marketing site (Vercel; URLs via `VITE_POLYHIVE_*` env vars)
 
 ## Documentation
 
@@ -43,7 +43,7 @@ See [docs/DEVELOPMENT.md](docs/DEVELOPMENT.md) for full setup, build sync requir
 
 ## Critical rules
 
-- **NEVER restart the main Paseo daemon on port 6767 without permission** — it manages all running agents. If you're an agent, restarting it kills your own process.
+- **NEVER restart the main PolyHive daemon on port 6767 without permission** — it manages all running agents. If you're an agent, restarting it kills your own process.
 - **NEVER assume a timeout means the service needs restarting** — timeouts can be transient.
 - **NEVER add auth checks to tests** — agent providers handle their own auth.
 - **NEVER run the full test suite locally.** The test suites are heavy and will freeze the machine, especially if multiple agents run them in parallel. Rules:
@@ -98,4 +98,4 @@ The app runs on web (browsers, including mobile browsers) and the Electron deskt
 ## Debugging
 
 
-Find the complete daemon logs and traces in the $PASEO_HOME/daemon.log
+Find the complete daemon logs and traces in the $POLYHIVE_HOME/daemon.log

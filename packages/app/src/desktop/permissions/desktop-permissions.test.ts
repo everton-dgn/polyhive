@@ -6,26 +6,26 @@ type GlobalSnapshot = {
   Notification: unknown;
   navigatorDescriptor?: PropertyDescriptor;
   windowDescriptor?: PropertyDescriptor;
-  paseoDesktop: unknown;
+  polyhiveDesktop: unknown;
 };
 
 const originalGlobals: GlobalSnapshot = {
   Notification: (globalThis as { Notification?: unknown }).Notification,
   navigatorDescriptor: Object.getOwnPropertyDescriptor(globalThis, "navigator"),
   windowDescriptor: Object.getOwnPropertyDescriptor(globalThis, "window"),
-  paseoDesktop:
+  polyhiveDesktop:
     typeof globalThis.window === "undefined"
       ? undefined
-      : (globalThis.window as { paseoDesktop?: unknown }).paseoDesktop,
+      : (globalThis.window as { polyhiveDesktop?: unknown }).polyhiveDesktop,
 };
 
-function ensureWindow(): { paseoDesktop?: unknown } {
-  const existingWindow = (globalThis as { window?: { paseoDesktop?: unknown } }).window;
+function ensureWindow(): { polyhiveDesktop?: unknown } {
+  const existingWindow = (globalThis as { window?: { polyhiveDesktop?: unknown } }).window;
   if (existingWindow) {
     return existingWindow;
   }
 
-  const nextWindow: { paseoDesktop?: unknown } = {};
+  const nextWindow: { polyhiveDesktop?: unknown } = {};
   Object.defineProperty(globalThis, "window", {
     configurable: true,
     writable: true,
@@ -58,7 +58,8 @@ function restoreGlobals(): void {
   }
 
   if (typeof globalThis.window !== "undefined") {
-    (globalThis.window as { paseoDesktop?: unknown }).paseoDesktop = originalGlobals.paseoDesktop;
+    (globalThis.window as { polyhiveDesktop?: unknown }).polyhiveDesktop =
+      originalGlobals.polyhiveDesktop;
   }
 }
 
@@ -81,7 +82,7 @@ describe("desktop-permissions", () => {
 
     expect(shouldShowDesktopPermissionSection()).toBe(false);
 
-    ensureWindow().paseoDesktop = {};
+    ensureWindow().polyhiveDesktop = {};
     expect(shouldShowDesktopPermissionSection()).toBe(true);
   });
 

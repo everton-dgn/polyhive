@@ -7,7 +7,10 @@ import { experimental_createMCPClient } from "ai";
 import { StreamableHTTPClientTransport } from "@modelcontextprotocol/sdk/client/streamableHttp.js";
 
 import { AGENT_WAIT_TIMEOUT_MS } from "./mcp-shared.js";
-import { createTestPaseoDaemon, type TestPaseoDaemon } from "../test-utils/paseo-daemon.js";
+import {
+  createTestPolyHiveDaemon,
+  type TestPolyHiveDaemon,
+} from "../test-utils/polyhive-daemon.js";
 
 type StructuredContent = { [key: string]: unknown };
 
@@ -105,7 +108,7 @@ async function waitFor<T>(options: {
 
 describe("MCP parity end-to-end", () => {
   let tempRoot: string;
-  let daemonHandle: TestPaseoDaemon;
+  let daemonHandle: TestPolyHiveDaemon;
   let topLevelClient: McpClient;
   let agentScopedClient: McpClient;
   let parentAgentId: string;
@@ -201,7 +204,7 @@ describe("MCP parity end-to-end", () => {
     parentAgentCwd = await makeCwd("parent-agent-cwd");
     worktreeRepoCwd = await makeCwd("worktree-repo");
 
-    daemonHandle = await createTestPaseoDaemon();
+    daemonHandle = await createTestPolyHiveDaemon();
     topLevelClient = await createMcpClient(`http://127.0.0.1:${daemonHandle.port}/mcp/agents`);
 
     const parentPayload = await callToolStructured(topLevelClient, "create_agent", {
@@ -242,20 +245,20 @@ describe("MCP parity end-to-end", () => {
       expect(AGENT_WAIT_TIMEOUT_MS).toBe(30_000);
     });
 
-    test("create_agent with callerAgentId sets paseo.parent-agent-id label", async () => {
+    test("create_agent with callerAgentId sets polyhive.parent-agent-id label", async () => {
       let agentId: string | null = null;
       try {
         agentId = await createChildAgent();
         const snapshot = daemonHandle.daemon.agentManager.getAgent(agentId);
         expect(snapshot?.labels).toMatchObject({
-          "paseo.parent-agent-id": parentAgentId,
+          "polyhive.parent-agent-id": parentAgentId,
         });
       } finally {
         await archiveAgentIfPresent(agentId);
       }
     });
 
-    test("agentManager.createAgent injects paseo MCP using the daemon listen target", async () => {
+    test("agentManager.createAgent injects polyhive MCP using the daemon listen target", async () => {
       let agentId: string | null = null;
       try {
         const listenTarget = daemonHandle.daemon.getListenTarget();
@@ -276,7 +279,7 @@ describe("MCP parity end-to-end", () => {
         });
 
         expect(snapshot.config.mcpServers).toMatchObject({
-          paseo: {
+          polyhive: {
             type: "http",
             url: expectedUrl,
           },
@@ -284,7 +287,7 @@ describe("MCP parity end-to-end", () => {
 
         const liveAgent = daemonHandle.daemon.agentManager.getAgent(agentId);
         expect(liveAgent?.config.mcpServers).toMatchObject({
-          paseo: {
+          polyhive: {
             type: "http",
             url: expectedUrl,
           },

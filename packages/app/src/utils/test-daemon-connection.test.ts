@@ -68,7 +68,7 @@ vi.mock("@/desktop/daemon/desktop-daemon-transport", () => ({
     }: {
       transportType: "socket" | "pipe";
       transportPath: string;
-    }) => `paseo+local://${transportType}?path=${encodeURIComponent(transportPath)}`,
+    }) => `polyhive+local://${transportType}?path=${encodeURIComponent(transportPath)}`,
   ),
 }));
 
@@ -105,14 +105,14 @@ describe("test-daemon-connection connectToDaemon", () => {
     const mod = await import("./test-daemon-connection");
 
     const result = await mod.connectToDaemon({
-      id: "socket:/tmp/paseo.sock",
+      id: "socket:/tmp/polyhive.sock",
       type: "directSocket",
-      path: "/tmp/paseo.sock",
+      path: "/tmp/polyhive.sock",
     });
     await result.client.close();
 
     expect(daemonClientMock.createdConfigs[0]?.url).toBe(
-      "paseo+local://socket?path=%2Ftmp%2Fpaseo.sock",
+      "polyhive+local://socket?path=%2Ftmp%2Fpolyhive.sock",
     );
   });
 });

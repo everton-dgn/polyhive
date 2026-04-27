@@ -387,13 +387,13 @@ function DraftAgentScreenContent({
 
   const worktreeListRoot = checkout?.isGit ? checkout.repoRoot : "";
   const worktreeListQuery = useQuery({
-    queryKey: ["paseoWorktreeList", selectedServerId, worktreeListRoot],
+    queryKey: ["polyhiveWorktreeList", selectedServerId, worktreeListRoot],
     queryFn: async () => {
       const client = sessionClient;
       if (!client) {
         throw new Error("Daemon client unavailable");
       }
-      const payload = await client.getPaseoWorktreeList({
+      const payload = await client.getPolyHiveWorktreeList({
         repoRoot: worktreeListRoot || undefined,
         cwd: worktreeListRoot ? undefined : trimmedWorkingDir || undefined,
       });

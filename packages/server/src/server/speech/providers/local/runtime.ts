@@ -1,6 +1,6 @@
 import type { Logger } from "pino";
 
-import type { PaseoSpeechConfig } from "../../../bootstrap.js";
+import type { PolyHiveSpeechConfig } from "../../../bootstrap.js";
 import type { SpeechToTextProvider, TextToSpeechProvider } from "../../speech-provider.js";
 import type { RequestedSpeechProviders } from "../../speech-types.js";
 import type { TurnDetectionProvider } from "../../turn-detection-provider.js";
@@ -57,10 +57,12 @@ export type InitializedLocalSpeech = {
 };
 
 function buildModelDownloadHint(modelId: LocalSpeechModelId): string {
-  return `Use 'paseo speech download --model ${modelId}' to download this model.`;
+  return `Use 'polyhive speech download --model ${modelId}' to download this model.`;
 }
 
-function resolveConfiguredLocalModels(speechConfig: PaseoSpeechConfig | null): ResolvedLocalModels {
+function resolveConfiguredLocalModels(
+  speechConfig: PolyHiveSpeechConfig | null,
+): ResolvedLocalModels {
   return {
     dictationLocalSttModel: LocalSttModelIdSchema.parse(
       speechConfig?.local?.models.dictationStt ?? DEFAULT_LOCAL_STT_MODEL,
@@ -75,7 +77,7 @@ function resolveConfiguredLocalModels(speechConfig: PaseoSpeechConfig | null): R
 }
 
 export function getLocalSpeechAvailability(
-  speechConfig: PaseoSpeechConfig | null,
+  speechConfig: PolyHiveSpeechConfig | null,
 ): LocalSpeechAvailability {
   const localConfig = speechConfig?.local ?? null;
   return {
@@ -185,7 +187,7 @@ async function createLocalSttEngine(params: {
 
 export async function initializeLocalSpeechServices(params: {
   providers: RequestedSpeechProviders;
-  speechConfig: PaseoSpeechConfig | null;
+  speechConfig: PolyHiveSpeechConfig | null;
   logger: Logger;
 }): Promise<InitializedLocalSpeech> {
   const { providers, logger, speechConfig } = params;

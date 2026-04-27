@@ -75,8 +75,8 @@ type ScrollInvestigationStore = {
 };
 
 type ScrollInvestigationGlobal = typeof globalThis & {
-  __PASEO_SCROLL_JANK_INVESTIGATION__?: ScrollInvestigationStore;
-  __PASEO_SCROLL_JANK_INVESTIGATION_DISABLED__?: boolean;
+  __POLYHIVE_SCROLL_JANK_INVESTIGATION__?: ScrollInvestigationStore;
+  __POLYHIVE_SCROLL_JANK_INVESTIGATION_DISABLED__?: boolean;
 };
 
 const TRACKED_EVENT_TYPES = new Set([
@@ -91,7 +91,7 @@ const SOURCE_LABEL = "[ScrollJankInvestigation]";
 
 function shouldInstall(): boolean {
   const runtime = globalThis as ScrollInvestigationGlobal;
-  return isDev && !runtime.__PASEO_SCROLL_JANK_INVESTIGATION_DISABLED__;
+  return isDev && !runtime.__POLYHIVE_SCROLL_JANK_INVESTIGATION_DISABLED__;
 }
 
 function normalizeCapture(options?: AddEventListenerOptions | boolean): boolean {
@@ -200,7 +200,7 @@ export function installScrollJankInvestigation(): void {
   }
 
   const runtime = globalThis as ScrollInvestigationGlobal;
-  if (runtime.__PASEO_SCROLL_JANK_INVESTIGATION__) {
+  if (runtime.__POLYHIVE_SCROLL_JANK_INVESTIGATION__) {
     return;
   }
 
@@ -525,16 +525,16 @@ export function installScrollJankInvestigation(): void {
     _installedAtMs: Date.now(),
   };
 
-  runtime.__PASEO_SCROLL_JANK_INVESTIGATION__ = store;
+  runtime.__POLYHIVE_SCROLL_JANK_INVESTIGATION__ = store;
   console.log(
     `${SOURCE_LABEL} installed`,
-    "Use window.__PASEO_SCROLL_JANK_INVESTIGATION__.snapshot()",
+    "Use window.__POLYHIVE_SCROLL_JANK_INVESTIGATION__.snapshot()",
   );
 }
 
 function getStore(): ScrollInvestigationStore | null {
   const runtime = globalThis as ScrollInvestigationGlobal;
-  return runtime.__PASEO_SCROLL_JANK_INVESTIGATION__ ?? null;
+  return runtime.__POLYHIVE_SCROLL_JANK_INVESTIGATION__ ?? null;
 }
 
 export function markScrollInvestigationRender(componentId: string): void {

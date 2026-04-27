@@ -1,7 +1,11 @@
-// CLI exports for @getpaseo/server
-export { createPaseoDaemon, type PaseoDaemon, type PaseoDaemonConfig } from "./bootstrap.js";
+// CLI exports for polyhive-server
+export {
+  createPolyHiveDaemon,
+  type PolyHiveDaemon,
+  type PolyHiveDaemonConfig,
+} from "./bootstrap.js";
 export { loadConfig, type CliConfigOverrides } from "./config.js";
-export { resolvePaseoHome } from "./paseo-home.js";
+export { resolvePolyHiveHome } from "./polyhive-home.js";
 export { getOrCreateServerId } from "./server-id.js";
 export { createRootLogger, type LogLevel, type LogFormat } from "./logger.js";
 export { loadPersistedConfig, type PersistedConfig } from "./persisted-config.js";

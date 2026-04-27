@@ -13,8 +13,8 @@ const RELEASES_URL = `${GITHUB_WEB_BASE}/releases`;
 export const Route = createFileRoute("/docs/updates")({
   head: () => ({
     meta: pageMeta(
-      "Updates - Paseo Docs",
-      "How to update the Paseo daemon, web client, and macOS app.",
+      "Updates - PolyHive Docs",
+      "How to update the PolyHive daemon, web client, and macOS app.",
     ),
   }),
   component: UpdatesDocs,

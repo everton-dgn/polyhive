@@ -16,7 +16,7 @@ interface GitHubRelease {
 }
 
 const REQUIRED_ASSET_PATTERNS = [
-  /Paseo-.*-arm64\.dmg$/, // Mac Apple Silicon
+  /PolyHive-.*-arm64\.dmg$/, // Mac Apple Silicon
 ];
 
 function hasRequiredAssets(release: GitHubRelease): boolean {

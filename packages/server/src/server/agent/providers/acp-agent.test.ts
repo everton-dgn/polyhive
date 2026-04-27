@@ -15,7 +15,7 @@ function createSession(): ACPAgentSession {
   return new ACPAgentSession(
     {
       provider: "claude-acp",
-      cwd: "/tmp/paseo-acp-test",
+      cwd: "/tmp/polyhive-acp-test",
     },
     {
       provider: "claude-acp",
@@ -35,7 +35,7 @@ function createSession(): ACPAgentSession {
 }
 
 describe("mapACPUsage", () => {
-  test("maps ACP usage fields into Paseo usage", () => {
+  test("maps ACP usage fields into PolyHive usage", () => {
     expect(
       mapACPUsage({
         inputTokens: 11,
@@ -422,7 +422,7 @@ describe("ACPAgentSession slash commands", () => {
     const session = new ACPAgentSession(
       {
         provider: "claude-acp",
-        cwd: "/tmp/paseo-acp-test",
+        cwd: "/tmp/polyhive-acp-test",
       },
       {
         provider: "claude-acp",

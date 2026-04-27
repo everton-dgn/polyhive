@@ -8,9 +8,9 @@ import {
   loadPersistedConfig,
   type CliConfigOverrides,
   type PersistedConfig,
-} from "@getpaseo/server";
+} from "polyhive-server";
 import {
-  resolveLocalPaseoHome,
+  resolveLocalPolyHiveHome,
   resolveLocalDaemonState,
   resolveTcpHostFromListen,
   startLocalDaemonDetached,
@@ -99,8 +99,8 @@ function toCliOverrides(options: OnboardOptions): CliConfigOverrides {
   return cliOverrides;
 }
 
-function savePersistedConfig(paseoHome: string, config: OnboardPersistedConfig): void {
-  const configPath = path.join(paseoHome, "config.json");
+function savePersistedConfig(polyhiveHome: string, config: OnboardPersistedConfig): void {
+  const configPath = path.join(polyhiveHome, "config.json");
   writeFileSync(configPath, `${JSON.stringify(config, null, 2)}\n`);
 }
 
@@ -255,22 +255,22 @@ async function waitForDaemonReady(args: {
   );
 }
 
-function printNextSteps(pairingUrl: string | null, paseoHome: string, richUi: boolean): void {
-  const daemonLogPath = path.join(paseoHome, "daemon.log");
+function printNextSteps(pairingUrl: string | null, polyhiveHome: string, richUi: boolean): void {
+  const daemonLogPath = path.join(polyhiveHome, "daemon.log");
   const nextStepsLines = [
     pairingUrl
-      ? "1. Open Paseo and scan the QR code above, or paste the pairing link."
-      : "1. Open Paseo and connect to your daemon.",
-    "2. Web app: https://app.paseo.sh",
+      ? "1. Open PolyHive and scan the QR code above, or paste the pairing link."
+      : "1. Open PolyHive and connect to your daemon.",
+    "2. Web app: https://app.polyhive.sh",
     "3. Desktop app: https://github.com/everton-dgn/polyhive/releases/latest",
-    "4. Docs: https://paseo.sh/docs",
-    '5. Example: paseo run --output-schema schema.json "extract fields"',
+    "4. Docs: https://polyhive.sh/docs",
+    '5. Example: polyhive run --output-schema schema.json "extract fields"',
   ];
   const quickReferenceLines = [
-    "1. paseo --help",
-    "2. paseo ls",
-    '3. paseo run "your prompt"',
-    "4. paseo status",
+    "1. polyhive --help",
+    "2. polyhive ls",
+    '3. polyhive run "your prompt"',
+    "4. polyhive status",
     `5. Daemon logs: ${daemonLogPath}`,
   ];
 
@@ -297,7 +297,7 @@ export function onboardCommand(): Command {
     .description("Run first-time setup, start daemon, and print pairing instructions")
     .option("--listen <listen>", "Listen target (host:port, port, or unix socket path)")
     .option("--port <port>", "Port to listen on (default: 6767)")
-    .option("--home <path>", "Paseo home directory (default: ~/.paseo)")
+    .option("--home <path>", "PolyHive home directory (default: ~/.polyhive)")
     .option("--no-relay", "Disable relay connection")
     .option("--no-mcp", "Disable the Agent MCP HTTP endpoint")
     .option(
@@ -318,7 +318,7 @@ export function onboardCommand(): Command {
 export async function runOnboard(options: OnboardOptions): Promise<void> {
   const richUi = process.stdin.isTTY && process.stdout.isTTY;
   if (richUi) {
-    intro("Welcome to Paseo");
+    intro("Welcome to PolyHive");
   }
 
   if (options.listen && options.port) {
@@ -335,12 +335,12 @@ export async function runOnboard(options: OnboardOptions): Promise<void> {
     process.exit(1);
   }
 
-  const paseoHome = resolveLocalPaseoHome(options.home);
+  const polyhiveHome = resolveLocalPolyHiveHome(options.home);
   if (richUi) {
-    renderNote(paseoHome, "Paseo home");
+    renderNote(polyhiveHome, "PolyHive home");
   }
 
-  let persisted = loadPersistedConfig(paseoHome) as OnboardPersistedConfig;
+  let persisted = loadPersistedConfig(polyhiveHome) as OnboardPersistedConfig;
   const persistedVoiceSelection = resolvePersistedVoiceSelection(persisted);
   const shouldPrompt = options.voice === "ask" || options.voice === undefined;
   let voiceEnabled: boolean;
@@ -363,9 +363,9 @@ export async function runOnboard(options: OnboardOptions): Promise<void> {
   }
 
   persisted = applyVoiceSelection(persisted, voiceEnabled);
-  savePersistedConfig(paseoHome, persisted);
+  savePersistedConfig(polyhiveHome, persisted);
 
-  const config = loadConfig(paseoHome, { cli: toCliOverrides(options) });
+  const config = loadConfig(polyhiveHome, { cli: toCliOverrides(options) });
 
   const voiceStatus = voiceEnabled
     ? "Voice features enabled. Local speech models will be downloaded automatically if missing."
@@ -411,7 +411,7 @@ export async function runOnboard(options: OnboardOptions): Promise<void> {
       log.message("Waiting for daemon to become ready...");
     }
     readyState = await waitForDaemonReady({
-      home: options.home ?? paseoHome,
+      home: options.home ?? polyhiveHome,
       timeoutMs,
       onStatus: readySpinner ? (message) => readySpinner.message(message) : undefined,
     });
@@ -433,15 +433,15 @@ export async function runOnboard(options: OnboardOptions): Promise<void> {
 
   if (config.relayEnabled === false) {
     log.warn("Relay is disabled; pairing offer is unavailable for this daemon.");
-    printNextSteps(null, paseoHome, richUi);
+    printNextSteps(null, polyhiveHome, richUi);
     if (richUi) {
-      outro("Paseo daemon is running.");
+      outro("PolyHive daemon is running.");
     }
     return;
   }
 
   const pairing = await generateLocalPairingOffer({
-    paseoHome,
+    polyhiveHome,
     relayEnabled: config.relayEnabled,
     relayEndpoint: config.relayEndpoint,
     relayPublicEndpoint: config.relayPublicEndpoint,
@@ -451,9 +451,9 @@ export async function runOnboard(options: OnboardOptions): Promise<void> {
 
   if (!pairing.url) {
     log.warn("Relay pairing URL is unavailable for this daemon configuration.");
-    printNextSteps(null, paseoHome, richUi);
+    printNextSteps(null, polyhiveHome, richUi);
     if (richUi) {
-      outro("Paseo daemon is running.");
+      outro("PolyHive daemon is running.");
     }
     return;
   }
@@ -463,8 +463,8 @@ export async function runOnboard(options: OnboardOptions): Promise<void> {
     "Scan to pair",
   );
   renderNote(pairing.url, "Pairing link");
-  printNextSteps(pairing.url, paseoHome, richUi);
+  printNextSteps(pairing.url, polyhiveHome, richUi);
   if (richUi) {
-    outro("Paseo is ready!");
+    outro("PolyHive is ready!");
   }
 }

@@ -25,7 +25,7 @@ function createWorkspaceRuntimeSnapshot(
       mainRepoRoot: null,
       currentBranch: "main",
       remoteUrl: "https://github.com/acme/repo.git",
-      isPaseoOwnedWorktree: false,
+      isPolyHiveOwnedWorktree: false,
       isDirty: false,
       baseRef: "main",
       aheadBehind: { ahead: 0, behind: 0 },
@@ -128,7 +128,7 @@ function createSessionForWorkspaceGitWatchTests(): {
     onMessage: (message) => emitted.push(message as any),
     logger: logger as any,
     downloadTokenStore: {} as any,
-    paseoHome: "/tmp/paseo-test",
+    polyhiveHome: "/tmp/polyhive-test",
     agentManager: {
       subscribe: () => () => {},
       listAgents: () => [],
@@ -365,7 +365,7 @@ describe("workspace git watch targets", () => {
       behindOfOrigin: 1,
       hasRemote: true,
       remoteUrl: "https://github.com/acme/repo.git",
-      isPaseoOwnedWorktree: false,
+      isPolyHiveOwnedWorktree: false,
       error: null,
       requestId: "subscription:/tmp/repo",
     });

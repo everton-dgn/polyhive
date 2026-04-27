@@ -20,7 +20,7 @@ import {
   appendTimelineItemIfAgentKnown,
   emitLiveTimelineItemIfAgentKnown,
 } from "./timeline-append.js";
-import { deletePaseoWorktree, type WorktreeConfig } from "../../utils/worktree.js";
+import { deletePolyHiveWorktree, type WorktreeConfig } from "../../utils/worktree.js";
 import { WaitForAgentTracker } from "./wait-for-agent-tracker.js";
 import { scheduleAgentMetadataGeneration } from "./agent-metadata-generator.js";
 import type { VoiceCallerContext, VoiceSpeakHandler } from "../voice-types.js";
@@ -49,10 +49,10 @@ import {
 import type { GitHubService } from "../../services/github-service.js";
 import type { WorkspaceGitService } from "../workspace-git-service.js";
 import type {
-  CreatePaseoWorktreeFn,
-  CreatePaseoWorktreeInput,
-  CreatePaseoWorktreeResult,
-} from "../paseo-worktree-service.js";
+  CreatePolyHiveWorktreeFn,
+  CreatePolyHiveWorktreeInput,
+  CreatePolyHiveWorktreeResult,
+} from "../polyhive-worktree-service.js";
 import { toWorktreeRequestError } from "../worktree-errors.js";
 
 export interface AgentMcpServerOptions {
@@ -64,8 +64,8 @@ export interface AgentMcpServerOptions {
   providerRegistry?: Record<AgentProvider, ProviderDefinition> | null;
   github?: GitHubService;
   workspaceGitService?: Pick<WorkspaceGitService, "getSnapshot" | "listWorktrees">;
-  createPaseoWorktree?: CreatePaseoWorktreeFn;
-  paseoHome?: string;
+  createPolyHiveWorktree?: CreatePolyHiveWorktreeFn;
+  polyhiveHome?: string;
   /**
    * ID of the agent that is connecting to this MCP server.
    * Used for cwd/mode inheritance when agents spawn child agents.
@@ -557,9 +557,9 @@ export async function createAgentMcpServer(options: AgentMcpServerOptions): Prom
               action,
               githubPrNumber,
               runSetup: false,
-              paseoHome: options.paseoHome,
+              polyhiveHome: options.polyhiveHome,
             },
-            createPaseoWorktree: options.createPaseoWorktree,
+            createPolyHiveWorktree: options.createPolyHiveWorktree,
             resolveDefaultBranch: baseBranch ? async () => baseBranch : undefined,
             workspaceGitService: options.workspaceGitService,
             logger: options.logger,
@@ -574,7 +574,7 @@ export async function createAgentMcpServer(options: AgentMcpServerOptions): Prom
 
       const childAgentDefaultLabels = callerContext?.childAgentDefaultLabels;
       const mergedLabels = {
-        ...(callerAgentId ? { "paseo.parent-agent-id": callerAgentId } : {}),
+        ...(callerAgentId ? { "polyhive.parent-agent-id": callerAgentId } : {}),
         ...(childAgentDefaultLabels ?? {}),
         ...(labels ?? {}),
       };
@@ -620,7 +620,7 @@ export async function createAgentMcpServer(options: AgentMcpServerOptions): Prom
         cwd: snapshot.cwd,
         initialPrompt: trimmedPrompt,
         explicitTitle: snapshot.config.title,
-        paseoHome: options.paseoHome,
+        polyhiveHome: options.polyhiveHome,
         logger: childLogger,
         deps: options.workspaceGitService
           ? {
@@ -1513,7 +1513,7 @@ export async function createAgentMcpServer(options: AgentMcpServerOptions): Prom
     "list_worktrees",
     {
       title: "List worktrees",
-      description: "List Paseo-managed git worktrees for a repository.",
+      description: "List PolyHive-managed git worktrees for a repository.",
       inputSchema: {
         cwd: z
           .string()
@@ -1544,7 +1544,7 @@ export async function createAgentMcpServer(options: AgentMcpServerOptions): Prom
     "create_worktree",
     {
       title: "Create worktree",
-      description: "Create a Paseo-managed git worktree.",
+      description: "Create a PolyHive-managed git worktree.",
       inputSchema: {
         cwd: z
           .string()
@@ -1574,9 +1574,9 @@ export async function createAgentMcpServer(options: AgentMcpServerOptions): Prom
           action,
           githubPrNumber,
           runSetup: false,
-          paseoHome: options.paseoHome,
+          polyhiveHome: options.polyhiveHome,
         },
-        createPaseoWorktree: options.createPaseoWorktree,
+        createPolyHiveWorktree: options.createPolyHiveWorktree,
         resolveDefaultBranch: baseBranch ? async () => baseBranch : undefined,
         workspaceGitService: options.workspaceGitService,
         logger: options.logger,
@@ -1597,7 +1597,7 @@ export async function createAgentMcpServer(options: AgentMcpServerOptions): Prom
     "archive_worktree",
     {
       title: "Archive worktree",
-      description: "Delete a Paseo-managed git worktree.",
+      description: "Delete a PolyHive-managed git worktree.",
       inputSchema: {
         cwd: z
           .string()
@@ -1612,11 +1612,11 @@ export async function createAgentMcpServer(options: AgentMcpServerOptions): Prom
     },
     async ({ cwd, worktreePath, worktreeSlug }) => {
       const repoRoot = resolveScopedCwd(cwd, { required: true });
-      await deletePaseoWorktree({
+      await deletePolyHiveWorktree({
         cwd: repoRoot,
         worktreePath,
         worktreeSlug,
-        paseoHome: options.paseoHome,
+        polyhiveHome: options.polyhiveHome,
       });
       options.github?.invalidate({ cwd: repoRoot });
       try {
@@ -1779,8 +1779,8 @@ export async function createAgentMcpServer(options: AgentMcpServerOptions): Prom
 }
 
 interface CreateMcpWorktreeOptions {
-  input: CreatePaseoWorktreeInput;
-  createPaseoWorktree: CreatePaseoWorktreeFn | undefined;
+  input: CreatePolyHiveWorktreeInput;
+  createPolyHiveWorktree: CreatePolyHiveWorktreeFn | undefined;
   resolveDefaultBranch?: (repoRoot: string) => Promise<string>;
   workspaceGitService?: Pick<WorkspaceGitService, "getSnapshot">;
   logger: Logger;
@@ -1788,12 +1788,12 @@ interface CreateMcpWorktreeOptions {
 
 async function createMcpWorktree(
   options: CreateMcpWorktreeOptions,
-): Promise<CreatePaseoWorktreeResult> {
+): Promise<CreatePolyHiveWorktreeResult> {
   try {
-    if (!options.createPaseoWorktree) {
-      throw new Error("Paseo worktree service is not configured");
+    if (!options.createPolyHiveWorktree) {
+      throw new Error("PolyHive worktree service is not configured");
     }
-    const result = await options.createPaseoWorktree(options.input, {
+    const result = await options.createPolyHiveWorktree(options.input, {
       resolveDefaultBranch: options.resolveDefaultBranch,
     });
     if (options.workspaceGitService) {

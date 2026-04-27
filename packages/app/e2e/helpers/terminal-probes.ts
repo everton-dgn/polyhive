@@ -102,7 +102,7 @@ export async function installTerminalRenderProbe(page: Page): Promise<void> {
     };
 
     const win = window as any;
-    const existingDescriptor = Object.getOwnPropertyDescriptor(win, "__paseoTerminal");
+    const existingDescriptor = Object.getOwnPropertyDescriptor(win, "__polyhiveTerminal");
     const getExisting = () =>
       existingDescriptor?.get ? existingDescriptor.get.call(win) : existingDescriptor?.value;
 
@@ -177,7 +177,7 @@ export async function installTerminalRenderProbe(page: Page): Promise<void> {
       value: probe,
     });
 
-    Object.defineProperty(win, "__paseoTerminal", {
+    Object.defineProperty(win, "__polyhiveTerminal", {
       configurable: true,
       get() {
         return probe.term;
@@ -194,7 +194,7 @@ export async function installTerminalRenderProbe(page: Page): Promise<void> {
         probe.events.push({ at: performance.now(), type: "set" });
         probe.term = next;
 
-        if (next?.write && !next.__paseoRenderProbeWriteWrapped) {
+        if (next?.write && !next.__polyhiveRenderProbeWriteWrapped) {
           const originalWrite = next.write.bind(next);
           next.write = (data: string | Uint8Array, callback?: () => void) => {
             const text =
@@ -223,7 +223,7 @@ export async function installTerminalRenderProbe(page: Page): Promise<void> {
             }
             return originalWrite(data, callback);
           };
-          next.__paseoRenderProbeWriteWrapped = true;
+          next.__polyhiveRenderProbeWriteWrapped = true;
         }
       },
     });
@@ -627,19 +627,19 @@ export async function installTerminalKeystrokeStressProbe(page: Page): Promise<v
     Object.defineProperty(InstrumentedWebSocket, "CLOSED", { value: NativeWebSocket.CLOSED });
     window.WebSocket = InstrumentedWebSocket as typeof WebSocket;
 
-    const existingDescriptor = Object.getOwnPropertyDescriptor(window, "__paseoTerminal");
+    const existingDescriptor = Object.getOwnPropertyDescriptor(window, "__polyhiveTerminal");
     const getExisting = () =>
       existingDescriptor?.get ? existingDescriptor.get.call(window) : existingDescriptor?.value;
 
     let terminal = getExisting();
-    Object.defineProperty(window, "__paseoTerminal", {
+    Object.defineProperty(window, "__polyhiveTerminal", {
       configurable: true,
       get() {
         return terminal;
       },
       set(next: any) {
         terminal = next;
-        if (next?.write && !next.__paseoKeystrokeProbeWriteWrapped) {
+        if (next?.write && !next.__polyhiveKeystrokeProbeWriteWrapped) {
           const originalWrite = next.write.bind(next);
           next.write = (data: string | Uint8Array, callback?: () => void) => {
             const text =
@@ -656,7 +656,7 @@ export async function installTerminalKeystrokeStressProbe(page: Page): Promise<v
               callback?.();
             });
           };
-          next.__paseoKeystrokeProbeWriteWrapped = true;
+          next.__polyhiveKeystrokeProbeWriteWrapped = true;
         }
       },
     });

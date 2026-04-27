@@ -7,7 +7,7 @@ import { syncReleaseNotes } from "./sync-release-notes-from-changelog.mjs";
 
 function withTempChangelog(fn) {
   const previousCwd = process.cwd();
-  const tempDir = mkdtempSync(path.join(tmpdir(), "paseo-release-notes-test-"));
+  const tempDir = mkdtempSync(path.join(tmpdir(), "polyhive-release-notes-test-"));
   process.chdir(tempDir);
   writeFileSync("CHANGELOG.md", "## 0.1.60-beta.1 - 2026-04-20\n\n- Beta notes.\n");
 
@@ -26,7 +26,7 @@ test("updates an existing release body through the release id API", () => {
     const execFileSync = (command, args, options) => {
       calls.push({ args, command, options });
 
-      if (args[0] === "api" && args[1] === "repos/getpaseo/paseo/releases/tags/v0.1.60-beta.1") {
+      if (args[0] === "api" && args[1] === "repos/polyhive/polyhive/releases/tags/v0.1.60-beta.1") {
         return JSON.stringify({ id: 311163621 });
       }
 
@@ -41,7 +41,7 @@ test("updates an existing release body through the release id API", () => {
       throw new Error(`Unexpected gh call: ${command} ${args.join(" ")}`);
     };
 
-    syncReleaseNotes(["--repo", "getpaseo/paseo", "--tag", "v0.1.60-beta.1"], {
+    syncReleaseNotes(["--repo", "polyhive/polyhive", "--tag", "v0.1.60-beta.1"], {
       execFileSync,
     });
 
@@ -56,7 +56,7 @@ test("updates an existing release body through the release id API", () => {
           call.args[0] === "api" &&
           call.args[1] === "-X" &&
           call.args[2] === "PATCH" &&
-          call.args[3] === "repos/getpaseo/paseo/releases/311163621",
+          call.args[3] === "repos/polyhive/polyhive/releases/311163621",
       ),
       true,
       "existing releases should be patched by release id",

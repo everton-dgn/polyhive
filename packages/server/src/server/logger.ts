@@ -4,7 +4,7 @@ import pino from "pino";
 import pretty from "pino-pretty";
 import { createStream as createRotatingFileStream } from "rotating-file-stream";
 import type { PersistedConfig } from "./persisted-config.js";
-import { resolvePaseoHome } from "./paseo-home.js";
+import { resolvePolyHiveHome } from "./polyhive-home.js";
 
 export type LogLevel = "trace" | "debug" | "info" | "warn" | "error" | "fatal";
 export type LogFormat = "pretty" | "json";
@@ -33,7 +33,7 @@ type LegacyLogConfig = {
 type LoggerConfigInput = PersistedConfig | LegacyLogConfig | undefined;
 
 type ResolveLogConfigOptions = {
-  paseoHome?: string;
+  polyhiveHome?: string;
   env?: NodeJS.ProcessEnv;
 };
 
@@ -82,8 +82,8 @@ function parsePositiveInteger(value: string | undefined): number | undefined {
   return parsed;
 }
 
-function resolveFilePath(paseoHome: string, configuredPath: string | undefined): string {
-  const fallback = path.join(paseoHome, DEFAULT_DAEMON_LOG_FILENAME);
+function resolveFilePath(polyhiveHome: string, configuredPath: string | undefined): string {
+  const fallback = path.join(polyhiveHome, DEFAULT_DAEMON_LOG_FILENAME);
   if (!configuredPath) {
     return fallback;
   }
@@ -92,7 +92,7 @@ function resolveFilePath(paseoHome: string, configuredPath: string | undefined):
     return configuredPath;
   }
 
-  return path.resolve(paseoHome, configuredPath);
+  return path.resolve(polyhiveHome, configuredPath);
 }
 
 function minLogLevel(levels: LogLevel[]): LogLevel {
@@ -107,11 +107,11 @@ function minLogLevel(levels: LogLevel[]): LogLevel {
   return minLevel;
 }
 
-function resolveConfiguredPaseoHome(options: ResolveLogConfigOptions | undefined): string {
-  if (options?.paseoHome) {
-    return options.paseoHome;
+function resolveConfiguredPolyHiveHome(options: ResolveLogConfigOptions | undefined): string {
+  if (options?.polyhiveHome) {
+    return options.polyhiveHome;
   }
-  return resolvePaseoHome(options?.env ?? process.env);
+  return resolvePolyHiveHome(options?.env ?? process.env);
 }
 
 function normalizeLoggerConfigInput(config: LoggerConfigInput): PersistedConfig | undefined {
@@ -185,40 +185,43 @@ export function resolveLogConfig(
 ): ResolvedLogConfig {
   const persistedConfig = normalizeLoggerConfigInput(configInput);
   const env = options?.env ?? process.env;
-  const paseoHome = resolveConfiguredPaseoHome(options);
+  const polyhiveHome = resolveConfiguredPolyHiveHome(options);
   const persistedLog = persistedConfig?.log;
 
-  const envGlobalLevel = parseLogLevel(env.PASEO_LOG);
+  const envGlobalLevel = parseLogLevel(env.POLYHIVE_LOG);
   const persistedGlobalLevel = persistedLog?.level;
   const consoleLevel: LogLevel =
-    parseLogLevel(env.PASEO_LOG_CONSOLE_LEVEL) ??
+    parseLogLevel(env.POLYHIVE_LOG_CONSOLE_LEVEL) ??
     envGlobalLevel ??
     persistedLog?.console?.level ??
     persistedGlobalLevel ??
     DEFAULT_CONSOLE_LEVEL;
 
   const fileLevel: LogLevel =
-    parseLogLevel(env.PASEO_LOG_FILE_LEVEL) ??
+    parseLogLevel(env.POLYHIVE_LOG_FILE_LEVEL) ??
     envGlobalLevel ??
     persistedLog?.file?.level ??
     persistedGlobalLevel ??
     DEFAULT_FILE_LEVEL;
 
   const consoleFormat: LogFormat =
-    parseLogFormat(env.PASEO_LOG_FORMAT) ??
+    parseLogFormat(env.POLYHIVE_LOG_FORMAT) ??
     persistedLog?.console?.format ??
     persistedLog?.format ??
     DEFAULT_CONSOLE_FORMAT;
 
-  const filePath = resolveFilePath(paseoHome, env.PASEO_LOG_FILE_PATH ?? persistedLog?.file?.path);
+  const filePath = resolveFilePath(
+    polyhiveHome,
+    env.POLYHIVE_LOG_FILE_PATH ?? persistedLog?.file?.path,
+  );
 
   const rotateMaxSize =
-    env.PASEO_LOG_FILE_ROTATE_SIZE?.trim() ||
+    env.POLYHIVE_LOG_FILE_ROTATE_SIZE?.trim() ||
     persistedLog?.file?.rotate?.maxSize ||
     DEFAULT_FILE_ROTATE_SIZE;
 
   const rotateMaxFiles =
-    parsePositiveInteger(env.PASEO_LOG_FILE_ROTATE_COUNT) ??
+    parsePositiveInteger(env.POLYHIVE_LOG_FILE_ROTATE_COUNT) ??
     persistedLog?.file?.rotate?.maxFiles ??
     DEFAULT_FILE_ROTATE_MAX_FILES;
 

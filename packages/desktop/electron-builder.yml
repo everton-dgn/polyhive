@@ -1,7 +1,7 @@
 npmRebuild: false
 appId: sh.polyhive.desktop
-productName: Paseo
-executableName: Paseo
+productName: PolyHive
+executableName: PolyHive
 afterPack: ./scripts/after-pack.js
 directories:
   output: release
@@ -19,12 +19,12 @@ publish:
   owner: everton-dgn
   repo: polyhive
 mac:
-  artifactName: "Paseo-${version}-${arch}.${ext}"
+  artifactName: "PolyHive-${version}-${arch}.${ext}"
   category: public.app-category.developer-tools
   icon: assets/icon.icns
   extraResources:
-    - from: bin/paseo
-      to: bin/paseo
+    - from: bin/polyhive
+      to: bin/polyhive
   target:
     - dmg
     - zip

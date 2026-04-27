@@ -23,10 +23,10 @@ function makeFixture(): {
   assertScript: string;
   expectedArgs: string[];
 } {
-  const root = mkdtempSync(path.join(tmpdir(), "paseo spawn regression "));
+  const root = mkdtempSync(path.join(tmpdir(), "polyhive spawn regression "));
   tempDirs.push(root);
 
-  const fakeDaemonNode = path.join(root, "Fake Paseo.exe");
+  const fakeDaemonNode = path.join(root, "Fake PolyHive.exe");
   copyFileSync(process.execPath, fakeDaemonNode);
 
   const expectedArgs = ["--config", JSON_ARG];
@@ -39,7 +39,7 @@ if (process.argv.includes("--version")) {
   process.exit(0);
 }
 
-const expected = JSON.parse(process.env.PASEO_EXPECTED_ARGV_JSON);
+const expected = JSON.parse(process.env.POLYHIVE_EXPECTED_ARGV_JSON);
 const actual = process.argv.slice(2);
 if (JSON.stringify(actual) !== JSON.stringify(expected)) {
   console.error("ARGV_MISMATCH");
@@ -104,7 +104,7 @@ async function runFixture(params: {
   const child = spawnProcess(params.command, params.args, {
     env: {
       ...process.env,
-      PASEO_EXPECTED_ARGV_JSON: JSON.stringify(["--config", JSON_ARG]),
+      POLYHIVE_EXPECTED_ARGV_JSON: JSON.stringify(["--config", JSON_ARG]),
     },
     stdio: ["ignore", "pipe", "pipe"],
     ...(params.shell === undefined ? {} : { shell: params.shell }),

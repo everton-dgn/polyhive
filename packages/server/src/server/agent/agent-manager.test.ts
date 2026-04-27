@@ -669,12 +669,12 @@ describe("AgentManager", () => {
     });
     expect(client.lastLaunchContext).toEqual({
       env: {
-        PASEO_AGENT_ID: snapshot.id,
+        POLYHIVE_AGENT_ID: snapshot.id,
       },
     });
   });
 
-  test("createAgent injects paseo MCP server when manager has an MCP base URL", async () => {
+  test("createAgent injects polyhive MCP server when manager has an MCP base URL", async () => {
     const workdir = mkdtempSync(join(tmpdir(), "agent-manager-test-"));
     const storagePath = join(workdir, "agents");
     const storage = new AgentStorage(storagePath, logger);
@@ -711,7 +711,7 @@ describe("AgentManager", () => {
     });
 
     expect(snapshot.config.mcpServers).toEqual({
-      paseo: {
+      polyhive: {
         type: "http",
         url: `http://127.0.0.1:6767/mcp/agents?callerAgentId=${snapshot.id}`,
       },
@@ -723,7 +723,7 @@ describe("AgentManager", () => {
     expect(client.lastConfig?.mcpServers).toEqual(snapshot.config.mcpServers);
   });
 
-  test("createAgent preserves a user-provided paseo MCP config", async () => {
+  test("createAgent preserves a user-provided polyhive MCP config", async () => {
     const workdir = mkdtempSync(join(tmpdir(), "agent-manager-test-"));
     const storagePath = join(workdir, "agents");
     const storage = new AgentStorage(storagePath, logger);
@@ -752,17 +752,17 @@ describe("AgentManager", () => {
       provider: "codex",
       cwd: workdir,
       mcpServers: {
-        paseo: {
+        polyhive: {
           type: "http",
-          url: "https://example.com/custom-paseo",
+          url: "https://example.com/custom-polyhive",
         },
       },
     });
 
     expect(snapshot.config.mcpServers).toEqual({
-      paseo: {
+      polyhive: {
         type: "http",
-        url: "https://example.com/custom-paseo",
+        url: "https://example.com/custom-polyhive",
       },
     });
     expect(client.lastConfig?.mcpServers).toEqual(snapshot.config.mcpServers);
@@ -856,35 +856,35 @@ describe("AgentManager", () => {
       cwd: workdir,
       systemPrompt: "new prompt",
       mcpServers: {
-        paseo: {
+        polyhive: {
           type: "stdio",
           command: "node",
-          args: ["/tmp/mcp-bridge.mjs", "--socket", "/tmp/paseo.sock"],
+          args: ["/tmp/mcp-bridge.mjs", "--socket", "/tmp/polyhive.sock"],
         },
       },
     });
 
     expect(resumed.config.systemPrompt).toBe("new prompt");
     expect(resumed.config.mcpServers).toEqual({
-      paseo: {
+      polyhive: {
         type: "stdio",
         command: "node",
-        args: ["/tmp/mcp-bridge.mjs", "--socket", "/tmp/paseo.sock"],
+        args: ["/tmp/mcp-bridge.mjs", "--socket", "/tmp/polyhive.sock"],
       },
     });
     expect(client.lastResumeOverrides).toMatchObject({
       systemPrompt: "new prompt",
       mcpServers: {
-        paseo: {
+        polyhive: {
           type: "stdio",
           command: "node",
-          args: ["/tmp/mcp-bridge.mjs", "--socket", "/tmp/paseo.sock"],
+          args: ["/tmp/mcp-bridge.mjs", "--socket", "/tmp/polyhive.sock"],
         },
       },
     });
     expect(client.lastResumeLaunchContext).toEqual({
       env: {
-        PASEO_AGENT_ID: resumed.id,
+        POLYHIVE_AGENT_ID: resumed.id,
       },
     });
   });
@@ -946,7 +946,7 @@ describe("AgentManager", () => {
 
     expect(client.lastCreateLaunchContext).toEqual({
       env: {
-        PASEO_AGENT_ID: snapshot.id,
+        POLYHIVE_AGENT_ID: snapshot.id,
       },
     });
 
@@ -956,7 +956,7 @@ describe("AgentManager", () => {
 
     expect(client.lastResumeLaunchContext).toEqual({
       env: {
-        PASEO_AGENT_ID: snapshot.id,
+        POLYHIVE_AGENT_ID: snapshot.id,
       },
     });
   });

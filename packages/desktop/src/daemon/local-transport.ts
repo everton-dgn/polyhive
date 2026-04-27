@@ -29,7 +29,7 @@ const sessions = new Map<string, Session>();
 
 function emitTransportEvent(payload: TransportEventPayload): void {
   for (const win of BrowserWindow.getAllWindows()) {
-    win.webContents.send("paseo:event:local-daemon-transport-event", payload);
+    win.webContents.send("polyhive:event:local-daemon-transport-event", payload);
   }
 }
 

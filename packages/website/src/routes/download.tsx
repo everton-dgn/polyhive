@@ -19,8 +19,8 @@ const RELEASES_URL = `${GITHUB_WEB_BASE}/releases`;
 export const Route = createFileRoute("/download")({
   head: () => ({
     meta: pageMeta(
-      "Download - Paseo",
-      "Download Paseo for macOS or open the web app from any browser (including mobile).",
+      "Download - PolyHive",
+      "Download PolyHive for macOS or open the web app from any browser (including mobile).",
     ),
   }),
   component: Download,
@@ -37,8 +37,8 @@ function Download() {
       <div className="max-w-3xl mx-auto p-6 md:p-12">
         <header className="flex items-center justify-between gap-4 mb-12">
           <Link to="/" className="flex items-center gap-3">
-            <img src="/logo.svg" alt="Paseo" className="w-6 h-6" />
-            <span className="text-lg font-medium">Paseo</span>
+            <img src="/logo.svg" alt="PolyHive" className="w-6 h-6" />
+            <span className="text-lg font-medium">PolyHive</span>
           </Link>
           <div className="flex items-center gap-4">
             <Link
@@ -83,7 +83,7 @@ function Download() {
               <GlobeIcon className="h-5 w-5 text-muted-foreground" />
             </div>
             <p className="text-muted-foreground mb-6">
-              Paseo runs in any modern browser — including mobile. No install needed.
+              PolyHive runs in any modern browser — including mobile. No install needed.
             </p>
             <a
               href={webAppUrl}

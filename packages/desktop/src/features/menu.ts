@@ -88,7 +88,7 @@ export function setupApplicationMenu(): void {
   const menu = Menu.buildFromTemplate(template);
   Menu.setApplicationMenu(menu);
 
-  ipcMain.handle("paseo:menu:showContextMenu", (event, input?: ShowContextMenuInput) => {
+  ipcMain.handle("polyhive:menu:showContextMenu", (event, input?: ShowContextMenuInput) => {
     const win = BrowserWindow.fromWebContents(event.sender);
     if (!win) {
       return;

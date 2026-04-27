@@ -19,7 +19,7 @@ concurrency:
 
 env:
   SOURCE_TAG: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.tag || github.ref_name }}
-  DESKTOP_WORKSPACE: '@getpaseo/desktop'
+  DESKTOP_WORKSPACE: 'polyhive-desktop'
   DESKTOP_PACKAGE_PATH: 'packages/desktop'
 
 jobs:
@@ -52,7 +52,7 @@ jobs:
             fi
             gh release create "$RELEASE_TAG" \
               --repo "${{ github.repository }}" \
-              --title "Paseo $RELEASE_TAG" \
+              --title "PolyHive $RELEASE_TAG" \
               --generate-notes \
               $prerelease_flag || {
                 echo "Release creation raced with another workflow; continuing."
@@ -104,7 +104,7 @@ jobs:
           NODE
 
       - name: Build web app for desktop
-        run: npm run build:web --workspace=@getpaseo/app
+        run: npm run build:web --workspace=polyhive-app
 
       - name: Build desktop release
         shell: bash

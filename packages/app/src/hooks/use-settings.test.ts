@@ -52,7 +52,7 @@ describe("use-settings", () => {
 
   it("loads persisted built-in daemon management state", async () => {
     asyncStorageMock.getItem.mockImplementation(async (key: string) => {
-      if (key === "@paseo:app-settings") {
+      if (key === "@polyhive:app-settings") {
         return JSON.stringify({
           theme: "light",
           manageBuiltInDaemon: false,
@@ -75,7 +75,7 @@ describe("use-settings", () => {
 
   it("loads persisted beta release channel", async () => {
     asyncStorageMock.getItem.mockImplementation(async (key: string) => {
-      if (key === "@paseo:app-settings") {
+      if (key === "@polyhive:app-settings") {
         return JSON.stringify({
           releaseChannel: "beta",
         });

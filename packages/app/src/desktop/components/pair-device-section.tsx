@@ -87,7 +87,7 @@ export function PairDeviceSection() {
         ) : (
           <View style={styles.content}>
             <Text style={styles.hint}>
-              Scan this QR code with Paseo on your phone, or copy the link below.
+              Scan this QR code with PolyHive on your phone, or copy the link below.
             </Text>
             <View style={styles.qrContainer}>
               {qrQuery.data ? (

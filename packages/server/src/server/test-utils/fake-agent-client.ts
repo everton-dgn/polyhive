@@ -308,7 +308,7 @@ class FakeAgentSession implements AgentSession {
     this.memoryMarker = memoryMarker ?? null;
     this.historyPath = path.join(
       tmpdir(),
-      "paseo-fake-provider-history",
+      "polyhive-fake-provider-history",
       this.providerName,
       `${this.id}.jsonl`,
     );
@@ -822,15 +822,15 @@ class FakeAgentSession implements AgentSession {
     if (this.providerName === "codex" && fullName.startsWith("prompts:")) {
       const promptId = fullName.slice("prompts:".length);
       return {
-        text: `PASEO_OK ${args ?? ""}`.trim(),
-        timeline: [{ type: "assistant_message", text: `PASEO_OK ${promptId}` }],
+        text: `POLYHIVE_OK ${args ?? ""}`.trim(),
+        timeline: [{ type: "assistant_message", text: `POLYHIVE_OK ${promptId}` }],
         usage: { inputTokens: 1, outputTokens: 1 },
       };
     }
 
     return {
-      text: "PASEO_SKILL_OK",
-      timeline: [{ type: "assistant_message", text: "PASEO_SKILL_OK" }],
+      text: "POLYHIVE_SKILL_OK",
+      timeline: [{ type: "assistant_message", text: "POLYHIVE_SKILL_OK" }],
       usage: { inputTokens: 1, outputTokens: 1 },
     };
   }

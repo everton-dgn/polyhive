@@ -19,7 +19,7 @@ describe("resolveStructuredHelperMcpServers", () => {
             provider: "codex",
             cwd: "C:/workspace/app",
             mcpServers: {
-              paseo: { type: "http", url: "http://127.0.0.1:6767/mcp" },
+              polyhive: { type: "http", url: "http://127.0.0.1:6767/mcp" },
             },
           },
         },

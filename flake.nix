@@ -1,5 +1,5 @@
 {
-  description = "Paseo - self-hosted daemon for AI coding agents";
+  description = "PolyHive - self-hosted daemon for AI coding agents";
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
@@ -22,11 +22,11 @@
         system:
         let
           pkgs = pkgsFor system;
-          paseo = pkgs.callPackage ./nix/package.nix { };
+          polyhive = pkgs.callPackage ./nix/package.nix { };
         in
         {
-          default = paseo;
-          paseo = paseo;
+          default = polyhive;
+          polyhive = polyhive;
         }
       );
 

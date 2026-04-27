@@ -7,7 +7,7 @@ import { afterEach, describe, expect, it } from "vitest";
 const tempDirs: string[] = [];
 
 function makeTempDir(): string {
-  const dir = mkdtempSync(join(tmpdir(), "paseo-checkout-git-"));
+  const dir = mkdtempSync(join(tmpdir(), "polyhive-checkout-git-"));
   tempDirs.push(dir);
   return dir;
 }

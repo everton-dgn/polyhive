@@ -1,12 +1,12 @@
 ---
-name: paseo-loop
+name: polyhive-loop
 description: Run an agent loop until an exit condition is met. Use when the user says "loop", "babysit", "keep trying until", "check every X", "watch", or wants iterative autonomous execution.
 user-invocable: true
 ---
 
-# Paseo Loop Skill
+# PolyHive Loop Skill
 
-You are setting up a loop — an iterative worker/verifier cycle managed by the Paseo daemon.
+You are setting up a loop — an iterative worker/verifier cycle managed by the PolyHive daemon.
 
 **User's arguments:** $ARGUMENTS
 
@@ -14,7 +14,7 @@ You are setting up a loop — an iterative worker/verifier cycle managed by the 
 
 ## Prerequisites
 
-Load the **Paseo skill** first. It contains the CLI reference for `paseo loop` and related commands.
+Load the **PolyHive skill** first. It contains the CLI reference for `polyhive loop` and related commands.
 
 ## Core Model
 
@@ -53,7 +53,7 @@ Default: both use Claude/sonnet. For implementation loops, use Codex for the wor
 ### Babysit / watch / check every X
 
 ```bash
-paseo loop run "Check PR #42. Review CI, comments, and branch status. Fix issues as they arise." \
+polyhive loop run "Check PR #42. Review CI, comments, and branch status. Fix issues as they arise." \
   --verify-check "gh pr checks 42 --fail-fast" \
   --sleep 2m \
   --max-time 1h \
@@ -63,7 +63,7 @@ paseo loop run "Check PR #42. Review CI, comments, and branch status. Fix issues
 ### Keep trying until tests pass
 
 ```bash
-paseo loop run "Run the test suite, investigate failures, and fix the code." \
+polyhive loop run "Run the test suite, investigate failures, and fix the code." \
   --provider codex/gpt-5.4 \
   --verify "Run the test suite. Return done=true only if all tests pass. Cite the exact command and outcome." \
   --verify-check "npm test" \
@@ -74,7 +74,7 @@ paseo loop run "Run the test suite, investigate failures, and fix the code." \
 ### Implementation loop with cross-provider review
 
 ```bash
-paseo loop run "Implement issue #456. Make incremental progress each iteration." \
+polyhive loop run "Implement issue #456. Make incremental progress each iteration." \
   --provider codex/gpt-5.4 \
   --verify "Verify issue #456 is complete. Check changed files, run typecheck and tests." \
   --verify-provider claude/sonnet \
@@ -87,10 +87,10 @@ paseo loop run "Implement issue #456. Make incremental progress each iteration."
 ## Managing Loops
 
 ```bash
-paseo loop ls                   # List all loops
-paseo loop inspect <id>         # Show details and iteration history
-paseo loop logs <id>            # Stream logs
-paseo loop stop <id>            # Stop a running loop
+polyhive loop ls                   # List all loops
+polyhive loop inspect <id>         # Show details and iteration history
+polyhive loop logs <id>            # Stream logs
+polyhive loop stop <id>            # Stop a running loop
 ```
 
 ## Your Job
@@ -101,7 +101,7 @@ paseo loop stop <id>            # Stop a running loop
 4. Choose providers/models for worker and verifier
 5. Choose sleep only when the task is polling or waiting on an external system
 6. Add sensible stop conditions
-7. Run `paseo loop run` with the final arguments
+7. Run `polyhive loop run` with the final arguments
 
 ## Prompt Writing Rules
 

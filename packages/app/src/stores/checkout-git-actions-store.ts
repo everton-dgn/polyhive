@@ -105,11 +105,11 @@ function invalidateCheckoutGitQueries(serverId: string, cwd: string) {
 function invalidateWorktreeList() {
   void appQueryClient.invalidateQueries({
     predicate: (query) =>
-      Array.isArray(query.queryKey) && query.queryKey[0] === "paseoWorktreeList",
+      Array.isArray(query.queryKey) && query.queryKey[0] === "polyhiveWorktreeList",
   });
   void appQueryClient.invalidateQueries({
     predicate: (query) =>
-      Array.isArray(query.queryKey) && query.queryKey[0] === "sidebarPaseoWorktreeList",
+      Array.isArray(query.queryKey) && query.queryKey[0] === "sidebarPolyHiveWorktreeList",
   });
 }
 
@@ -132,7 +132,7 @@ function removeWorktreeFromCachedLists(input: { serverId: string; worktreePath: 
     {
       predicate: (query) =>
         Array.isArray(query.queryKey) &&
-        query.queryKey[0] === "paseoWorktreeList" &&
+        query.queryKey[0] === "polyhiveWorktreeList" &&
         query.queryKey[1] === serverId,
     },
     removeFromList,
@@ -142,7 +142,7 @@ function removeWorktreeFromCachedLists(input: { serverId: string; worktreePath: 
     {
       predicate: (query) =>
         Array.isArray(query.queryKey) &&
-        query.queryKey[0] === "sidebarPaseoWorktreeList" &&
+        query.queryKey[0] === "sidebarPolyHiveWorktreeList" &&
         query.queryKey[1] === serverId,
     },
     removeFromList,
@@ -353,7 +353,7 @@ export const useCheckoutGitActionsStore = create<CheckoutGitActionsStoreState>()
       actionId: "archive-worktree",
       run: async () => {
         const client = resolveClient(serverId);
-        const payload = await client.archivePaseoWorktree({ worktreePath });
+        const payload = await client.archivePolyHiveWorktree({ worktreePath });
         if (payload.error) {
           throw new Error(payload.error.message);
         }

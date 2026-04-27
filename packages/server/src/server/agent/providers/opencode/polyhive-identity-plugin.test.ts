@@ -8,11 +8,11 @@ import { afterEach, beforeEach, describe, expect, test } from "vitest";
 import {
   buildOpenCodeServerConfig,
   installIdentityPlugin,
-  PASEO_IDENTITY_PLUGIN_FILE,
-  PASEO_IDENTITY_PLUGIN_ID,
-  PASEO_IDENTITY_PLUGIN_SOURCE,
-  PASEO_SESSION_MAP_ENV_VAR,
-} from "./paseo-identity-plugin.js";
+  POLYHIVE_IDENTITY_PLUGIN_FILE,
+  POLYHIVE_IDENTITY_PLUGIN_ID,
+  POLYHIVE_IDENTITY_PLUGIN_SOURCE,
+  POLYHIVE_SESSION_MAP_ENV_VAR,
+} from "./polyhive-identity-plugin.js";
 
 interface PluginHooks {
   "shell.env"?: (
@@ -38,21 +38,21 @@ async function loadPluginHooks(filePath: string): Promise<PluginHooks> {
   return mod.server();
 }
 
-describe("paseo-identity-plugin installation", () => {
+describe("polyhive-identity-plugin installation", () => {
   let tmpHome: string;
 
   beforeEach(() => {
-    tmpHome = mkdtempSync(join(tmpdir(), "paseo-plugin-install-"));
+    tmpHome = mkdtempSync(join(tmpdir(), "polyhive-plugin-install-"));
   });
 
   afterEach(() => {
     rmSync(tmpHome, { recursive: true, force: true });
   });
 
-  test("writes source to $PASEO_HOME/paseo-identity-plugin.mjs", () => {
+  test("writes source to $POLYHIVE_HOME/polyhive-identity-plugin.mjs", () => {
     const result = installIdentityPlugin(tmpHome);
-    expect(result.filePath).toBe(join(tmpHome, PASEO_IDENTITY_PLUGIN_FILE));
-    expect(readFileSync(result.filePath, "utf8")).toBe(PASEO_IDENTITY_PLUGIN_SOURCE);
+    expect(result.filePath).toBe(join(tmpHome, POLYHIVE_IDENTITY_PLUGIN_FILE));
+    expect(readFileSync(result.filePath, "utf8")).toBe(POLYHIVE_IDENTITY_PLUGIN_SOURCE);
     expect(result.fileUrl.startsWith("file://")).toBe(true);
   });
 
@@ -70,48 +70,48 @@ describe("paseo-identity-plugin installation", () => {
   test("plugin module exports id and server in PluginModule shape", async () => {
     const { filePath } = installIdentityPlugin(tmpHome);
     const mod = await loadPluginModule(filePath);
-    expect(mod.id).toBe(PASEO_IDENTITY_PLUGIN_ID);
+    expect(mod.id).toBe(POLYHIVE_IDENTITY_PLUGIN_ID);
     expect(typeof mod.server).toBe("function");
-    expect(mod.default).toEqual({ id: PASEO_IDENTITY_PLUGIN_ID, server: mod.server });
+    expect(mod.default).toEqual({ id: POLYHIVE_IDENTITY_PLUGIN_ID, server: mod.server });
   });
 
   test("rewrites file when content differs", () => {
     const { filePath } = installIdentityPlugin(tmpHome);
     writeFileSync(filePath, "// stale content", "utf8");
     installIdentityPlugin(tmpHome);
-    expect(readFileSync(filePath, "utf8")).toBe(PASEO_IDENTITY_PLUGIN_SOURCE);
+    expect(readFileSync(filePath, "utf8")).toBe(POLYHIVE_IDENTITY_PLUGIN_SOURCE);
   });
 });
 
-describe("paseo-identity-plugin shell.env hook", () => {
+describe("polyhive-identity-plugin shell.env hook", () => {
   let tmpHome: string;
   let sessionMapPath: string;
   let previousEnvValue: string | undefined;
 
   beforeEach(() => {
-    tmpHome = mkdtempSync(join(tmpdir(), "paseo-plugin-run-"));
+    tmpHome = mkdtempSync(join(tmpdir(), "polyhive-plugin-run-"));
     sessionMapPath = join(tmpHome, "session-map.json");
-    previousEnvValue = process.env[PASEO_SESSION_MAP_ENV_VAR];
-    process.env[PASEO_SESSION_MAP_ENV_VAR] = sessionMapPath;
+    previousEnvValue = process.env[POLYHIVE_SESSION_MAP_ENV_VAR];
+    process.env[POLYHIVE_SESSION_MAP_ENV_VAR] = sessionMapPath;
   });
 
   afterEach(() => {
     if (previousEnvValue === undefined) {
-      delete process.env[PASEO_SESSION_MAP_ENV_VAR];
+      delete process.env[POLYHIVE_SESSION_MAP_ENV_VAR];
     } else {
-      process.env[PASEO_SESSION_MAP_ENV_VAR] = previousEnvValue;
+      process.env[POLYHIVE_SESSION_MAP_ENV_VAR] = previousEnvValue;
     }
     rmSync(tmpHome, { recursive: true, force: true });
   });
 
-  test("injects PASEO_AGENT_ID for known sessionID", async () => {
+  test("injects POLYHIVE_AGENT_ID for known sessionID", async () => {
     writeFileSync(sessionMapPath, JSON.stringify({ "session-a": "agent-a" }), "utf8");
     const { filePath } = installIdentityPlugin(tmpHome);
     const hooks = await loadPluginHooks(filePath);
 
     const output: { env: Record<string, string> } = { env: {} };
     await hooks["shell.env"]?.({ cwd: "/tmp", sessionID: "session-a" }, output);
-    expect(output.env.PASEO_AGENT_ID).toBe("agent-a");
+    expect(output.env.POLYHIVE_AGENT_ID).toBe("agent-a");
   });
 
   test("does not inject when sessionID is unknown", async () => {
@@ -121,7 +121,7 @@ describe("paseo-identity-plugin shell.env hook", () => {
 
     const output: { env: Record<string, string> } = { env: {} };
     await hooks["shell.env"]?.({ cwd: "/tmp", sessionID: "session-other" }, output);
-    expect(output.env.PASEO_AGENT_ID).toBeUndefined();
+    expect(output.env.POLYHIVE_AGENT_ID).toBeUndefined();
   });
 
   test("does not inject when sessionID is absent", async () => {
@@ -131,7 +131,7 @@ describe("paseo-identity-plugin shell.env hook", () => {
 
     const output: { env: Record<string, string> } = { env: {} };
     await hooks["shell.env"]?.({ cwd: "/tmp" }, output);
-    expect(output.env.PASEO_AGENT_ID).toBeUndefined();
+    expect(output.env.POLYHIVE_AGENT_ID).toBeUndefined();
   });
 
   test("tolerates missing session map file", async () => {
@@ -140,7 +140,7 @@ describe("paseo-identity-plugin shell.env hook", () => {
 
     const output: { env: Record<string, string> } = { env: {} };
     await hooks["shell.env"]?.({ cwd: "/tmp", sessionID: "session-any" }, output);
-    expect(output.env.PASEO_AGENT_ID).toBeUndefined();
+    expect(output.env.POLYHIVE_AGENT_ID).toBeUndefined();
   });
 
   test("tolerates malformed session map json", async () => {
@@ -150,14 +150,14 @@ describe("paseo-identity-plugin shell.env hook", () => {
 
     const output: { env: Record<string, string> } = { env: {} };
     await hooks["shell.env"]?.({ cwd: "/tmp", sessionID: "session-a" }, output);
-    expect(output.env.PASEO_AGENT_ID).toBeUndefined();
+    expect(output.env.POLYHIVE_AGENT_ID).toBeUndefined();
   });
 });
 
 describe("buildOpenCodeServerConfig", () => {
   test("emits only the plugin URL, leaving project/global config to OpenCode merge", () => {
-    const config = buildOpenCodeServerConfig("file:///tmp/paseo-identity-plugin.mjs");
-    expect(config).toEqual({ plugin: ["file:///tmp/paseo-identity-plugin.mjs"] });
+    const config = buildOpenCodeServerConfig("file:///tmp/polyhive-identity-plugin.mjs");
+    expect(config).toEqual({ plugin: ["file:///tmp/polyhive-identity-plugin.mjs"] });
   });
 
   test("does not include unrelated keys that would overwrite project/global config", () => {

@@ -13,7 +13,7 @@ describe("OpenCodeServerManager session identity bridge", () => {
 
   beforeEach(() => {
     tmpHome = mkdtempSync(join(tmpdir(), "opencode-agent-env-"));
-    vi.stubEnv("PASEO_HOME", tmpHome);
+    vi.stubEnv("POLYHIVE_HOME", tmpHome);
   });
 
   afterEach(() => {
@@ -23,34 +23,34 @@ describe("OpenCodeServerManager session identity bridge", () => {
 
   test("registerSession persists sessionId -> agentId mapping", () => {
     const manager = OpenCodeServerManager.createForTesting(createTestLogger());
-    manager.registerSession("opencode-session-1", "paseo-agent-1");
-    manager.registerSession("opencode-session-2", "paseo-agent-2");
+    manager.registerSession("opencode-session-1", "polyhive-agent-1");
+    manager.registerSession("opencode-session-2", "polyhive-agent-2");
 
-    expect(manager.getAgentIdForSession("opencode-session-1")).toBe("paseo-agent-1");
-    expect(manager.getAgentIdForSession("opencode-session-2")).toBe("paseo-agent-2");
+    expect(manager.getAgentIdForSession("opencode-session-1")).toBe("polyhive-agent-1");
+    expect(manager.getAgentIdForSession("opencode-session-2")).toBe("polyhive-agent-2");
 
     const filePath = join(tmpHome, SESSION_MAP_FILE_NAME);
     expect(existsSync(filePath)).toBe(true);
     const persisted = JSON.parse(readFileSync(filePath, "utf8")) as Record<string, string>;
     expect(persisted).toEqual({
-      "opencode-session-1": "paseo-agent-1",
-      "opencode-session-2": "paseo-agent-2",
+      "opencode-session-1": "polyhive-agent-1",
+      "opencode-session-2": "polyhive-agent-2",
     });
   });
 
   test("unregisterSession removes entry from map", () => {
     const manager = OpenCodeServerManager.createForTesting(createTestLogger());
-    manager.registerSession("opencode-session-1", "paseo-agent-1");
-    manager.registerSession("opencode-session-2", "paseo-agent-2");
+    manager.registerSession("opencode-session-1", "polyhive-agent-1");
+    manager.registerSession("opencode-session-2", "polyhive-agent-2");
     manager.unregisterSession("opencode-session-1");
 
     expect(manager.getAgentIdForSession("opencode-session-1")).toBeUndefined();
-    expect(manager.getAgentIdForSession("opencode-session-2")).toBe("paseo-agent-2");
+    expect(manager.getAgentIdForSession("opencode-session-2")).toBe("polyhive-agent-2");
 
     const persisted = JSON.parse(
       readFileSync(join(tmpHome, SESSION_MAP_FILE_NAME), "utf8"),
     ) as Record<string, string>;
-    expect(persisted).toEqual({ "opencode-session-2": "paseo-agent-2" });
+    expect(persisted).toEqual({ "opencode-session-2": "polyhive-agent-2" });
   });
 
   test("registerSession ignores empty ids", () => {
@@ -67,7 +67,7 @@ describe("OpenCodeServerManager session identity bridge", () => {
     expect(() => manager.unregisterSession(undefined)).not.toThrow();
   });
 
-  test("two managers sharing the same PASEO_HOME observe each other's writes", () => {
+  test("two managers sharing the same POLYHIVE_HOME observe each other's writes", () => {
     const managerA = OpenCodeServerManager.createForTesting(createTestLogger());
     managerA.registerSession("shared-session", "agent-x");
 
@@ -75,7 +75,7 @@ describe("OpenCodeServerManager session identity bridge", () => {
     expect(managerB.getAgentIdForSession("shared-session")).toBe("agent-x");
   });
 
-  test("sessionMapPath points to $PASEO_HOME/opencode-session-map.json", () => {
+  test("sessionMapPath points to $POLYHIVE_HOME/opencode-session-map.json", () => {
     const manager = OpenCodeServerManager.createForTesting(createTestLogger());
     expect(manager.sessionMapPath).toBe(join(tmpHome, SESSION_MAP_FILE_NAME));
   });

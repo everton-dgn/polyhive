@@ -15,9 +15,9 @@ import { getAvailablePort } from "./helpers/network.ts";
 
 const pollIntervalMs = 100;
 const testEnv = {
-  PASEO_LOCAL_SPEECH_AUTO_DOWNLOAD: process.env.PASEO_LOCAL_SPEECH_AUTO_DOWNLOAD ?? "0",
-  PASEO_DICTATION_ENABLED: process.env.PASEO_DICTATION_ENABLED ?? "0",
-  PASEO_VOICE_MODE_ENABLED: process.env.PASEO_VOICE_MODE_ENABLED ?? "0",
+  POLYHIVE_LOCAL_SPEECH_AUTO_DOWNLOAD: process.env.POLYHIVE_LOCAL_SPEECH_AUTO_DOWNLOAD ?? "0",
+  POLYHIVE_DICTATION_ENABLED: process.env.POLYHIVE_DICTATION_ENABLED ?? "0",
+  POLYHIVE_VOICE_MODE_ENABLED: process.env.POLYHIVE_VOICE_MODE_ENABLED ?? "0",
 };
 
 function sleep(ms: number): Promise<void> {
@@ -87,8 +87,8 @@ async function canConnectToDaemon(host: string, timeoutMs: number): Promise<bool
   return false;
 }
 
-async function readPidLockPid(paseoHome: string): Promise<number | null> {
-  const pidPath = join(paseoHome, "paseo.pid");
+async function readPidLockPid(polyhiveHome: string): Promise<number | null> {
+  const pidPath = join(polyhiveHome, "polyhive.pid");
   try {
     const content = await readFile(pidPath, "utf-8");
     const parsed = JSON.parse(content) as { pid?: unknown };
@@ -104,7 +104,7 @@ async function readPidLockPid(paseoHome: string): Promise<number | null> {
 console.log("=== Daemon Restart (unsupervised regression) ===\n");
 
 const port = await getAvailablePort();
-const paseoHome = await mkdtemp(join(tmpdir(), "paseo-restart-unsupervised-"));
+const polyhiveHome = await mkdtemp(join(tmpdir(), "polyhive-restart-unsupervised-"));
 const cliRoot = join(import.meta.dirname, "..");
 const host = `127.0.0.1:${port}`;
 
@@ -119,9 +119,9 @@ try {
     env: {
       ...process.env,
       ...testEnv,
-      PASEO_HOME: paseoHome,
-      PASEO_LISTEN: host,
-      PASEO_RELAY_ENABLED: "false",
+      POLYHIVE_HOME: polyhiveHome,
+      POLYHIVE_LISTEN: host,
+      POLYHIVE_RELAY_ENABLED: "false",
       CI: "true",
     },
     stdio: ["ignore", "pipe", "pipe"],
@@ -143,7 +143,7 @@ try {
   );
 
   assert(daemonProcess.pid, "unsupervised daemon process pid should exist");
-  const lockPid = await readPidLockPid(paseoHome);
+  const lockPid = await readPidLockPid(polyhiveHome);
   assert.strictEqual(lockPid, daemonProcess.pid, "unsupervised worker should own pid lock");
   console.log(`✓ unsupervised daemon started with pid ${daemonProcess.pid}\n`);
 
@@ -172,7 +172,7 @@ try {
   );
 
   await waitFor(
-    async () => (await readPidLockPid(paseoHome)) === null,
+    async () => (await readPidLockPid(polyhiveHome)) === null,
     15000,
     "pid lock was not released after unsupervised restart request",
   );
@@ -190,7 +190,7 @@ try {
     });
   }
 
-  await rm(paseoHome, { recursive: true, force: true });
+  await rm(polyhiveHome, { recursive: true, force: true });
 }
 
 console.log("=== Unsupervised restart regression test passed ===");

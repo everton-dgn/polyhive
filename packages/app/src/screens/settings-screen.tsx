@@ -324,7 +324,7 @@ function DesktopAppUpdateRow() {
 
     void confirmDialog({
       title: "Install desktop update",
-      message: "This updates Paseo on this computer",
+      message: "This updates PolyHive on this computer",
       confirmLabel: "Install update",
       cancelLabel: "Cancel",
     })

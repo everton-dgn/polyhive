@@ -26,16 +26,16 @@ function extractWorktreeName(path: string): string {
   return basename(path);
 }
 
-export function resolvePaseoHomePath(): string {
-  return process.env.PASEO_HOME ?? join(homedir(), ".paseo");
+export function resolvePolyHiveHomePath(): string {
+  return process.env.POLYHIVE_HOME ?? join(homedir(), ".polyhive");
 }
 
-export function resolvePaseoWorktreesDir(): string {
-  return join(resolvePaseoHomePath(), "worktrees");
+export function resolvePolyHiveWorktreesDir(): string {
+  return join(resolvePolyHiveHomePath(), "worktrees");
 }
 
 function isAgentInManagedWorktree(agentCwd: string): boolean {
-  const worktreesDir = resolvePaseoWorktreesDir();
+  const worktreesDir = resolvePolyHiveWorktreesDir();
   return agentCwd === worktreesDir || agentCwd.startsWith(worktreesDir + sep);
 }
 
@@ -70,7 +70,7 @@ export async function runLsCommand(
     const error: CommandError = {
       code: "DAEMON_NOT_RUNNING",
       message: `Cannot connect to daemon at ${host}: ${message}`,
-      details: "Start the daemon with: paseo daemon start",
+      details: "Start the daemon with: polyhive daemon start",
     };
     throw error;
   }
@@ -80,7 +80,7 @@ export async function runLsCommand(
     const agents = agentsPayload.entries.map((entry) => entry.agent);
 
     // Get worktree list from daemon
-    const response = await client.getPaseoWorktreeList({});
+    const response = await client.getPolyHiveWorktreeList({});
 
     await client.close();
 

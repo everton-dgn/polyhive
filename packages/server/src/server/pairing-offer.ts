@@ -12,7 +12,7 @@ export type LocalPairingOffer = {
 };
 
 export async function generateLocalPairingOffer(args: {
-  paseoHome: string;
+  polyhiveHome: string;
   relayEnabled?: boolean;
   relayEndpoint?: string;
   relayPublicEndpoint?: string;
@@ -29,11 +29,11 @@ export async function generateLocalPairingOffer(args: {
     };
   }
 
-  const relayEndpoint = args.relayEndpoint ?? "relay.paseo.sh:443";
+  const relayEndpoint = args.relayEndpoint ?? "relay.polyhive.sh:443";
   const relayPublicEndpoint = args.relayPublicEndpoint ?? relayEndpoint;
-  const appBaseUrl = args.appBaseUrl ?? "https://app.paseo.sh";
-  const serverId = getOrCreateServerId(args.paseoHome, { logger: args.logger });
-  const daemonKeyPair = await loadOrCreateDaemonKeyPair(args.paseoHome, args.logger);
+  const appBaseUrl = args.appBaseUrl ?? "https://app.polyhive.sh";
+  const serverId = getOrCreateServerId(args.polyhiveHome, { logger: args.logger });
+  const daemonKeyPair = await loadOrCreateDaemonKeyPair(args.polyhiveHome, args.logger);
   const offer = await createConnectionOfferV2({
     serverId,
     daemonPublicKeyB64: daemonKeyPair.publicKeyB64,

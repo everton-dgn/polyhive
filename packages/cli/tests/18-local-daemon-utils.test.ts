@@ -27,10 +27,10 @@ console.log("=== Local Daemon Utility Helpers ===\n");
 
 {
   console.log("Test 3: rejects unix socket listen values");
-  assert.strictEqual(resolveTcpHostFromListen("/tmp/paseo.sock"), null);
-  assert.strictEqual(resolveTcpHostFromListen("unix:///tmp/paseo.sock"), null);
-  assert.strictEqual(resolveTcpHostFromListen("pipe://\\\\.\\pipe\\paseo-managed-test"), null);
-  assert.strictEqual(resolveTcpHostFromListen("\\\\.\\pipe\\paseo-managed-test"), null);
+  assert.strictEqual(resolveTcpHostFromListen("/tmp/polyhive.sock"), null);
+  assert.strictEqual(resolveTcpHostFromListen("unix:///tmp/polyhive.sock"), null);
+  assert.strictEqual(resolveTcpHostFromListen("pipe://\\\\.\\pipe\\polyhive-managed-test"), null);
+  assert.strictEqual(resolveTcpHostFromListen("\\\\.\\pipe\\polyhive-managed-test"), null);
   console.log("✓ rejects unix socket listen values\n");
 }
 

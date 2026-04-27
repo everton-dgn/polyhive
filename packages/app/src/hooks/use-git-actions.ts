@@ -61,7 +61,7 @@ export function useGitActions({ serverId, cwd, icons }: UseGitActionsInput): Use
     if (!gitStatus?.repoRoot) {
       return null;
     }
-    return `@paseo:changes-ship-default:${gitStatus.repoRoot}`;
+    return `@polyhive:changes-ship-default:${gitStatus.repoRoot}`;
   }, [gitStatus?.repoRoot]);
 
   useEffect(() => {
@@ -255,12 +255,12 @@ export function useGitActions({ serverId, cwd, icons }: UseGitActionsInput): Use
   }, [baseRef]);
   const hasPullRequest = Boolean(prStatus?.url);
   const hasRemote = gitStatus?.hasRemote ?? false;
-  const isPaseoOwnedWorktree = gitStatus?.isPaseoOwnedWorktree ?? false;
+  const isPolyHiveOwnedWorktree = gitStatus?.isPolyHiveOwnedWorktree ?? false;
   const isMergedPullRequest = Boolean(prStatus?.isMerged);
   const currentBranch = gitStatus?.currentBranch;
   const isOnBaseBranch = currentBranch === baseRefLabel;
   const shouldPromoteArchive =
-    isPaseoOwnedWorktree &&
+    isPolyHiveOwnedWorktree &&
     !hasUncommittedChanges &&
     (postShipArchiveSuggested || isMergedPullRequest);
 
@@ -287,7 +287,7 @@ export function useGitActions({ serverId, cwd, icons }: UseGitActionsInput): Use
       hasPullRequest,
       pullRequestUrl: prStatus?.url ?? null,
       hasRemote,
-      isPaseoOwnedWorktree,
+      isPolyHiveOwnedWorktree,
       isOnBaseBranch,
       hasUncommittedChanges,
       baseRefAvailable: Boolean(baseRef),
@@ -356,7 +356,7 @@ export function useGitActions({ serverId, cwd, icons }: UseGitActionsInput): Use
     prStatus?.url,
     aheadCount,
     behindBaseCount,
-    isPaseoOwnedWorktree,
+    isPolyHiveOwnedWorktree,
     isOnBaseBranch,
     githubFeaturesEnabled,
     hasUncommittedChanges,

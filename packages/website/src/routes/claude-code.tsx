@@ -5,7 +5,7 @@ import { pageMeta } from "~/meta";
 export const Route = createFileRoute("/claude-code")({
   head: () => ({
     meta: pageMeta(
-      "Claude Code Web - Ship from your browser | Paseo",
+      "Claude Code Web - Ship from your browser | PolyHive",
       "Run Claude Code on your Mac and control it from a browser. Launch agents, check progress, review diffs, and merge while your code stays on your machine.",
     ),
   }),

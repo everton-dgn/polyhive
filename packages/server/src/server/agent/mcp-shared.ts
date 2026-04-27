@@ -317,7 +317,7 @@ export function setupFinishNotification(params: SetupFinishNotificationParams): 
     }
 
     const title = agentManager.getAgent(childAgentId)?.config?.title ?? childAgentId;
-    const prompt = `<paseo-system>\nAgent ${childAgentId} (${title}) ${reason}.\n</paseo-system>`;
+    const prompt = `<polyhive-system>\nAgent ${childAgentId} (${title}) ${reason}.\n</polyhive-system>`;
 
     startAgentRun(agentManager, callerAgentId, prompt, logger, {
       replaceRunning: true,

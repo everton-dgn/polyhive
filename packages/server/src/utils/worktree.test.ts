@@ -3,12 +3,12 @@ import {
   BranchAlreadyCheckedOutError,
   createWorktree as createWorktreePrimitive,
   deriveWorktreeProjectHash,
-  deletePaseoWorktree,
+  deletePolyHiveWorktree,
   getScriptConfigs,
   getWorktreeTerminalSpecs,
   isServiceScript,
-  isPaseoOwnedWorktreeCwd,
-  listPaseoWorktrees,
+  isPolyHiveOwnedWorktreeCwd,
+  listPolyHiveWorktrees,
   resolveWorktreeRuntimeEnv,
   type WorktreeSetupCommandProgressEvent,
   runWorktreeSetupCommands,
@@ -16,7 +16,7 @@ import {
   type CreateWorktreeOptions,
   type WorktreeConfig,
 } from "./worktree";
-import { getPaseoWorktreeMetadataPath } from "./worktree-metadata.js";
+import { getPolyHiveWorktreeMetadataPath } from "./worktree-metadata.js";
 import { execSync } from "child_process";
 import {
   mkdtempSync,
@@ -37,7 +37,7 @@ interface LegacyCreateWorktreeTestOptions {
   baseBranch: string;
   worktreeSlug: string;
   runSetup?: boolean;
-  paseoHome?: string;
+  polyhiveHome?: string;
 }
 
 function createLegacyWorktreeForTest(
@@ -56,20 +56,20 @@ function createLegacyWorktreeForTest(
       newBranchName: options.branchName,
     },
     runSetup: options.runSetup ?? true,
-    paseoHome: options.paseoHome,
+    polyhiveHome: options.polyhiveHome,
   });
 }
 
 describe("createWorktree", () => {
   let tempDir: string;
   let repoDir: string;
-  let paseoHome: string;
+  let polyhiveHome: string;
 
   beforeEach(() => {
     // Use realpathSync to resolve symlinks (e.g., /var -> /private/var on macOS)
     tempDir = realpathSync(mkdtempSync(join(tmpdir(), "worktree-test-")));
     repoDir = join(tempDir, "test-repo");
-    paseoHome = join(tempDir, "paseo-home");
+    polyhiveHome = join(tempDir, "polyhive-home");
 
     // Create a git repo with an initial commit
     mkdirSync(repoDir, { recursive: true });
@@ -92,24 +92,24 @@ describe("createWorktree", () => {
       cwd: repoDir,
       baseBranch: "main",
       worktreeSlug: "hello-world",
-      paseoHome,
+      polyhiveHome,
     });
 
-    expect(result.worktreePath).toBe(join(paseoHome, "worktrees", projectHash, "hello-world"));
+    expect(result.worktreePath).toBe(join(polyhiveHome, "worktrees", projectHash, "hello-world"));
     expect(existsSync(result.worktreePath)).toBe(true);
     expect(existsSync(join(result.worktreePath, "file.txt"))).toBe(true);
-    const metadataPath = getPaseoWorktreeMetadataPath(result.worktreePath);
+    const metadataPath = getPolyHiveWorktreeMetadataPath(result.worktreePath);
     expect(existsSync(metadataPath)).toBe(true);
     const metadata = JSON.parse(readFileSync(metadataPath, "utf8"));
     expect(metadata).toMatchObject({ version: 1, baseRefName: "main" });
   });
 
-  it.skip("detects paseo-owned worktrees across realpath differences (macOS /var vs /private/var)", async () => {
+  it.skip("detects polyhive-owned worktrees across realpath differences (macOS /var vs /private/var)", async () => {
     // Intentionally create repo using the non-realpath tmpdir() variant (often /var/... on macOS).
     const varTempDir = mkdtempSync(join(tmpdir(), "worktree-realpath-test-"));
     const privateTempDir = realpathSync(varTempDir);
     const varRepoDir = join(varTempDir, "test-repo");
-    const varPaseoHome = join(varTempDir, "paseo-home");
+    const varPolyHiveHome = join(varTempDir, "polyhive-home");
     mkdirSync(varRepoDir, { recursive: true });
     execSync("git init -b main", { cwd: varRepoDir });
     execSync('git config user.email "test@test.com"', { cwd: varRepoDir });
@@ -123,37 +123,37 @@ describe("createWorktree", () => {
       cwd: varRepoDir,
       baseBranch: "main",
       worktreeSlug: "realpath-test",
-      paseoHome: varPaseoHome,
+      polyhiveHome: varPolyHiveHome,
     });
 
     const projectHash = await deriveWorktreeProjectHash(varRepoDir);
     const privateWorktreePath = join(
       privateTempDir,
-      "paseo-home",
+      "polyhive-home",
       "worktrees",
       projectHash,
       "realpath-test",
     );
     expect(existsSync(privateWorktreePath)).toBe(true);
 
-    const ownership = await isPaseoOwnedWorktreeCwd(privateWorktreePath, {
-      paseoHome: varPaseoHome,
+    const ownership = await isPolyHiveOwnedWorktreeCwd(privateWorktreePath, {
+      polyhiveHome: varPolyHiveHome,
     });
     expect(ownership.allowed).toBe(true);
 
     rmSync(varTempDir, { recursive: true, force: true });
   });
 
-  it("reports repoRoot as the repository root for paseo-owned worktrees", async () => {
+  it("reports repoRoot as the repository root for polyhive-owned worktrees", async () => {
     const result = await createLegacyWorktreeForTest({
       branchName: "main",
       cwd: repoDir,
       baseBranch: "main",
       worktreeSlug: "repo-root-check",
-      paseoHome,
+      polyhiveHome,
     });
 
-    const ownership = await isPaseoOwnedWorktreeCwd(result.worktreePath, { paseoHome });
+    const ownership = await isPolyHiveOwnedWorktreeCwd(result.worktreePath, { polyhiveHome });
     expect(ownership.allowed).toBe(true);
     expect(ownership.repoRoot).toBe(repoDir);
   });
@@ -162,7 +162,7 @@ describe("createWorktree", () => {
     const nonGitDir = join(tempDir, "not-a-repo");
     mkdirSync(nonGitDir, { recursive: true });
 
-    const ownership = await isPaseoOwnedWorktreeCwd(nonGitDir, { paseoHome });
+    const ownership = await isPolyHiveOwnedWorktreeCwd(nonGitDir, { polyhiveHome });
 
     expect(ownership.allowed).toBe(false);
     expect(ownership.worktreePath).toBe(realpathSync(nonGitDir));
@@ -175,10 +175,10 @@ describe("createWorktree", () => {
       worktreeSlug: "my-feature",
       source: { kind: "branch-off", baseBranch: "main", newBranchName: "feature/x" },
       runSetup: true,
-      paseoHome,
+      polyhiveHome,
     });
 
-    expect(result.worktreePath).toBe(join(paseoHome, "worktrees", projectHash, "my-feature"));
+    expect(result.worktreePath).toBe(join(polyhiveHome, "worktrees", projectHash, "my-feature"));
     expect(existsSync(result.worktreePath)).toBe(true);
 
     const currentBranch = execSync("git branch --show-current", {
@@ -189,7 +189,7 @@ describe("createWorktree", () => {
     expect(currentBranch).toBe("feature/x");
     execSync("git merge-base --is-ancestor main HEAD", { cwd: result.worktreePath });
 
-    const metadataPath = getPaseoWorktreeMetadataPath(result.worktreePath);
+    const metadataPath = getPolyHiveWorktreeMetadataPath(result.worktreePath);
     const metadata = JSON.parse(readFileSync(metadataPath, "utf8"));
     expect(metadata).toMatchObject({ version: 1, baseRefName: "main" });
   });
@@ -202,7 +202,7 @@ describe("createWorktree", () => {
       worktreeSlug: "dev-worktree",
       source: { kind: "checkout-branch", branchName: "dev" },
       runSetup: true,
-      paseoHome,
+      polyhiveHome,
     });
 
     expect(existsSync(result.worktreePath)).toBe(true);
@@ -213,7 +213,7 @@ describe("createWorktree", () => {
       .trim();
     expect(currentBranch).toBe("dev");
 
-    const metadataPath = getPaseoWorktreeMetadataPath(result.worktreePath);
+    const metadataPath = getPolyHiveWorktreeMetadataPath(result.worktreePath);
     const metadata = JSON.parse(readFileSync(metadataPath, "utf8"));
     expect(metadata).toMatchObject({ version: 1, baseRefName: "dev" });
   });
@@ -226,7 +226,7 @@ describe("createWorktree", () => {
         worktreeSlug: "dev-worktree",
         source: { kind: "checkout-branch", branchName: "main" },
         runSetup: true,
-        paseoHome,
+        polyhiveHome,
       });
     } catch (error) {
       caughtError = error;
@@ -248,7 +248,7 @@ describe("createWorktree", () => {
     execSync("git checkout -b contributor/feature", { cwd: remoteCloneDir });
     writeFileSync(join(remoteCloneDir, "file.txt"), "from-pr\n");
     writeFileSync(
-      join(remoteCloneDir, "paseo.json"),
+      join(remoteCloneDir, "polyhive.json"),
       JSON.stringify({ worktree: { setup: ['echo "setup ran" > setup.log'] } }),
     );
     execSync("git add .", { cwd: remoteCloneDir });
@@ -267,7 +267,7 @@ describe("createWorktree", () => {
         baseRefName: "main",
       },
       runSetup: true,
-      paseoHome,
+      polyhiveHome,
     });
 
     expect(readFileSync(join(result.worktreePath, "file.txt"), "utf8")).toBe("from-pr\n");
@@ -279,7 +279,7 @@ describe("createWorktree", () => {
       .trim();
     expect(currentBranch).toBe("user/feature");
 
-    const metadataPath = getPaseoWorktreeMetadataPath(result.worktreePath);
+    const metadataPath = getPolyHiveWorktreeMetadataPath(result.worktreePath);
     const metadata = JSON.parse(readFileSync(metadataPath, "utf8"));
     expect(metadata).toMatchObject({ baseRefName: "main" });
   });
@@ -314,7 +314,7 @@ describe("createWorktree", () => {
       baseBranch: "main",
       worktreeSlug: "prefer-origin-feature",
       runSetup: false,
-      paseoHome,
+      polyhiveHome,
     });
 
     expect(readFileSync(join(result.worktreePath, "file.txt"), "utf8")).toBe("from-origin\n");
@@ -331,7 +331,7 @@ describe("createWorktree", () => {
       baseBranch: "main",
       worktreeSlug: "prefer-local-fallback-feature",
       runSetup: false,
-      paseoHome,
+      polyhiveHome,
     });
 
     expect(readFileSync(join(result.worktreePath, "file.txt"), "utf8")).toBe("from-local-only\n");
@@ -345,7 +345,7 @@ describe("createWorktree", () => {
         baseBranch: "does-not-exist",
         worktreeSlug: "missing-base-feature",
         runSetup: false,
-        paseoHome,
+        polyhiveHome,
       }),
     ).rejects.toThrow("Base branch not found: does-not-exist");
   });
@@ -371,11 +371,11 @@ describe("createWorktree", () => {
       cwd: repoDir,
       baseBranch: "main",
       worktreeSlug: "hello",
-      paseoHome,
+      polyhiveHome,
     });
 
     // Should create branch "hello-1" since "hello" exists
-    expect(result.worktreePath).toBe(join(paseoHome, "worktrees", projectHash, "hello"));
+    expect(result.worktreePath).toBe(join(polyhiveHome, "worktrees", projectHash, "hello"));
     expect(existsSync(result.worktreePath)).toBe(true);
 
     const branches = execSync("git branch", { cwd: repoDir }).toString();
@@ -392,7 +392,7 @@ describe("createWorktree", () => {
       cwd: repoDir,
       baseBranch: "main",
       worktreeSlug: "hello",
-      paseoHome,
+      polyhiveHome,
     });
 
     expect(existsSync(result.worktreePath)).toBe(true);
@@ -401,21 +401,21 @@ describe("createWorktree", () => {
     expect(branches).toContain("hello-2");
   });
 
-  it("runs setup commands from paseo.json", async () => {
-    // Create paseo.json with setup commands
-    const paseoConfig = {
+  it("runs setup commands from polyhive.json", async () => {
+    // Create polyhive.json with setup commands
+    const polyhiveConfig = {
       worktree: {
         setup: [
-          'echo "source=$PASEO_SOURCE_CHECKOUT_PATH" > setup.log',
-          'echo "root_alias=$PASEO_ROOT_PATH" >> setup.log',
-          'echo "worktree=$PASEO_WORKTREE_PATH" >> setup.log',
-          'echo "branch=$PASEO_BRANCH_NAME" >> setup.log',
-          'echo "port=$PASEO_WORKTREE_PORT" >> setup.log',
+          'echo "source=$POLYHIVE_SOURCE_CHECKOUT_PATH" > setup.log',
+          'echo "root_alias=$POLYHIVE_ROOT_PATH" >> setup.log',
+          'echo "worktree=$POLYHIVE_WORKTREE_PATH" >> setup.log',
+          'echo "branch=$POLYHIVE_BRANCH_NAME" >> setup.log',
+          'echo "port=$POLYHIVE_WORKTREE_PORT" >> setup.log',
         ],
       },
     };
-    writeFileSync(join(repoDir, "paseo.json"), JSON.stringify(paseoConfig));
-    execSync('git add paseo.json && git -c commit.gpgsign=false commit -m "add paseo.json"', {
+    writeFileSync(join(repoDir, "polyhive.json"), JSON.stringify(polyhiveConfig));
+    execSync('git add polyhive.json && git -c commit.gpgsign=false commit -m "add polyhive.json"', {
       cwd: repoDir,
     });
 
@@ -424,7 +424,7 @@ describe("createWorktree", () => {
       cwd: repoDir,
       baseBranch: "main",
       worktreeSlug: "setup-test",
-      paseoHome,
+      polyhiveHome,
     });
 
     expect(existsSync(result.worktreePath)).toBe(true);
@@ -443,13 +443,13 @@ describe("createWorktree", () => {
   });
 
   it("does not run setup commands when runSetup=false", async () => {
-    const paseoConfig = {
+    const polyhiveConfig = {
       worktree: {
         setup: ['echo "setup ran" > setup.log'],
       },
     };
-    writeFileSync(join(repoDir, "paseo.json"), JSON.stringify(paseoConfig));
-    execSync('git add paseo.json && git -c commit.gpgsign=false commit -m "add paseo.json"', {
+    writeFileSync(join(repoDir, "polyhive.json"), JSON.stringify(polyhiveConfig));
+    execSync('git add polyhive.json && git -c commit.gpgsign=false commit -m "add polyhive.json"', {
       cwd: repoDir,
     });
 
@@ -459,7 +459,7 @@ describe("createWorktree", () => {
       baseBranch: "main",
       worktreeSlug: "no-setup-test",
       runSetup: false,
-      paseoHome,
+      polyhiveHome,
     });
 
     expect(existsSync(result.worktreePath)).toBe(true);
@@ -467,15 +467,18 @@ describe("createWorktree", () => {
   });
 
   it("streams setup command progress events while commands are executing", async () => {
-    const paseoConfig = {
+    const polyhiveConfig = {
       worktree: {
         setup: ['echo "first line"; echo "second line" 1>&2'],
       },
     };
-    writeFileSync(join(repoDir, "paseo.json"), JSON.stringify(paseoConfig));
-    execSync('git add paseo.json && git -c commit.gpgsign=false commit -m "add streaming setup"', {
-      cwd: repoDir,
-    });
+    writeFileSync(join(repoDir, "polyhive.json"), JSON.stringify(polyhiveConfig));
+    execSync(
+      'git add polyhive.json && git -c commit.gpgsign=false commit -m "add streaming setup"',
+      {
+        cwd: repoDir,
+      },
+    );
 
     const progressEvents: WorktreeSetupCommandProgressEvent[] = [];
     const results = await runWorktreeSetupCommands({
@@ -500,7 +503,7 @@ describe("createWorktree", () => {
       baseBranch: "main",
       worktreeSlug: "runtime-env-port-reuse",
       runSetup: false,
-      paseoHome,
+      polyhiveHome,
     });
 
     const first = await resolveWorktreeRuntimeEnv({
@@ -512,7 +515,7 @@ describe("createWorktree", () => {
       branchName: result.branchName,
     });
 
-    expect(second.PASEO_WORKTREE_PORT).toBe(first.PASEO_WORKTREE_PORT);
+    expect(second.POLYHIVE_WORKTREE_PORT).toBe(first.POLYHIVE_WORKTREE_PORT);
   });
 
   it("fails runtime env resolution when persisted port is in use", async () => {
@@ -522,14 +525,14 @@ describe("createWorktree", () => {
       baseBranch: "main",
       worktreeSlug: "runtime-env-port-conflict",
       runSetup: false,
-      paseoHome,
+      polyhiveHome,
     });
 
     const env = await resolveWorktreeRuntimeEnv({
       worktreePath: result.worktreePath,
       branchName: result.branchName,
     });
-    const port = Number(env.PASEO_WORKTREE_PORT);
+    const port = Number(env.POLYHIVE_WORKTREE_PORT);
 
     const server = net.createServer();
     await new Promise<void>((resolve, reject) => {
@@ -556,18 +559,18 @@ describe("createWorktree", () => {
   });
 
   it("cleans up worktree if setup command fails", async () => {
-    // Create paseo.json with failing setup command
-    const paseoConfig = {
+    // Create polyhive.json with failing setup command
+    const polyhiveConfig = {
       worktree: {
         setup: ["exit 1"],
       },
     };
-    writeFileSync(join(repoDir, "paseo.json"), JSON.stringify(paseoConfig));
-    execSync('git add paseo.json && git -c commit.gpgsign=false commit -m "add paseo.json"', {
+    writeFileSync(join(repoDir, "polyhive.json"), JSON.stringify(polyhiveConfig));
+    execSync('git add polyhive.json && git -c commit.gpgsign=false commit -m "add polyhive.json"', {
       cwd: repoDir,
     });
 
-    const expectedWorktreePath = join(paseoHome, "worktrees", "test-repo", "fail-test");
+    const expectedWorktreePath = join(polyhiveHome, "worktrees", "test-repo", "fail-test");
 
     await expect(
       createLegacyWorktreeForTest({
@@ -575,7 +578,7 @@ describe("createWorktree", () => {
         cwd: repoDir,
         baseBranch: "main",
         worktreeSlug: "fail-test",
-        paseoHome,
+        polyhiveHome,
       }),
     ).rejects.toThrow("Worktree setup command failed");
 
@@ -583,8 +586,8 @@ describe("createWorktree", () => {
     expect(existsSync(expectedWorktreePath)).toBe(false);
   });
 
-  it("reads worktree terminal specs from paseo.json with optional name", async () => {
-    const paseoConfig = {
+  it("reads worktree terminal specs from polyhive.json with optional name", async () => {
+    const polyhiveConfig = {
       worktree: {
         terminals: [
           { name: "Dev Server", command: "npm run dev" },
@@ -592,7 +595,7 @@ describe("createWorktree", () => {
         ],
       },
     };
-    writeFileSync(join(repoDir, "paseo.json"), JSON.stringify(paseoConfig));
+    writeFileSync(join(repoDir, "polyhive.json"), JSON.stringify(polyhiveConfig));
 
     expect(getWorktreeTerminalSpecs(repoDir)).toEqual([
       { name: "Dev Server", command: "npm run dev" },
@@ -601,7 +604,7 @@ describe("createWorktree", () => {
   });
 
   it("filters invalid worktree terminal specs", async () => {
-    const paseoConfig = {
+    const polyhiveConfig = {
       worktree: {
         terminals: [
           null,
@@ -612,7 +615,7 @@ describe("createWorktree", () => {
         ],
       },
     };
-    writeFileSync(join(repoDir, "paseo.json"), JSON.stringify(paseoConfig));
+    writeFileSync(join(repoDir, "polyhive.json"), JSON.stringify(polyhiveConfig));
 
     expect(getWorktreeTerminalSpecs(repoDir)).toEqual([
       { name: "Watch", command: "npm run watch" },
@@ -622,7 +625,7 @@ describe("createWorktree", () => {
 
   it("parses omitted script type as a plain script", async () => {
     writeFileSync(
-      join(repoDir, "paseo.json"),
+      join(repoDir, "polyhive.json"),
       JSON.stringify({
         scripts: {
           typecheck: {
@@ -644,7 +647,7 @@ describe("createWorktree", () => {
 
   it("parses service scripts and preserves optional port", async () => {
     writeFileSync(
-      join(repoDir, "paseo.json"),
+      join(repoDir, "polyhive.json"),
       JSON.stringify({
         scripts: {
           server: {
@@ -670,7 +673,7 @@ describe("createWorktree", () => {
 
   it("ignores invalid script entries gracefully", async () => {
     writeFileSync(
-      join(repoDir, "paseo.json"),
+      join(repoDir, "polyhive.json"),
       JSON.stringify({
         scripts: {
           valid: {
@@ -706,15 +709,15 @@ describe("createWorktree", () => {
   });
 });
 
-describe("paseo worktree manager", () => {
+describe("polyhive worktree manager", () => {
   let tempDir: string;
   let repoDir: string;
-  let paseoHome: string;
+  let polyhiveHome: string;
 
   beforeEach(() => {
     tempDir = realpathSync(mkdtempSync(join(tmpdir(), "worktree-manager-test-")));
     repoDir = join(tempDir, "test-repo");
-    paseoHome = join(tempDir, "paseo-home");
+    polyhiveHome = join(tempDir, "polyhive-home");
 
     mkdirSync(repoDir, { recursive: true });
     execSync("git init -b main", { cwd: repoDir });
@@ -748,88 +751,88 @@ describe("paseo worktree manager", () => {
       cwd: repoA,
       baseBranch: "main",
       worktreeSlug: "alpha",
-      paseoHome,
+      polyhiveHome,
     });
     const fromRepoB = await createLegacyWorktreeForTest({
       branchName: "main",
       cwd: repoB,
       baseBranch: "main",
       worktreeSlug: "alpha",
-      paseoHome,
+      polyhiveHome,
     });
 
     expect(dirname(fromRepoA.worktreePath)).not.toBe(dirname(fromRepoB.worktreePath));
     expect(fromRepoA.worktreePath.endsWith("alpha-1")).toBe(false);
     expect(fromRepoB.worktreePath.endsWith("alpha-1")).toBe(false);
 
-    const repoAWorktrees = await listPaseoWorktrees({ cwd: repoA, paseoHome });
-    const repoBWorktrees = await listPaseoWorktrees({ cwd: repoB, paseoHome });
+    const repoAWorktrees = await listPolyHiveWorktrees({ cwd: repoA, polyhiveHome });
+    const repoBWorktrees = await listPolyHiveWorktrees({ cwd: repoB, polyhiveHome });
 
     expect(repoAWorktrees.map((entry) => entry.path)).toEqual([fromRepoA.worktreePath]);
     expect(repoBWorktrees.map((entry) => entry.path)).toEqual([fromRepoB.worktreePath]);
   });
 
-  it("lists and deletes paseo worktrees under ~/.paseo/worktrees/{hash}", async () => {
+  it("lists and deletes polyhive worktrees under ~/.polyhive/worktrees/{hash}", async () => {
     const first = await createLegacyWorktreeForTest({
       branchName: "main",
       cwd: repoDir,
       baseBranch: "main",
       worktreeSlug: "alpha",
-      paseoHome,
+      polyhiveHome,
     });
     const second = await createLegacyWorktreeForTest({
       branchName: "main",
       cwd: repoDir,
       baseBranch: "main",
       worktreeSlug: "beta",
-      paseoHome,
+      polyhiveHome,
     });
 
-    const worktrees = await listPaseoWorktrees({ cwd: repoDir, paseoHome });
+    const worktrees = await listPolyHiveWorktrees({ cwd: repoDir, polyhiveHome });
     const paths = worktrees.map((worktree) => worktree.path).sort();
     expect(paths).toEqual([first.worktreePath, second.worktreePath].sort());
 
-    await deletePaseoWorktree({ cwd: repoDir, worktreePath: first.worktreePath, paseoHome });
+    await deletePolyHiveWorktree({ cwd: repoDir, worktreePath: first.worktreePath, polyhiveHome });
     expect(existsSync(first.worktreePath)).toBe(false);
 
-    const remaining = await listPaseoWorktrees({ cwd: repoDir, paseoHome });
+    const remaining = await listPolyHiveWorktrees({ cwd: repoDir, polyhiveHome });
     expect(remaining.map((worktree) => worktree.path)).toEqual([second.worktreePath]);
   });
 
-  it("deletes a paseo worktree even when given a subdirectory path", async () => {
+  it("deletes a polyhive worktree even when given a subdirectory path", async () => {
     const created = await createLegacyWorktreeForTest({
       branchName: "main",
       cwd: repoDir,
       baseBranch: "main",
       worktreeSlug: "alpha",
-      paseoHome,
+      polyhiveHome,
     });
 
     const nestedDir = join(created.worktreePath, "nested", "dir");
     mkdirSync(nestedDir, { recursive: true });
 
-    await deletePaseoWorktree({ cwd: repoDir, worktreePath: nestedDir, paseoHome });
+    await deletePolyHiveWorktree({ cwd: repoDir, worktreePath: nestedDir, polyhiveHome });
     expect(existsSync(created.worktreePath)).toBe(false);
 
-    const remaining = await listPaseoWorktrees({ cwd: repoDir, paseoHome });
+    const remaining = await listPolyHiveWorktrees({ cwd: repoDir, polyhiveHome });
     expect(remaining.some((worktree) => worktree.path === created.worktreePath)).toBe(false);
   });
 
-  it("runs teardown commands from paseo.json before deleting a worktree", async () => {
-    const paseoConfig = {
+  it("runs teardown commands from polyhive.json before deleting a worktree", async () => {
+    const polyhiveConfig = {
       worktree: {
         teardown: [
-          'echo "source=$PASEO_SOURCE_CHECKOUT_PATH" > "$PASEO_SOURCE_CHECKOUT_PATH/teardown.log"',
-          'echo "root_alias=$PASEO_ROOT_PATH" >> "$PASEO_SOURCE_CHECKOUT_PATH/teardown.log"',
-          'echo "worktree=$PASEO_WORKTREE_PATH" >> "$PASEO_SOURCE_CHECKOUT_PATH/teardown.log"',
-          'echo "branch=$PASEO_BRANCH_NAME" >> "$PASEO_SOURCE_CHECKOUT_PATH/teardown.log"',
-          'echo "port=$PASEO_WORKTREE_PORT" >> "$PASEO_SOURCE_CHECKOUT_PATH/teardown.log"',
+          'echo "source=$POLYHIVE_SOURCE_CHECKOUT_PATH" > "$POLYHIVE_SOURCE_CHECKOUT_PATH/teardown.log"',
+          'echo "root_alias=$POLYHIVE_ROOT_PATH" >> "$POLYHIVE_SOURCE_CHECKOUT_PATH/teardown.log"',
+          'echo "worktree=$POLYHIVE_WORKTREE_PATH" >> "$POLYHIVE_SOURCE_CHECKOUT_PATH/teardown.log"',
+          'echo "branch=$POLYHIVE_BRANCH_NAME" >> "$POLYHIVE_SOURCE_CHECKOUT_PATH/teardown.log"',
+          'echo "port=$POLYHIVE_WORKTREE_PORT" >> "$POLYHIVE_SOURCE_CHECKOUT_PATH/teardown.log"',
         ],
       },
     };
-    writeFileSync(join(repoDir, "paseo.json"), JSON.stringify(paseoConfig));
+    writeFileSync(join(repoDir, "polyhive.json"), JSON.stringify(polyhiveConfig));
     execSync(
-      'git add paseo.json && git -c commit.gpgsign=false commit -m "add teardown commands"',
+      'git add polyhive.json && git -c commit.gpgsign=false commit -m "add teardown commands"',
       {
         cwd: repoDir,
       },
@@ -840,14 +843,18 @@ describe("paseo worktree manager", () => {
       cwd: repoDir,
       baseBranch: "main",
       worktreeSlug: "teardown-test",
-      paseoHome,
+      polyhiveHome,
     });
     const runtimeEnv = await resolveWorktreeRuntimeEnv({
       worktreePath: created.worktreePath,
       branchName: created.branchName,
     });
 
-    await deletePaseoWorktree({ cwd: repoDir, worktreePath: created.worktreePath, paseoHome });
+    await deletePolyHiveWorktree({
+      cwd: repoDir,
+      worktreePath: created.worktreePath,
+      polyhiveHome,
+    });
     expect(existsSync(created.worktreePath)).toBe(false);
 
     const teardownLog = readFileSync(join(repoDir, "teardown.log"), "utf8");
@@ -855,20 +862,20 @@ describe("paseo worktree manager", () => {
     expect(teardownLog).toContain(`root_alias=${repoDir}`);
     expect(teardownLog).toContain(`worktree=${created.worktreePath}`);
     expect(teardownLog).toContain("branch=teardown-branch");
-    expect(teardownLog).toContain(`port=${runtimeEnv.PASEO_WORKTREE_PORT}`);
+    expect(teardownLog).toContain(`port=${runtimeEnv.POLYHIVE_WORKTREE_PORT}`);
   });
 
-  it("omits PASEO_WORKTREE_PORT from teardown env when runtime metadata is missing", async () => {
-    const paseoConfig = {
+  it("omits POLYHIVE_WORKTREE_PORT from teardown env when runtime metadata is missing", async () => {
+    const polyhiveConfig = {
       worktree: {
         teardown: [
-          'echo "port=${PASEO_WORKTREE_PORT-unset}" > "$PASEO_SOURCE_CHECKOUT_PATH/teardown-port.log"',
+          'echo "port=${POLYHIVE_WORKTREE_PORT-unset}" > "$POLYHIVE_SOURCE_CHECKOUT_PATH/teardown-port.log"',
         ],
       },
     };
-    writeFileSync(join(repoDir, "paseo.json"), JSON.stringify(paseoConfig));
+    writeFileSync(join(repoDir, "polyhive.json"), JSON.stringify(polyhiveConfig));
     execSync(
-      'git add paseo.json && git -c commit.gpgsign=false commit -m "add teardown port logging"',
+      'git add polyhive.json && git -c commit.gpgsign=false commit -m "add teardown port logging"',
       { cwd: repoDir },
     );
 
@@ -877,27 +884,31 @@ describe("paseo worktree manager", () => {
       cwd: repoDir,
       baseBranch: "main",
       worktreeSlug: "teardown-port-missing-test",
-      paseoHome,
+      polyhiveHome,
     });
 
-    await deletePaseoWorktree({ cwd: repoDir, worktreePath: created.worktreePath, paseoHome });
+    await deletePolyHiveWorktree({
+      cwd: repoDir,
+      worktreePath: created.worktreePath,
+      polyhiveHome,
+    });
 
     expect(readFileSync(join(repoDir, "teardown-port.log"), "utf8").trim()).toBe("port=unset");
     expect(existsSync(created.worktreePath)).toBe(false);
   });
 
   it("does not remove worktree when a teardown command fails", async () => {
-    const paseoConfig = {
+    const polyhiveConfig = {
       worktree: {
         teardown: [
-          'echo "started" > "$PASEO_SOURCE_CHECKOUT_PATH/teardown-start.log"',
+          'echo "started" > "$POLYHIVE_SOURCE_CHECKOUT_PATH/teardown-start.log"',
           "echo boom 1>&2; exit 9",
         ],
       },
     };
-    writeFileSync(join(repoDir, "paseo.json"), JSON.stringify(paseoConfig));
+    writeFileSync(join(repoDir, "polyhive.json"), JSON.stringify(polyhiveConfig));
     execSync(
-      'git add paseo.json && git -c commit.gpgsign=false commit -m "add failing teardown commands"',
+      'git add polyhive.json && git -c commit.gpgsign=false commit -m "add failing teardown commands"',
       { cwd: repoDir },
     );
 
@@ -906,24 +917,24 @@ describe("paseo worktree manager", () => {
       cwd: repoDir,
       baseBranch: "main",
       worktreeSlug: "teardown-failure-test",
-      paseoHome,
+      polyhiveHome,
     });
 
     await expect(
-      deletePaseoWorktree({ cwd: repoDir, worktreePath: created.worktreePath, paseoHome }),
+      deletePolyHiveWorktree({ cwd: repoDir, worktreePath: created.worktreePath, polyhiveHome }),
     ).rejects.toThrow("Worktree teardown command failed");
 
     expect(existsSync(created.worktreePath)).toBe(true);
     expect(existsSync(join(repoDir, "teardown-start.log"))).toBe(true);
   });
 
-  it("treats a worktree as paseo-owned even when its .git admin is missing", async () => {
+  it("treats a worktree as polyhive-owned even when its .git admin is missing", async () => {
     const created = await createLegacyWorktreeForTest({
       branchName: "orphan-admin-branch",
       cwd: repoDir,
       baseBranch: "main",
       worktreeSlug: "orphan-admin",
-      paseoHome,
+      polyhiveHome,
     });
 
     // Simulate a previous archive attempt that removed git's admin dir but left
@@ -934,29 +945,33 @@ describe("paseo worktree manager", () => {
     });
     expect(existsSync(created.worktreePath)).toBe(true);
 
-    const ownership = await isPaseoOwnedWorktreeCwd(created.worktreePath, { paseoHome });
+    const ownership = await isPolyHiveOwnedWorktreeCwd(created.worktreePath, { polyhiveHome });
     expect(ownership.allowed).toBe(true);
   });
 
-  it("rejects paths that are not under the paseo worktrees root", async () => {
-    const outsidePath = join(tempDir, "outside-paseo-home");
+  it("rejects paths that are not under the polyhive worktrees root", async () => {
+    const outsidePath = join(tempDir, "outside-polyhive-home");
     mkdirSync(outsidePath, { recursive: true });
 
-    const ownership = await isPaseoOwnedWorktreeCwd(outsidePath, { paseoHome });
+    const ownership = await isPolyHiveOwnedWorktreeCwd(outsidePath, { polyhiveHome });
 
     expect(ownership.allowed).toBe(false);
   });
 
   it("rejects the worktrees root itself and the per-repo hash dir", async () => {
     const projectHash = await deriveWorktreeProjectHash(repoDir);
-    const worktreesRoot = join(paseoHome, "worktrees");
+    const worktreesRoot = join(polyhiveHome, "worktrees");
     const projectHashDir = join(worktreesRoot, projectHash);
     mkdirSync(projectHashDir, { recursive: true });
 
-    await expect(isPaseoOwnedWorktreeCwd(worktreesRoot, { paseoHome })).resolves.toMatchObject({
+    await expect(
+      isPolyHiveOwnedWorktreeCwd(worktreesRoot, { polyhiveHome }),
+    ).resolves.toMatchObject({
       allowed: false,
     });
-    await expect(isPaseoOwnedWorktreeCwd(projectHashDir, { paseoHome })).resolves.toMatchObject({
+    await expect(
+      isPolyHiveOwnedWorktreeCwd(projectHashDir, { polyhiveHome }),
+    ).resolves.toMatchObject({
       allowed: false,
     });
   });
@@ -967,7 +982,7 @@ describe("paseo worktree manager", () => {
       cwd: repoDir,
       baseBranch: "main",
       worktreeSlug: "orphan-delete",
-      paseoHome,
+      polyhiveHome,
     });
 
     rmSync(join(repoDir, ".git", "worktrees", "orphan-delete"), {
@@ -976,10 +991,10 @@ describe("paseo worktree manager", () => {
     });
     expect(existsSync(created.worktreePath)).toBe(true);
 
-    await deletePaseoWorktree({
+    await deletePolyHiveWorktree({
       cwd: repoDir,
       worktreePath: created.worktreePath,
-      paseoHome,
+      polyhiveHome,
     });
 
     expect(existsSync(created.worktreePath)).toBe(false);
@@ -991,19 +1006,19 @@ describe("paseo worktree manager", () => {
       cwd: repoDir,
       baseBranch: "main",
       worktreeSlug: "idempotent-delete",
-      paseoHome,
+      polyhiveHome,
     });
 
-    await deletePaseoWorktree({
+    await deletePolyHiveWorktree({
       cwd: repoDir,
       worktreePath: created.worktreePath,
-      paseoHome,
+      polyhiveHome,
     });
     expect(existsSync(created.worktreePath)).toBe(false);
 
     // Second call — nothing left on disk and no admin entry — must not throw.
     await expect(
-      deletePaseoWorktree({ cwd: repoDir, worktreePath: created.worktreePath, paseoHome }),
+      deletePolyHiveWorktree({ cwd: repoDir, worktreePath: created.worktreePath, polyhiveHome }),
     ).resolves.toBeUndefined();
   });
 
@@ -1013,20 +1028,20 @@ describe("paseo worktree manager", () => {
       cwd: repoDir,
       baseBranch: "main",
       worktreeSlug: "no-cwd",
-      paseoHome,
+      polyhiveHome,
     });
 
-    const ownership = await isPaseoOwnedWorktreeCwd(created.worktreePath, { paseoHome });
+    const ownership = await isPolyHiveOwnedWorktreeCwd(created.worktreePath, { polyhiveHome });
     expect(ownership.allowed).toBe(true);
     expect(ownership.worktreeRoot).toBeTruthy();
 
     // Simulate the handler path when git has forgotten about the worktree:
     // caller forwards the path-derived worktreesRoot from the ownership check.
-    await deletePaseoWorktree({
+    await deletePolyHiveWorktree({
       cwd: null,
       worktreePath: created.worktreePath,
       worktreesRoot: ownership.worktreeRoot,
-      paseoHome,
+      polyhiveHome,
     });
 
     expect(existsSync(created.worktreePath)).toBe(false);

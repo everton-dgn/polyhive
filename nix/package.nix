@@ -78,17 +78,14 @@ buildNpmPackage rec {
     # Copy node_modules (preserving workspace symlinks)
     cp -a node_modules $out/lib/polyhive/
 
-    # Auto-detect which PolyHive workspace packages were built by build:daemon
-    # (they'll have a dist/ directory). Copy those and remove the rest.
+    # Copy PolyHive workspace packages built by build:daemon. Workspace links in
+    # node_modules are dangling until these target directories exist.
     for spec in \
       polyhive:cli \
       polyhive-highlight:highlight \
       polyhive-relay:relay \
       polyhive-server:server; do
-      package_name=''${spec%%:*}
       workspace_name=''${spec#*:}
-      link="$out/lib/polyhive/node_modules/$package_name"
-      [ -e "$link" ] || continue
       if [ -d "packages/$workspace_name/dist" ]; then
         mkdir -p "$out/lib/polyhive/packages/$workspace_name"
         cp "packages/$workspace_name/package.json" "$out/lib/polyhive/packages/$workspace_name/"
@@ -96,8 +93,6 @@ buildNpmPackage rec {
         if [ -d "packages/$workspace_name/node_modules" ]; then
           cp -a "packages/$workspace_name/node_modules" "$out/lib/polyhive/packages/$workspace_name/"
         fi
-      else
-        rm -f "$link"
       fi
     done
 

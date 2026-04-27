@@ -2,8 +2,12 @@ import { Command } from "commander";
 import { connectToDaemon, getDaemonHost } from "../../utils/client.js";
 import type { CommandOptions } from "../../output/index.js";
 import { fetchProjectedTimelineItems } from "../../utils/timeline.js";
-import type { DaemonClient, AgentStreamMessage, AgentTimelineItem } from "polyhive-server";
-import { curateAgentActivity } from "polyhive-server";
+import type {
+  DaemonClient,
+  AgentStreamMessage,
+  AgentTimelineItem,
+} from "@everton-dgn/polyhive-server";
+import { curateAgentActivity } from "@everton-dgn/polyhive-server";
 
 export function addLogsOptions(cmd: Command): Command {
   return cmd

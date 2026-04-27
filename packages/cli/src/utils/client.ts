@@ -1,5 +1,5 @@
 import { existsSync, readFileSync } from "node:fs";
-import { loadConfig, resolvePolyHiveHome, DaemonClient } from "polyhive-server";
+import { loadConfig, resolvePolyHiveHome, DaemonClient } from "@everton-dgn/polyhive-server";
 import path from "node:path";
 import WebSocket from "ws";
 import { getOrCreateCliClientId } from "./client-id.js";

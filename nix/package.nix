@@ -37,7 +37,7 @@ buildNpmPackage rec {
 
   # To update: run `nix build` with lib.fakeHash, copy the `got:` hash.
   # CI auto-updates this when package-lock.json changes (see .github/workflows/).
-  npmDepsHash = "sha256-wAjzG6uxDKoV8IVBTudTwPVVy1MNkIOdBgIkgsCJVjQ=";
+  npmDepsHash = "sha256-I4SwUjjtoXTSBVmDprPfHbwWOv4U7f42DsDdRrC9Tx4=";
 
   # Prevent onnxruntime-node's install script from running during automatic
   # npm rebuild (it tries to download from api.nuget.org, which fails in the sandbox).
@@ -81,10 +81,10 @@ buildNpmPackage rec {
     # Copy PolyHive workspace packages built by build:daemon. Workspace links in
     # node_modules are dangling until these target directories exist.
     for spec in \
-      polyhive:cli \
-      polyhive-highlight:highlight \
-      polyhive-relay:relay \
-      polyhive-server:server; do
+      @everton-dgn/polyhive-cli:cli \
+      @everton-dgn/polyhive-highlight:highlight \
+      @everton-dgn/polyhive-relay:relay \
+      @everton-dgn/polyhive-server:server; do
       workspace_name=''${spec#*:}
       if [ -d "packages/$workspace_name/dist" ]; then
         mkdir -p "$out/lib/polyhive/packages/$workspace_name"

@@ -20,11 +20,11 @@ afterEach(() => {
 });
 
 describe("resolveDaemonVersion", () => {
-  it("resolves server version by walking up to polyhive-server package.json", () => {
+  it("resolves server version by walking up to @everton-dgn/polyhive-server package.json", () => {
     const root = createTempDir();
     writeFileSync(
       path.join(root, "package.json"),
-      JSON.stringify({ name: "polyhive-server", version: "9.8.7" }),
+      JSON.stringify({ name: "@everton-dgn/polyhive-server", version: "9.8.7" }),
       "utf8",
     );
     const nestedDir = path.join(root, "dist", "server");
@@ -34,7 +34,7 @@ describe("resolveDaemonVersion", () => {
     expect(resolveDaemonVersion(moduleUrl)).toBe("9.8.7");
   });
 
-  it("throws when polyhive-server package metadata cannot be resolved", () => {
+  it("throws when @everton-dgn/polyhive-server package metadata cannot be resolved", () => {
     const root = createTempDir();
     writeFileSync(
       path.join(root, "package.json"),
@@ -48,11 +48,11 @@ describe("resolveDaemonVersion", () => {
     expect(() => resolveDaemonVersion(moduleUrl)).toThrow(DaemonVersionResolutionError);
   });
 
-  it("throws when polyhive-server version is missing", () => {
+  it("throws when @everton-dgn/polyhive-server version is missing", () => {
     const root = createTempDir();
     writeFileSync(
       path.join(root, "package.json"),
-      JSON.stringify({ name: "polyhive-server" }),
+      JSON.stringify({ name: "@everton-dgn/polyhive-server" }),
       "utf8",
     );
     const nestedDir = path.join(root, "dist", "server");

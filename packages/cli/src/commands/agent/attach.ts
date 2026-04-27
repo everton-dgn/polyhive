@@ -12,7 +12,7 @@ import type {
   AgentStreamMessage,
   AgentStreamEventPayload,
   AgentTimelineItem,
-} from "polyhive-server";
+} from "@everton-dgn/polyhive-server";
 
 export interface AgentAttachOptions {
   host?: string;

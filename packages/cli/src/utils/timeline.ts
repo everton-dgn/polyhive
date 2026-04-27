@@ -1,4 +1,4 @@
-import type { AgentTimelineItem, DaemonClient } from "polyhive-server";
+import type { AgentTimelineItem, DaemonClient } from "@everton-dgn/polyhive-server";
 
 type FetchProjectedTimelineItemsInput = {
   client: DaemonClient;

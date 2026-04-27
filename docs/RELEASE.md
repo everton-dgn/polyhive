@@ -39,7 +39,7 @@ npm run release:push         # Push HEAD + tag (triggers CI workflows)
 
 ## Automated npm publish (CI)
 
-The `NPM Publish` workflow at `.github/workflows/npm-publish.yml` runs on every stable tag push and publishes the four public packages (`polyhive`, `polyhive-server`, `polyhive-relay`, `polyhive-highlight`) with [npm provenance](https://docs.npmjs.com/generating-provenance-statements) attached.
+The `NPM Publish` workflow at `.github/workflows/npm-publish.yml` runs on every stable tag push and publishes the four public packages (`@everton-dgn/polyhive-cli`, `@everton-dgn/polyhive-server`, `@everton-dgn/polyhive-relay`, `@everton-dgn/polyhive-highlight`) with [npm provenance](https://docs.npmjs.com/generating-provenance-statements) attached.
 
 This is the preferred publish path. `npm run release:publish` is kept as a manual fallback for the rare cases when CI is unavailable or you intentionally want to publish from your laptop.
 

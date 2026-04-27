@@ -46,8 +46,8 @@ npm run test:ui                     # Vitest UI at localhost:51204
 
 ### Other useful commands
 ```bash
-npm run build --workspace=polyhive-relay    # Rebuild relay before daemon
-npm run build --workspace=polyhive-server   # Rebuild server
+npm run build --workspace=@everton-dgn/polyhive-relay    # Rebuild relay before daemon
+npm run build --workspace=@everton-dgn/polyhive-server   # Rebuild server
 npm run db:query -- "SELECT ..."             # Run arbitrary SQL
 npm run cli -- ls -a -g                      # List agents
 npm run cli -- daemon status                 # Check daemon status

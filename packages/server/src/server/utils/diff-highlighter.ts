@@ -1,6 +1,10 @@
 import { readFile } from "node:fs/promises";
 import { resolve } from "node:path";
-import { highlightCode, isLanguageSupported, type HighlightToken } from "polyhive-highlight";
+import {
+  highlightCode,
+  isLanguageSupported,
+  type HighlightToken,
+} from "@everton-dgn/polyhive-highlight";
 
 export interface DiffLine {
   type: "add" | "remove" | "context" | "header";

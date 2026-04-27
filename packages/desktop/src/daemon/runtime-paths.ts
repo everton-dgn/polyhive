@@ -1,6 +1,6 @@
 import { existsSync, readFileSync } from "node:fs";
 import { spawnSync } from "node:child_process";
-import { spawnProcess } from "polyhive-server";
+import { spawnProcess } from "@everton-dgn/polyhive-server";
 import { createRequire } from "node:module";
 import path from "node:path";
 import { app } from "electron";
@@ -15,7 +15,7 @@ import {
 } from "./node-entrypoint-launcher.js";
 
 const CLI_PACKAGE_NAME = "polyhive";
-const SERVER_PACKAGE_NAME = "polyhive-server";
+const SERVER_PACKAGE_NAME = "@everton-dgn/polyhive-server";
 const CLI_BIN_ENTRY = `${CLI_PACKAGE_NAME}/bin/polyhive`;
 
 type PackageInfo = {
@@ -111,7 +111,7 @@ export function resolveDaemonRunnerEntrypoint(): NodeEntrypointSpec {
         filePath: path.join(
           resolvePackagedAsarPath(),
           "node_modules",
-          "polyhive-server",
+          "@everton-dgn/polyhive-server",
           "dist",
           "scripts",
           "supervisor-entrypoint.js",

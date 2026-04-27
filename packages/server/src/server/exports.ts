@@ -1,4 +1,4 @@
-// CLI exports for polyhive-server
+// CLI exports for @everton-dgn/polyhive-server
 export {
   createPolyHiveDaemon,
   type PolyHiveDaemon,

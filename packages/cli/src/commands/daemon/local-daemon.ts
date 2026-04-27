@@ -2,7 +2,7 @@ import { spawn, spawnSync } from "node:child_process";
 import { existsSync, readFileSync } from "node:fs";
 import { createRequire } from "node:module";
 import path from "node:path";
-import { loadConfig, resolvePolyHiveHome } from "polyhive-server";
+import { loadConfig, resolvePolyHiveHome } from "@everton-dgn/polyhive-server";
 import { tryConnectToDaemon } from "../../utils/client.js";
 
 export interface DaemonStartOptions {
@@ -120,7 +120,7 @@ function buildChildEnv(options: DaemonStartOptions): NodeJS.ProcessEnv {
 }
 
 function resolveDaemonRunnerEntry(): string {
-  const serverExportPath = require.resolve("polyhive-server");
+  const serverExportPath = require.resolve("@everton-dgn/polyhive-server");
   let currentDir = path.dirname(serverExportPath);
 
   while (true) {
@@ -128,7 +128,7 @@ function resolveDaemonRunnerEntry(): string {
     if (existsSync(packageJsonPath)) {
       try {
         const packageJson = JSON.parse(readFileSync(packageJsonPath, "utf-8")) as { name?: string };
-        if (packageJson.name === "polyhive-server") {
+        if (packageJson.name === "@everton-dgn/polyhive-server") {
           const distRunner = path.join(currentDir, "dist", "scripts", "supervisor-entrypoint.js");
           if (existsSync(distRunner)) {
             return distRunner;
@@ -147,7 +147,7 @@ function resolveDaemonRunnerEntry(): string {
     currentDir = parentDir;
   }
 
-  throw new Error("Unable to resolve polyhive-server package root for daemon runner");
+  throw new Error("Unable to resolve @everton-dgn/polyhive-server package root for daemon runner");
 }
 
 function pidFilePath(polyhiveHome: string): string {

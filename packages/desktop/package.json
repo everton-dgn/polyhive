@@ -1,6 +1,6 @@
 {
   "name": "polyhive-desktop",
-  "version": "0.1.60-beta.1",
+  "version": "0.1.60",
   "private": true,
   "description": "PolyHive desktop app (Electron wrapper)",
   "main": "dist/main.js",
@@ -12,8 +12,8 @@
     "typecheck": "tsc --noEmit -p tsconfig.json"
   },
   "dependencies": {
-    "polyhive": "0.1.60-beta.1",
-    "polyhive-server": "0.1.60-beta.1",
+    "polyhive": "0.1.60",
+    "polyhive-server": "0.1.60",
     "electron-log": "5.4.3",
     "electron-updater": "6.8.3",
     "ws": "8.19.0"

@@ -2,6 +2,16 @@
   "name": "polyhive-relay",
   "version": "0.1.60",
   "description": "PolyHive relay for bridging daemon and client connections",
+  "license": "AGPL-3.0-or-later",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/everton-dgn/polyhive.git",
+    "directory": "packages/relay"
+  },
+  "homepage": "https://github.com/everton-dgn/polyhive#readme",
+  "bugs": {
+    "url": "https://github.com/everton-dgn/polyhive/issues"
+  },
   "type": "module",
   "publishConfig": {
     "access": "public"

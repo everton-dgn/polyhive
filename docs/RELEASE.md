@@ -33,9 +33,28 @@ Use the direct stable path when the current `main` changes are ready to become t
 npm run typecheck            # Verify the exact commit you intend to release
 npm run release:check        # Typecheck, build, dry-run pack
 npm run version:all:patch    # Bump version, create commit + tag
-npm run release:publish      # Publish to npm
+npm run release:publish      # Publish to npm (manual fallback only)
 npm run release:push         # Push HEAD + tag (triggers CI workflows)
 ```
+
+## Automated npm publish (CI)
+
+The `NPM Publish` workflow at `.github/workflows/npm-publish.yml` runs on every stable tag push (`v0.1.60`, `v0.2.0`, etc.) and publishes the four public packages (`polyhive`, `polyhive-server`, `polyhive-relay`, `polyhive-highlight`) with [npm provenance](https://docs.npmjs.com/generating-provenance-statements) attached.
+
+This is the preferred publish path. `npm run release:publish` is kept as a manual fallback for the rare cases when CI is unavailable or you intentionally want to publish from your laptop.
+
+**Required GitHub secret:** `NPM_TOKEN` — a granular access token from npmjs.com with:
+
+- Permissions: read and write
+- Scope: the four published packages (or "all packages" if granular per-package selection is unavailable for unpublished names)
+- 2FA bypass: enabled (publish runs unattended)
+- Expiration: pick the shortest reasonable window (rotate often)
+
+**The workflow does not run on beta tags** (`v0.1.60-beta.1`). Betas only ship desktop assets, never npm.
+
+**Re-running a publish:** push the same stable tag with `--force` (`git tag -f v0.1.60 HEAD && git push origin v0.1.60 --force`). Already-published versions are skipped by npm with a `403 Forbidden` — that is expected and not a regression.
+
+**Manual dispatch:** `gh workflow run "NPM Publish" -f tag=v0.1.60` triggers the workflow on the existing tag without re-pushing.
 
 ## Beta flow
 

@@ -245,6 +245,7 @@ const userMessageStylesheet = StyleSheet.create((theme) => ({
     flexDirection: "row",
     justifyContent: "flex-end",
     paddingHorizontal: theme.spacing[2],
+    userSelect: "text",
   },
   content: {
     alignItems: "flex-end",
@@ -404,6 +405,7 @@ export const assistantMessageStylesheet = StyleSheet.create((theme) => ({
   container: {
     paddingHorizontal: theme.spacing[2],
     paddingVertical: theme.spacing[3],
+    userSelect: "text",
   },
   containerSpacing: {
     marginBottom: theme.spacing[4],
@@ -847,7 +849,6 @@ const expandableBadgeStylesheet = StyleSheet.create((theme) => ({
     color: "transparent",
     fontSize: theme.fontSize.base,
     fontWeight: theme.fontWeight.normal,
-    flexShrink: 1,
   },
   spacer: {
     flex: 1,

@@ -228,7 +228,7 @@ const hasOpenCode = isBinaryInstalled("opencode");
       path.join(cwd, "opencode.json"),
       JSON.stringify({
         agent: {
-          "polyhive-test-custom": {
+          "polyHive-test-custom": {
             description: "Custom agent defined for PolyHive integration test",
             mode: "primary",
           },
@@ -244,7 +244,7 @@ const hasOpenCode = isBinaryInstalled("opencode");
     expect(modes.some((mode) => mode.id === "build")).toBe(true);
     expect(modes.some((mode) => mode.id === "plan")).toBe(true);
 
-    const custom = modes.find((mode) => mode.id === "polyhive-test-custom");
+    const custom = modes.find((mode) => mode.id === "polyHive-test-custom");
     expect(custom).toBeDefined();
     expect(custom!.label).toBe("PolyHive-test-custom");
     expect(custom!.description).toBe("Custom agent defined for PolyHive integration test");

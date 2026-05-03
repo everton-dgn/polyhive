@@ -1,10 +1,16 @@
+import type { Logger } from "pino";
 import type {
   ScriptStatusUpdateMessage,
   SessionOutboundMessage,
   WorkspaceScriptPayload,
 } from "../shared/messages.js";
 import { buildScriptHostname } from "../utils/script-hostname.js";
-import { getScriptConfigs, isServiceScript } from "../utils/worktree.js";
+import {
+  getScriptConfigs,
+  isServiceScript,
+  readPolyHiveConfig,
+  type PolyHiveConfig,
+} from "../utils/worktree.js";
 import { deriveProjectSlug } from "./workspace-git-metadata.js";
 import type { ScriptHealthEntry, ScriptHealthState } from "./script-health-monitor.js";
 import type { ScriptRouteStore } from "./script-proxy.js";
@@ -17,6 +23,7 @@ type SessionEmitter = {
 type BuildWorkspaceScriptPayloadsOptions = {
   workspaceId: string;
   workspaceDirectory: string;
+  polyhiveConfig: PolyHiveConfig | null;
   routeStore: ScriptRouteStore;
   runtimeStore: WorkspaceScriptRuntimeStore;
   daemonPort: number | null;
@@ -26,6 +33,21 @@ type BuildWorkspaceScriptPayloadsOptions = {
   };
   resolveHealth?: (hostname: string) => ScriptHealthState | null;
 };
+
+export function readPolyHiveConfigForProjection(
+  workspaceDirectory: string,
+  logger: Logger,
+): PolyHiveConfig | null {
+  const result = readPolyHiveConfig(workspaceDirectory);
+  if (result.ok) {
+    return result.config;
+  }
+  logger.warn(
+    { configPath: result.configPath, workspaceDirectory, err: result.error },
+    "Failed to parse polyhive.json; treating workspace as having no scripts",
+  );
+  return null;
+}
 
 function resolveDaemonPort(daemonPort: number | null | (() => number | null)): number | null {
   if (typeof daemonPort === "function") {
@@ -64,7 +86,7 @@ export function buildWorkspaceScriptPayloads(
   const workspaceDirectory = options.workspaceDirectory;
   const projectSlug = options.gitMetadata?.projectSlug ?? deriveProjectSlug(workspaceDirectory);
   const branchName = options.gitMetadata?.currentBranch ?? null;
-  const scriptConfigs = getScriptConfigs(workspaceDirectory);
+  const scriptConfigs = getScriptConfigs(options.polyhiveConfig);
   const runtimeEntries = new Map(
     options.runtimeStore
       .listForWorkspace(workspaceId)
@@ -161,12 +183,14 @@ export function createScriptStatusEmitter({
   runtimeStore,
   daemonPort,
   resolveWorkspaceDirectory,
+  logger,
 }: {
   sessions: () => SessionEmitter[];
   routeStore: ScriptRouteStore;
   runtimeStore: WorkspaceScriptRuntimeStore;
   daemonPort: number | null | (() => number | null);
   resolveWorkspaceDirectory: (workspaceId: string) => string | null | Promise<string | null>;
+  logger: Logger;
 }): (workspaceId: string, scripts: ScriptHealthEntry[]) => void {
   return (workspaceId, scripts) => {
     void (async () => {
@@ -183,6 +207,7 @@ export function createScriptStatusEmitter({
       const projected = buildWorkspaceScriptPayloads({
         workspaceId,
         workspaceDirectory,
+        polyhiveConfig: readPolyHiveConfigForProjection(workspaceDirectory, logger),
         routeStore,
         runtimeStore,
         daemonPort: resolvedDaemonPort,

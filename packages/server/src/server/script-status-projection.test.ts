@@ -11,6 +11,13 @@ import {
 import { WorkspaceScriptPayloadSchema } from "../shared/messages.js";
 import type { ScriptHealthState } from "./script-health-monitor.js";
 import { WorkspaceScriptRuntimeStore } from "./workspace-script-runtime-store.js";
+import { readPolyHiveConfig, type PolyHiveConfig } from "../utils/worktree.js";
+import { createTestLogger } from "../test-utils/test-logger.js";
+
+function loadConfig(repoRoot: string): PolyHiveConfig | null {
+  const result = readPolyHiveConfig(repoRoot);
+  return result.ok ? result.config : null;
+}
 
 function createWorkspaceRepo(options?: {
   branchName?: string;
@@ -44,13 +51,18 @@ function createWorkspaceRepo(options?: {
 function buildPayloads(input: {
   workspaceId: string;
   workspaceDirectory: string;
+  polyhiveConfig?: PolyHiveConfig | null;
   routeStore: ScriptRouteStore;
   runtimeStore: WorkspaceScriptRuntimeStore;
   daemonPort: number | null;
   gitMetadata?: { projectSlug: string; currentBranch: string | null };
   resolveHealth?: (hostname: string) => ScriptHealthState | null;
 }) {
-  return buildWorkspaceScriptPayloads(input);
+  const polyhiveConfig =
+    input.polyhiveConfig !== undefined
+      ? input.polyhiveConfig
+      : loadConfig(input.workspaceDirectory);
+  return buildWorkspaceScriptPayloads({ ...input, polyhiveConfig });
 }
 
 describe("script-status-projection", () => {
@@ -408,6 +420,7 @@ describe("script-status-projection", () => {
       daemonPort: 6767,
       resolveWorkspaceDirectory: async (workspaceId) =>
         workspaceId === "workspace-emitter" ? workspace.repoDir : null,
+      logger: createTestLogger(),
     });
 
     try {

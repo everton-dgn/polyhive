@@ -5,6 +5,7 @@ import type { TerminalSession } from "../terminal/terminal.js";
 import { buildScriptHostname } from "../utils/script-hostname.js";
 import {
   getScriptConfigs,
+  readPolyHiveConfig,
   getWorktreeTerminalSpecs,
   isServiceScript,
   processCarriageReturns,
@@ -717,7 +718,13 @@ export async function spawnWorkspaceScript(
     logger,
     onLifecycleChanged,
   } = options;
-  const scriptConfigs = getScriptConfigs(repoRoot);
+  const configResult = readPolyHiveConfig(repoRoot);
+  if (!configResult.ok) {
+    const cause =
+      configResult.error instanceof Error ? configResult.error.message : String(configResult.error);
+    throw new Error(`Failed to parse ${configResult.configPath}: ${cause}`);
+  }
+  const scriptConfigs = getScriptConfigs(configResult.config);
   const config = scriptConfigs.get(scriptName);
   if (!config) {
     throw new Error(`Script '${scriptName}' is not configured in polyhive.json`);

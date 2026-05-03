@@ -1270,6 +1270,7 @@ const styles = StyleSheet.create((theme) => ({
   contentContainer: {
     flex: 1,
     overflow: "hidden",
+    userSelect: "none",
   },
   content: {
     flex: 1,

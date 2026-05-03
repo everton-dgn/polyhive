@@ -155,6 +155,7 @@ function DiffGutterCell({
   return (
     <View style={[styles.gutterCell, lineTypeBackground(type), { width: gutterWidth }]}>
       <Text
+        numberOfLines={1}
         style={[
           styles.lineNumberText,
           type === "add" && styles.addLineNumberText,
@@ -240,6 +241,7 @@ function DiffLineView({
     <View style={[styles.diffLineContainer, lineTypeBackground(line.type)]}>
       <View style={[styles.lineNumberGutter, { width: gutterWidth }]}>
         <Text
+          numberOfLines={1}
           style={[
             styles.lineNumberText,
             line.type === "add" && styles.addLineNumberText,
@@ -284,6 +286,7 @@ function SplitDiffLine({
     <View style={[styles.diffLineContainer, lineTypeBackground(line?.type)]}>
       <View style={[styles.lineNumberGutter, { width: gutterWidth }]}>
         <Text
+          numberOfLines={1}
           style={[
             styles.lineNumberText,
             line?.type === "add" && styles.addLineNumberText,
@@ -473,6 +476,7 @@ function DiffFileBody({
 }) {
   const [scrollViewWidth, setScrollViewWidth] = useState(0);
   const [bodyWidth, setBodyWidth] = useState(0);
+  const { theme } = useUnistyles();
 
   return (
     <View
@@ -502,7 +506,7 @@ function DiffFileBody({
             hunk.newStart + hunk.newCount,
           );
         }
-        const gutterWidth = lineNumberGutterWidth(maxLineNo);
+        const gutterWidth = lineNumberGutterWidth(maxLineNo, theme.fontSize.xs);
 
         if (layout === "split") {
           const rows = buildSplitDiffRows(file);

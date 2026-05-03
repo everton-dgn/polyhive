@@ -423,6 +423,10 @@ export type WaitForChatMessagesOptions = {
 export type RunLoopOptions = {
   prompt: string;
   cwd: string;
+  provider?: string;
+  model?: string;
+  verifierProvider?: string;
+  verifierModel?: string;
   verifyPrompt?: string | null;
   verifyChecks?: string[];
   name?: string | null;
@@ -3501,6 +3505,10 @@ export class DaemonClient {
         type: "loop/run",
         prompt: options.prompt,
         cwd: options.cwd,
+        ...(options.provider ? { provider: options.provider } : {}),
+        ...(options.model ? { model: options.model } : {}),
+        ...(options.verifierProvider ? { verifierProvider: options.verifierProvider } : {}),
+        ...(options.verifierModel ? { verifierModel: options.verifierModel } : {}),
         ...(options.verifyPrompt ? { verifyPrompt: options.verifyPrompt } : {}),
         ...(options.verifyChecks && options.verifyChecks.length > 0
           ? { verifyChecks: options.verifyChecks }

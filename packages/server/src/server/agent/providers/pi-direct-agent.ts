@@ -644,13 +644,6 @@ function mapToolDetail(toolCall: PiTrackedToolCall, result?: PiToolResult): Tool
   }
 }
 
-function stringifyUnknownError(error: unknown): string {
-  if (error instanceof Error) {
-    return error.message;
-  }
-  return typeof error === "string" ? error : "Unknown Pi error";
-}
-
 function parseModelReference(modelId: string | null): PiModelReference | null {
   if (!modelId) {
     return null;
@@ -776,7 +769,7 @@ function isPiRequestAbortError(error: unknown): boolean {
     return true;
   }
 
-  return /\brequest was aborted\b/i.test(stringifyUnknownError(error));
+  return /\brequest was aborted\b/i.test(toDiagnosticErrorMessage(error));
 }
 
 function resolveThinkingOptionId(
@@ -1111,7 +1104,7 @@ export class PiDirectAgentSession implements AgentSession {
             type: "turn_canceled",
             provider: PI_PROVIDER,
             turnId: failedTurnId,
-            reason: stringifyUnknownError(error),
+            reason: toDiagnosticErrorMessage(error),
           });
           return;
         }
@@ -1119,7 +1112,7 @@ export class PiDirectAgentSession implements AgentSession {
           type: "turn_failed",
           provider: PI_PROVIDER,
           turnId: failedTurnId,
-          error: stringifyUnknownError(error),
+          error: toDiagnosticErrorMessage(error),
         });
       });
 
@@ -1481,12 +1474,8 @@ export class PiDirectAgentClient implements AgentClient {
       return false;
     }
 
-    return (
-      Boolean(process.env.OPENAI_API_KEY) ||
-      Boolean(process.env.ANTHROPIC_API_KEY) ||
-      Boolean(process.env.OPENROUTER_API_KEY) ||
-      existsSync(join(homedir(), ".pi", "agent", "auth.json"))
-    );
+    const registry = ModelRegistry.create(AuthStorage.create());
+    return registry.getAvailable().length > 0;
   }
 
   async getDiagnostic(): Promise<{ diagnostic: string }> {
@@ -1501,6 +1490,10 @@ export class PiDirectAgentClient implements AgentClient {
       const authConfigPath = join(homedir(), ".pi", "agent", "auth.json");
       let modelsValue = "Not checked";
       let status = formatDiagnosticStatus(available);
+      const registry = ModelRegistry.create(AuthStorage.create());
+      const configuredProviders = Array.from(
+        new Set(registry.getAvailable().map((model) => model.provider)),
+      ).sort();
 
       if (available) {
         try {
@@ -1520,16 +1513,8 @@ export class PiDirectAgentClient implements AgentClient {
           { label: "Binary", value: binary ?? "not found" },
           { label: "Version", value: version },
           {
-            label: "OPENAI_API_KEY",
-            value: process.env.OPENAI_API_KEY ? "set" : "not set",
-          },
-          {
-            label: "ANTHROPIC_API_KEY",
-            value: process.env.ANTHROPIC_API_KEY ? "set" : "not set",
-          },
-          {
-            label: "OPENROUTER_API_KEY",
-            value: process.env.OPENROUTER_API_KEY ? "set" : "not set",
+            label: "Configured providers",
+            value: configuredProviders.length > 0 ? configuredProviders.join(", ") : "none",
           },
           {
             label: "Auth config (~/.pi/agent/auth.json)",

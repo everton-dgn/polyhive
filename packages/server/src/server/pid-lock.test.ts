@@ -29,10 +29,10 @@ describe("pid-lock ownership", () => {
           patch: { listen: string },
           options: { ownerPid: number },
         ) => Promise<void>
-      )(polyhiveHome, { listen: "127.0.0.1:6767" }, { ownerPid });
+      )(polyhiveHome, { listen: "127.0.0.1:6768" }, { ownerPid });
 
       const updatedLock = await getPidLockInfo(polyhiveHome);
-      expect(updatedLock?.listen).toBe("127.0.0.1:6767");
+      expect(updatedLock?.listen).toBe("127.0.0.1:6768");
 
       await (
         releasePidLock as unknown as (home: string, options: { ownerPid: number }) => Promise<void>

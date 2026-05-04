@@ -695,7 +695,7 @@ describe("AgentManager", () => {
       },
       registry: storage,
       logger,
-      mcpBaseUrl: "http://127.0.0.1:6767/mcp/agents",
+      mcpBaseUrl: "http://127.0.0.1:6768/mcp/agents",
       idFactory: () => "00000000-0000-4000-8000-000000000103",
     });
 
@@ -713,7 +713,7 @@ describe("AgentManager", () => {
     expect(snapshot.config.mcpServers).toEqual({
       polyhive: {
         type: "http",
-        url: `http://127.0.0.1:6767/mcp/agents?callerAgentId=${snapshot.id}`,
+        url: `http://127.0.0.1:6768/mcp/agents?callerAgentId=${snapshot.id}`,
       },
       custom: {
         type: "stdio",
@@ -744,7 +744,7 @@ describe("AgentManager", () => {
       },
       registry: storage,
       logger,
-      mcpBaseUrl: "http://127.0.0.1:6767/mcp/agents",
+      mcpBaseUrl: "http://127.0.0.1:6768/mcp/agents",
       idFactory: () => "00000000-0000-4000-8000-000000000104",
     });
 

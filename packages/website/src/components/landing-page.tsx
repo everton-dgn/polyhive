@@ -1354,7 +1354,7 @@ const cliExamples: CLIExample[] = [
       "Launch agents locally or on a remote Mac. The --worktree flag spins up an isolated git branch so you can run multiple agents on the same repo without conflicts.",
     code: `polyhive run "implement user authentication"
 polyhive run --provider codex --worktree feature-x "implement feature X"
-polyhive run --host macmini.local:6767 "run the full test suite"
+polyhive run --host macmini.local:6768 "run the full test suite"
 
 polyhive ls                           # list running agents
 polyhive attach abc123                # stream live output

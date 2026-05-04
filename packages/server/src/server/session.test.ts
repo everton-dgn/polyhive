@@ -1363,7 +1363,7 @@ describe("session workspace script handling", () => {
       terminalManager: { subscribeTerminalsChanged: vi.fn(() => () => {}) },
       scriptRouteStore: { listRoutesForWorkspace: vi.fn(() => []) },
       scriptRuntimeStore: { listForWorkspace: vi.fn(() => []) },
-      getDaemonTcpPort: () => 6767,
+      getDaemonTcpPort: () => 6768,
       getDaemonTcpHost: () => "127.0.0.1",
       messages,
     });
@@ -1384,7 +1384,7 @@ describe("session workspace script handling", () => {
         projectSlug: "polyhive",
         branchName: "feature/service-scripts",
         scriptName: "api",
-        daemonPort: 6767,
+        daemonPort: 6768,
         daemonListenHost: "127.0.0.1",
       }),
     );

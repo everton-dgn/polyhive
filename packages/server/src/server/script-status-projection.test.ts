@@ -109,7 +109,7 @@ describe("script-status-projection", () => {
           workspaceDirectory: workspace.repoDir,
           routeStore,
           runtimeStore,
-          daemonPort: 6767,
+          daemonPort: 6768,
         }),
       ).toEqual([
         {
@@ -128,7 +128,7 @@ describe("script-status-projection", () => {
           type: "service",
           hostname: "web.repo.localhost",
           port: 3000,
-          proxyUrl: "http://web.repo.localhost:6767",
+          proxyUrl: "http://web.repo.localhost:6768",
           lifecycle: "stopped",
           health: null,
           exitCode: null,
@@ -159,7 +159,7 @@ describe("script-status-projection", () => {
         workspaceDirectory: workspace.repoDir,
         routeStore,
         runtimeStore,
-        daemonPort: 6767,
+        daemonPort: 6768,
         gitMetadata: {
           projectSlug: "service-provided",
           currentBranch: "feature/from-service",
@@ -172,7 +172,7 @@ describe("script-status-projection", () => {
           type: "service",
           hostname: "web.feature-from-service.service-provided.localhost",
           port: 3000,
-          proxyUrl: "http://web.feature-from-service.service-provided.localhost:6767",
+          proxyUrl: "http://web.feature-from-service.service-provided.localhost:6768",
           lifecycle: "stopped",
           health: null,
           exitCode: null,
@@ -219,7 +219,7 @@ describe("script-status-projection", () => {
           workspaceDirectory: workspace.repoDir,
           routeStore,
           runtimeStore,
-          daemonPort: 6767,
+          daemonPort: 6768,
           resolveHealth: () => "healthy",
         }),
       ).toEqual([
@@ -228,7 +228,7 @@ describe("script-status-projection", () => {
           type: "service",
           hostname: "web.feature-card.repo.localhost",
           port: 4321,
-          proxyUrl: "http://web.feature-card.repo.localhost:6767",
+          proxyUrl: "http://web.feature-card.repo.localhost:6768",
           lifecycle: "running",
           health: "healthy",
           exitCode: null,
@@ -274,7 +274,7 @@ describe("script-status-projection", () => {
           workspaceDirectory: workspace.repoDir,
           routeStore,
           runtimeStore,
-          daemonPort: 6767,
+          daemonPort: 6768,
           resolveHealth: () => "pending",
         }),
       ).toEqual([
@@ -283,7 +283,7 @@ describe("script-status-projection", () => {
           type: "service",
           hostname: "web.repo.localhost",
           port: 4321,
-          proxyUrl: "http://web.repo.localhost:6767",
+          proxyUrl: "http://web.repo.localhost:6768",
           lifecycle: "running",
           health: null,
           exitCode: null,
@@ -323,7 +323,7 @@ describe("script-status-projection", () => {
           workspaceDirectory: workspace.repoDir,
           routeStore,
           runtimeStore,
-          daemonPort: 6767,
+          daemonPort: 6768,
         }),
       ).toEqual([
         {
@@ -331,7 +331,7 @@ describe("script-status-projection", () => {
           type: "service",
           hostname: "docs.repo.localhost",
           port: 3002,
-          proxyUrl: "http://docs.repo.localhost:6767",
+          proxyUrl: "http://docs.repo.localhost:6768",
           lifecycle: "running",
           health: null,
           exitCode: null,
@@ -364,7 +364,7 @@ describe("script-status-projection", () => {
           workspaceDirectory: workspace.repoDir,
           routeStore,
           runtimeStore,
-          daemonPort: 6767,
+          daemonPort: 6768,
         }),
       ).toEqual([
         {
@@ -417,7 +417,7 @@ describe("script-status-projection", () => {
       sessions: () => [session],
       routeStore,
       runtimeStore,
-      daemonPort: 6767,
+      daemonPort: 6768,
       resolveWorkspaceDirectory: async (workspaceId) =>
         workspaceId === "workspace-emitter" ? workspace.repoDir : null,
       logger: createTestLogger(),
@@ -444,7 +444,7 @@ describe("script-status-projection", () => {
               type: "service",
               hostname: "api.repo.localhost",
               port: 3001,
-              proxyUrl: "http://api.repo.localhost:6767",
+              proxyUrl: "http://api.repo.localhost:6768",
               lifecycle: "running",
               health: "healthy",
               exitCode: null,

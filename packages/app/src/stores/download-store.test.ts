@@ -63,7 +63,7 @@ describe("download-store", () => {
       scopeId: "scope-1",
       fileName: "report.txt",
       path: "report.txt",
-      daemonProfile: makeHostProfile("user:pass@daemon.test:6767"),
+      daemonProfile: makeHostProfile("user:pass@daemon.test:6768"),
       requestFileDownloadToken: async () => ({
         token: "tok_123",
         fileName: "report.txt",
@@ -75,7 +75,7 @@ describe("download-store", () => {
     const [download] = useDownloadStore.getState().downloads.values();
     expect(download?.status).toBe("complete");
     expect(click).toHaveBeenCalledOnce();
-    expect(link.href).toBe("http://daemon.test:6767/api/files/download?token=tok_123");
+    expect(link.href).toBe("http://daemon.test:6768/api/files/download?token=tok_123");
     expect(link.download).toBe("report.txt");
     expect(link.href).not.toContain("user:pass@");
     expect(openExternalUrlMock).not.toHaveBeenCalled();
@@ -90,7 +90,7 @@ describe("download-store", () => {
       scopeId: "scope-1",
       fileName: "report.txt",
       path: "report.txt",
-      daemonProfile: makeHostProfile("daemon.test:6767"),
+      daemonProfile: makeHostProfile("daemon.test:6768"),
       requestFileDownloadToken: async () => ({
         token: "tok_123",
         fileName: "report.txt",
@@ -114,7 +114,7 @@ describe("download-store", () => {
       scopeId: "scope-1",
       fileName: "report.txt",
       path: "report.txt",
-      daemonProfile: makeHostProfile("daemon.test:6767"),
+      daemonProfile: makeHostProfile("daemon.test:6768"),
       requestFileDownloadToken: async () => ({
         token: "tok_123",
         fileName: "report.txt",
@@ -125,7 +125,7 @@ describe("download-store", () => {
 
     const [download] = useDownloadStore.getState().downloads.values();
     expect(openExternalUrlMock).toHaveBeenCalledWith(
-      "http://daemon.test:6767/api/files/download?token=tok_123",
+      "http://daemon.test:6768/api/files/download?token=tok_123",
     );
     expect(download?.status).toBe("error");
     expect(download?.message).toBe("handoff failed");
@@ -141,7 +141,7 @@ describe("download-store", () => {
       scopeId: "scope-1",
       fileName: "report.txt",
       path: "report.txt",
-      daemonProfile: makeHostProfile("user:pass@daemon.test:6767"),
+      daemonProfile: makeHostProfile("user:pass@daemon.test:6768"),
       requestFileDownloadToken: async () => ({
         token: "tok_123",
         fileName: "report.txt",
@@ -152,7 +152,7 @@ describe("download-store", () => {
 
     const [download] = useDownloadStore.getState().downloads.values();
     expect(openExternalUrlMock).toHaveBeenCalledWith(
-      "http://daemon.test:6767/api/files/download?token=tok_123",
+      "http://daemon.test:6768/api/files/download?token=tok_123",
     );
     expect(download?.status).toBe("complete");
   });

@@ -27,7 +27,7 @@ $.verbose = false;
 
 console.log("=== Logs Command Tests ===\n");
 
-// Get random port that's definitely not in use (never 6767)
+// Get random port that's definitely not in use (never 6768)
 const port = 10000 + Math.floor(Math.random() * 50000);
 const polyhiveHome = await mkdtemp(join(tmpdir(), "polyhive-test-home-"));
 

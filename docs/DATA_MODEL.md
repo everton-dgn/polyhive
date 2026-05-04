@@ -128,7 +128,7 @@ Single file, validated with `PersistedConfigSchema`.
 {
   version: 1,
   daemon: {
-    listen: "127.0.0.1:6767",
+    listen: "127.0.0.1:6768",
     hostnames: true | string[],
     mcp: { enabled: boolean },
     cors: { allowedOrigins: string[] },

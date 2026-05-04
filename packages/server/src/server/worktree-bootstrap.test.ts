@@ -1008,7 +1008,7 @@ describe("runAsyncWorktreeBootstrap", () => {
       projectSlug: "repo",
       branchName: "feature-socket-service",
       scriptName: "api",
-      daemonPort: 6767,
+      daemonPort: 6768,
       routeStore,
       runtimeStore,
       terminalManager: createStubTerminalManager(createTerminalCalls, terminalRecords),
@@ -1032,13 +1032,13 @@ describe("runAsyncWorktreeBootstrap", () => {
     expect(createTerminalCalls[0]?.env?.POLYHIVE_PORT).toEqual(expect.any(String));
     expect(createTerminalCalls[0]?.env?.HOST).toBe("127.0.0.1");
     expect(createTerminalCalls[0]?.env?.POLYHIVE_URL).toBe(
-      "http://api.feature-socket-service.repo.localhost:6767",
+      "http://api.feature-socket-service.repo.localhost:6768",
     );
     expect(createTerminalCalls[0]?.env?.POLYHIVE_SERVICE_API_PORT).toBe(
       createTerminalCalls[0]?.env?.POLYHIVE_PORT,
     );
     expect(createTerminalCalls[0]?.env?.POLYHIVE_SERVICE_API_URL).toBe(
-      "http://api.feature-socket-service.repo.localhost:6767",
+      "http://api.feature-socket-service.repo.localhost:6768",
     );
     const plannedPorts = await ensureWorkspaceServicePortPlan({
       workspaceId: repoDir,
@@ -1055,7 +1055,7 @@ describe("runAsyncWorktreeBootstrap", () => {
       String(plannedAppServerPort),
     );
     expect(createTerminalCalls[0]?.env?.POLYHIVE_SERVICE_APP_SERVER_URL).toBe(
-      "http://app-server.feature-socket-service.repo.localhost:6767",
+      "http://app-server.feature-socket-service.repo.localhost:6768",
     );
     expect(runtimeStore.get({ workspaceId: repoDir, scriptName: "api" })).toMatchObject({
       type: "service",
@@ -1098,7 +1098,7 @@ describe("runAsyncWorktreeBootstrap", () => {
       projectSlug: "repo",
       branchName: "feature-respawn-service",
       scriptName: "api",
-      daemonPort: 6767,
+      daemonPort: 6768,
       routeStore,
       runtimeStore,
       terminalManager,
@@ -1110,7 +1110,7 @@ describe("runAsyncWorktreeBootstrap", () => {
       projectSlug: "repo",
       branchName: "feature-respawn-service",
       scriptName: "worker",
-      daemonPort: 6767,
+      daemonPort: 6768,
       routeStore,
       runtimeStore,
       terminalManager,
@@ -1144,7 +1144,7 @@ describe("runAsyncWorktreeBootstrap", () => {
       projectSlug: "repo",
       branchName: "feature-respawn-service",
       scriptName: "api",
-      daemonPort: 6767,
+      daemonPort: 6768,
       routeStore,
       runtimeStore,
       terminalManager,
@@ -1197,7 +1197,7 @@ describe("runAsyncWorktreeBootstrap", () => {
       projectSlug: "repo",
       branchName: "feature-before-rename",
       scriptName: "api",
-      daemonPort: 6767,
+      daemonPort: 6768,
       routeStore,
       runtimeStore,
       terminalManager,
@@ -1258,7 +1258,7 @@ describe("runAsyncWorktreeBootstrap", () => {
         projectSlug: "repo",
         branchName: "feature-collision-service",
         scriptName: "app-server",
-        daemonPort: 6767,
+        daemonPort: 6768,
         routeStore,
         runtimeStore,
         terminalManager: createStubTerminalManager(createTerminalCalls),
@@ -1293,7 +1293,7 @@ describe("runAsyncWorktreeBootstrap", () => {
       projectSlug: "repo",
       branchName: "feature-collision-service",
       scriptName: "app-server",
-      daemonPort: 6767,
+      daemonPort: 6768,
       routeStore,
       runtimeStore,
       terminalManager: createStubTerminalManager(createTerminalCalls),
@@ -1349,7 +1349,7 @@ describe("runAsyncWorktreeBootstrap", () => {
         projectSlug: "repo",
         branchName: "feature-peer-env",
         scriptName,
-        daemonPort: 6767,
+        daemonPort: 6768,
         routeStore,
         runtimeStore,
         terminalManager,
@@ -1364,16 +1364,16 @@ describe("runAsyncWorktreeBootstrap", () => {
     const apiEnv = readEnvFile(apiEnvPath);
     const webEnv = readEnvFile(webEnvPath);
 
-    expect(apiEnv.POLYHIVE_SERVICE_API_URL).toBe("http://api.feature-peer-env.repo.localhost:6767");
-    expect(apiEnv.POLYHIVE_SERVICE_WEB_URL).toBe("http://web.feature-peer-env.repo.localhost:6767");
+    expect(apiEnv.POLYHIVE_SERVICE_API_URL).toBe("http://api.feature-peer-env.repo.localhost:6768");
+    expect(apiEnv.POLYHIVE_SERVICE_WEB_URL).toBe("http://web.feature-peer-env.repo.localhost:6768");
     expect(apiEnv.POLYHIVE_SERVICE_API_PORT).toEqual(expect.stringMatching(/^\d+$/));
     expect(apiEnv.POLYHIVE_SERVICE_WEB_PORT).toEqual(expect.stringMatching(/^\d+$/));
     expect(apiEnv.POLYHIVE_URL).toBe(apiEnv.POLYHIVE_SERVICE_API_URL);
     expect(apiEnv.POLYHIVE_PORT).toBe(apiEnv.POLYHIVE_SERVICE_API_PORT);
     expect(apiEnv).not.toHaveProperty("PORT");
 
-    expect(webEnv.POLYHIVE_SERVICE_API_URL).toBe("http://api.feature-peer-env.repo.localhost:6767");
-    expect(webEnv.POLYHIVE_SERVICE_WEB_URL).toBe("http://web.feature-peer-env.repo.localhost:6767");
+    expect(webEnv.POLYHIVE_SERVICE_API_URL).toBe("http://api.feature-peer-env.repo.localhost:6768");
+    expect(webEnv.POLYHIVE_SERVICE_WEB_URL).toBe("http://web.feature-peer-env.repo.localhost:6768");
     expect(webEnv.POLYHIVE_SERVICE_API_PORT).toBe(apiEnv.POLYHIVE_SERVICE_API_PORT);
     expect(webEnv.POLYHIVE_SERVICE_WEB_PORT).toBe(apiEnv.POLYHIVE_SERVICE_WEB_PORT);
     expect(webEnv.POLYHIVE_URL).toBe(webEnv.POLYHIVE_SERVICE_WEB_URL);
@@ -1430,7 +1430,7 @@ describe("runAsyncWorktreeBootstrap", () => {
       projectSlug: "repo",
       branchName: "feature-remote-service",
       scriptName: "web",
-      daemonPort: 6767,
+      daemonPort: 6768,
       daemonListenHost: "100.64.0.20",
       routeStore,
       runtimeStore,
@@ -1440,7 +1440,7 @@ describe("runAsyncWorktreeBootstrap", () => {
     expect(createTerminalCalls).toHaveLength(1);
     expect(createTerminalCalls[0]?.env?.HOST).toBe("0.0.0.0");
     expect(createTerminalCalls[0]?.env?.POLYHIVE_URL).toBe(
-      "http://web.feature-remote-service.repo.localhost:6767",
+      "http://web.feature-remote-service.repo.localhost:6768",
     );
   });
 });

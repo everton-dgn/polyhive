@@ -134,7 +134,7 @@ async function runVoiceRoundTrip(params: {
 }
 
 async function main(): Promise<void> {
-  const daemonUrl = process.env.POLYHIVE_DAEMON_URL ?? "ws://localhost:6767".replace(/^ws/, "http");
+  const daemonUrl = process.env.POLYHIVE_DAEMON_URL ?? "ws://localhost:6768".replace(/^ws/, "http");
   const timeoutMs = Number(process.env.POLYHIVE_VOICE_E2E_TIMEOUT_MS ?? "120000");
   const voiceAgentId = randomUUID();
 

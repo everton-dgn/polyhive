@@ -26,7 +26,7 @@ POLYHIVE_HOME=~/.polyhive-blue npm run dev
 ### Default ports
 
 In the main checkout:
-- Daemon: `localhost:6767`
+- Daemon: `localhost:6768`
 - Expo app: `localhost:8081`
 
 In worktrees or with `npm run dev`, ports may differ. Never assume defaults.

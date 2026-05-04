@@ -10,9 +10,9 @@ function getE2EDaemonPort(): string {
   if (!port) {
     throw new Error("E2E_DAEMON_PORT is not set (expected from Playwright globalSetup).");
   }
-  if (port === "6767") {
+  if (port === "6768") {
     throw new Error(
-      "E2E_DAEMON_PORT is 6767. Refusing to run e2e against the default local daemon.",
+      "E2E_DAEMON_PORT is 6768. Refusing to run e2e against the default local daemon.",
     );
   }
   return port;
@@ -42,7 +42,7 @@ async function ensureE2EStorageSeeded(page: Page): Promise<void> {
             (c: any) =>
               c?.type === "directTcp" &&
               typeof c?.endpoint === "string" &&
-              /:6767\b/.test(c.endpoint),
+              /:6768\b/.test(c.endpoint),
           )
         )
           return true;
@@ -136,11 +136,11 @@ async function assertE2EUsesSeededTestDaemon(page: Page): Promise<void> {
     Array.isArray(connections) &&
     connections.some(
       (c: any) =>
-        c?.type === "directTcp" && typeof c?.endpoint === "string" && /:6767\b/.test(c.endpoint),
+        c?.type === "directTcp" && typeof c?.endpoint === "string" && /:6768\b/.test(c.endpoint),
     )
   ) {
     throw new Error(
-      `E2E detected a daemon endpoint pointing at :6767 (${JSON.stringify(connections)}).`,
+      `E2E detected a daemon endpoint pointing at :6768 (${JSON.stringify(connections)}).`,
     );
   }
 
@@ -328,7 +328,7 @@ export const setWorkingDirectory = async (page: Page, directory: string) => {
 export const ensureHostSelected = async (page: Page) => {
   await ensureE2EStorageSeeded(page);
 
-  // Absolute verification that we're using the per-run e2e daemon (never :6767).
+  // Absolute verification that we're using the per-run e2e daemon (never :6768).
   // Also self-heal a rare case where app code rewrites daemon IDs after boot, by
   // realigning create-agent-preferences.serverId to the sole seeded daemon.
   try {

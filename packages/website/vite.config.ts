@@ -33,7 +33,7 @@ const sitemapPages = [
 export default defineConfig((): UserConfig => {
   return {
     server: {
-      port: 8082,
+      port: 8083,
       fs: {
         allow: [repoRoot],
       },

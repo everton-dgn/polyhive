@@ -5,7 +5,7 @@ import { resolveStructuredHelperMcpServers } from "./session.js";
 describe("resolveStructuredHelperMcpServers", () => {
   test("prefers a running agent in the same cwd when it has MCP servers", () => {
     const expected = {
-      task_board_mcp: { type: "http", url: "http://127.0.0.1:6767/mcp/task-board" },
+      task_board_mcp: { type: "http", url: "http://127.0.0.1:6768/mcp/task-board" },
     };
 
     const result = resolveStructuredHelperMcpServers({
@@ -19,7 +19,7 @@ describe("resolveStructuredHelperMcpServers", () => {
             provider: "codex",
             cwd: "C:/workspace/app",
             mcpServers: {
-              polyhive: { type: "http", url: "http://127.0.0.1:6767/mcp" },
+              polyhive: { type: "http", url: "http://127.0.0.1:6768/mcp" },
             },
           },
         },
@@ -51,7 +51,7 @@ describe("resolveStructuredHelperMcpServers", () => {
             provider: "codex",
             cwd: "C:/workspace/other",
             mcpServers: {
-              task_board_mcp: { type: "http", url: "http://127.0.0.1:6767/mcp/task-board" },
+              task_board_mcp: { type: "http", url: "http://127.0.0.1:6768/mcp/task-board" },
             },
           },
         },

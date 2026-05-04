@@ -58,7 +58,7 @@ const runningScript: WorkspaceScriptPayload = {
   type: "service",
   hostname: "web.polyhive.localhost",
   port: 3000,
-  proxyUrl: "http://web.polyhive.localhost:6767",
+  proxyUrl: "http://web.polyhive.localhost:6768",
   lifecycle: "running",
   health: "healthy",
   exitCode: null,

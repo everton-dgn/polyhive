@@ -75,7 +75,7 @@ function Configuration() {
   "$schema": "${SCHEMA_URL}",
   "version": 1,
   "daemon": {
-    "listen": "127.0.0.1:6767",
+    "listen": "127.0.0.1:6768",
     "hostnames": ["localhost", ".localhost"],
     "mcp": { "enabled": true }
   }

@@ -43,7 +43,7 @@ function getDaemonPort(): string {
   if (!daemonPort) {
     throw new Error("E2E_DAEMON_PORT is not set.");
   }
-  if (daemonPort === "6767") {
+  if (daemonPort === "6768") {
     throw new Error("E2E_DAEMON_PORT must not point at the developer daemon.");
   }
   return daemonPort;
@@ -145,9 +145,9 @@ export async function primeAdditionalPage(page: Page): Promise<void> {
   const seedNonce = randomUUID();
   const { daemon, preferences } = buildSeededStoragePayload();
 
-  await page.route(/:(6767)\b/, (route) => route.abort());
-  await page.routeWebSocket(/:(6767)\b/, async (ws) => {
-    await ws.close({ code: 1008, reason: "Blocked connection to localhost:6767 during e2e." });
+  await page.route(/:(6768)\b/, (route) => route.abort());
+  await page.routeWebSocket(/:(6768)\b/, async (ws) => {
+    await ws.close({ code: 1008, reason: "Blocked connection to localhost:6768 during e2e." });
   });
   await page.addInitScript(
     ({ daemon, preferences, seedNonce }) => {

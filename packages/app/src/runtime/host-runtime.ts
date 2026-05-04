@@ -1098,7 +1098,7 @@ export class HostRuntimeController {
 }
 
 const REGISTRY_STORAGE_KEY = "@polyhive:daemon-registry";
-const DEFAULT_LOCALHOST_ENDPOINT = process.env.EXPO_PUBLIC_LOCAL_DAEMON?.trim() || "localhost:6767";
+const DEFAULT_LOCALHOST_ENDPOINT = process.env.EXPO_PUBLIC_LOCAL_DAEMON?.trim() || "localhost:6768";
 const DEFAULT_LOCALHOST_BOOTSTRAP_KEY = "@polyhive:default-localhost-bootstrap-v1";
 const DEFAULT_LOCALHOST_BOOTSTRAP_TIMEOUT_MS = 2500;
 const CONNECTION_ONLINE_TIMEOUT_MS = 15_000;

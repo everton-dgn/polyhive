@@ -943,7 +943,7 @@ describe("DaemonClient", () => {
   test("requires non-empty clientId for direct connections", () => {
     expect(() => {
       new DaemonClient({
-        url: "ws://127.0.0.1:6767/ws",
+        url: "ws://127.0.0.1:6768/ws",
         clientId: "   ",
         reconnect: { enabled: false },
       });

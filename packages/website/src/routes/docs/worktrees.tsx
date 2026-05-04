@@ -174,11 +174,11 @@ http://<script>.<project>.localhost:<daemon-port>`}</pre>
         </p>
         <Code>
           <pre className="text-white/80">{`POLYHIVE_PORT=3000                         # this service's port
-POLYHIVE_URL=http://web.my-app.localhost:6767  # this service's proxy URL
+POLYHIVE_URL=http://web.my-app.localhost:6768  # this service's proxy URL
 POLYHIVE_SERVICE_API_PORT=51732
-POLYHIVE_SERVICE_API_URL=http://api.my-app.localhost:6767
+POLYHIVE_SERVICE_API_URL=http://api.my-app.localhost:6768
 POLYHIVE_SERVICE_WEB_PORT=3000
-POLYHIVE_SERVICE_WEB_URL=http://web.my-app.localhost:6767`}</pre>
+POLYHIVE_SERVICE_WEB_URL=http://web.my-app.localhost:6768`}</pre>
         </Code>
         <p className="text-white/60 leading-relaxed">
           Script names are upper-cased and non-alphanumerics become{" "}

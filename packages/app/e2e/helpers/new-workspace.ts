@@ -38,7 +38,7 @@ function getDaemonPort(): string {
   if (!daemonPort) {
     throw new Error("E2E_DAEMON_PORT is not set.");
   }
-  if (daemonPort === "6767") {
+  if (daemonPort === "6768") {
     throw new Error("E2E_DAEMON_PORT must not point at the developer daemon.");
   }
   return daemonPort;

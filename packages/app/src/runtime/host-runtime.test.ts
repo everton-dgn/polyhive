@@ -169,9 +169,9 @@ function makeFetchAgentsEntry(input: {
 
 function makeHost(input?: Partial<HostProfile>): HostProfile {
   const direct: HostConnection = {
-    id: "direct:lan:6767",
+    id: "direct:lan:6768",
     type: "directTcp",
-    endpoint: "lan:6767",
+    endpoint: "lan:6768",
   };
   const relay: HostConnection = {
     id: "relay:relay.polyhive.sh:443",
@@ -291,9 +291,9 @@ describe("HostRuntimeController", () => {
     const host = makeHost({
       connections: [
         {
-          id: "direct:lan:6767",
+          id: "direct:lan:6768",
           type: "directTcp",
-          endpoint: "lan:6767",
+          endpoint: "lan:6768",
         },
       ],
     });
@@ -319,9 +319,9 @@ describe("HostRuntimeController", () => {
       controller as unknown as {
         switchToConnection: (input: { connectionId: string }) => Promise<void>;
       }
-    ).switchToConnection({ connectionId: "direct:lan:6767" });
+    ).switchToConnection({ connectionId: "direct:lan:6768" });
 
-    expect(controller.getSnapshot().activeConnectionId).toBe("direct:lan:6767");
+    expect(controller.getSnapshot().activeConnectionId).toBe("direct:lan:6768");
     expect(controller.getSnapshot().connectionStatus).toBe("connecting");
     expect(controller.getSnapshot().agentDirectoryStatus).toBe("initial_loading");
   });
@@ -330,9 +330,9 @@ describe("HostRuntimeController", () => {
     const host = makeHost({
       connections: [
         {
-          id: "direct:lan:6767",
+          id: "direct:lan:6768",
           type: "directTcp",
-          endpoint: "lan:6767",
+          endpoint: "lan:6768",
         },
       ],
     });
@@ -356,17 +356,17 @@ describe("HostRuntimeController", () => {
       controller as unknown as {
         switchToConnection: (input: { connectionId: string }) => Promise<void>;
       }
-    ).switchToConnection({ connectionId: "direct:lan:6767" });
+    ).switchToConnection({ connectionId: "direct:lan:6768" });
 
     expect(seenClientIds).toEqual(["cid_runtime_stable"]);
     expect(controller.getSnapshot().connectionStatus).toBe("online");
   });
 
   it("adopts the first successful probe on startup", async () => {
-    const host = makeHost({ preferredConnectionId: "direct:lan:6767" });
+    const host = makeHost({ preferredConnectionId: "direct:lan:6768" });
     const clients: FakeDaemonClient[] = [];
     const latencies: Record<string, number | Error> = {
-      "direct:lan:6767": 82,
+      "direct:lan:6768": 82,
       "relay:relay.polyhive.sh:443": 18,
     };
     const controller = new HostRuntimeController({
@@ -377,7 +377,7 @@ describe("HostRuntimeController", () => {
     await controller.start({ autoProbe: false });
 
     const snapshot = controller.getSnapshot();
-    expect(snapshot.activeConnectionId).toBe("direct:lan:6767");
+    expect(snapshot.activeConnectionId).toBe("direct:lan:6768");
     expect(snapshot.connectionStatus).toBe("online");
     expect(clients).toHaveLength(2);
     expect(snapshot.client).toBe(clients[0] as unknown as DaemonClient);
@@ -386,7 +386,7 @@ describe("HostRuntimeController", () => {
   });
 
   it("activates the first successful probe without waiting for slower probes", async () => {
-    const host = makeHost({ preferredConnectionId: "direct:lan:6767" });
+    const host = makeHost({ preferredConnectionId: "direct:lan:6768" });
     const slowPing = createDeferred<number>();
     const clients: FakeDaemonClient[] = [];
 
@@ -397,7 +397,7 @@ describe("HostRuntimeController", () => {
           throw new Error("should adopt the probe client");
         },
         connectToDaemon: async ({ host, connection }) => {
-          const client = makeConnectedProbeClient(connection.id === "direct:lan:6767" ? 12 : 30);
+          const client = makeConnectedProbeClient(connection.id === "direct:lan:6768" ? 12 : 30);
           if (connection.id === "relay:relay.polyhive.sh:443") {
             client.ping = async () => ({ rttMs: await slowPing.promise });
           }
@@ -418,7 +418,7 @@ describe("HostRuntimeController", () => {
     while (Date.now() < timeoutAt) {
       const snapshot = controller.getSnapshot();
       if (
-        snapshot.activeConnectionId === "direct:lan:6767" &&
+        snapshot.activeConnectionId === "direct:lan:6768" &&
         snapshot.connectionStatus === "online"
       ) {
         break;
@@ -426,7 +426,7 @@ describe("HostRuntimeController", () => {
       await new Promise((resolve) => setTimeout(resolve, 0));
     }
 
-    expect(controller.getSnapshot().activeConnectionId).toBe("direct:lan:6767");
+    expect(controller.getSnapshot().activeConnectionId).toBe("direct:lan:6768");
     expect(controller.getSnapshot().connectionStatus).toBe("online");
 
     slowPing.resolve(30);
@@ -434,10 +434,10 @@ describe("HostRuntimeController", () => {
   });
 
   it("fails over when active connection becomes unavailable", async () => {
-    const host = makeHost({ preferredConnectionId: "direct:lan:6767" });
+    const host = makeHost({ preferredConnectionId: "direct:lan:6768" });
     const clients: FakeDaemonClient[] = [];
     const latencies: Record<string, number | Error> = {
-      "direct:lan:6767": 15,
+      "direct:lan:6768": 15,
       "relay:relay.polyhive.sh:443": 55,
     };
     const controller = new HostRuntimeController({
@@ -446,11 +446,11 @@ describe("HostRuntimeController", () => {
     });
 
     await controller.start({ autoProbe: false });
-    expect(controller.getSnapshot().activeConnectionId).toBe("direct:lan:6767");
+    expect(controller.getSnapshot().activeConnectionId).toBe("direct:lan:6768");
     const initialClient = controller.getSnapshot().client;
     expect(initialClient).toBeTruthy();
 
-    latencies["direct:lan:6767"] = new Error("direct unavailable");
+    latencies["direct:lan:6768"] = new Error("direct unavailable");
     latencies["relay:relay.polyhive.sh:443"] = 42;
     clearProbeBackoff(controller);
     await controller.runProbeCycleNow();
@@ -463,10 +463,10 @@ describe("HostRuntimeController", () => {
   });
 
   it("switches only after the faster alternative wins consecutive probes", async () => {
-    const host = makeHost({ preferredConnectionId: "direct:lan:6767" });
+    const host = makeHost({ preferredConnectionId: "direct:lan:6768" });
     const clients: FakeDaemonClient[] = [];
     const latencies: Record<string, number | Error> = {
-      "direct:lan:6767": 15,
+      "direct:lan:6768": 15,
       "relay:relay.polyhive.sh:443": 60,
     };
     const controller = new HostRuntimeController({
@@ -475,17 +475,17 @@ describe("HostRuntimeController", () => {
     });
 
     await controller.start({ autoProbe: false });
-    expect(controller.getSnapshot().activeConnectionId).toBe("direct:lan:6767");
+    expect(controller.getSnapshot().activeConnectionId).toBe("direct:lan:6768");
 
-    latencies["direct:lan:6767"] = 95;
+    latencies["direct:lan:6768"] = 95;
     latencies["relay:relay.polyhive.sh:443"] = 30;
     clearProbeBackoff(controller);
     await controller.runProbeCycleNow();
-    expect(controller.getSnapshot().activeConnectionId).toBe("direct:lan:6767");
+    expect(controller.getSnapshot().activeConnectionId).toBe("direct:lan:6768");
 
     clearProbeBackoff(controller);
     await controller.runProbeCycleNow();
-    expect(controller.getSnapshot().activeConnectionId).toBe("direct:lan:6767");
+    expect(controller.getSnapshot().activeConnectionId).toBe("direct:lan:6768");
 
     let switched = controller.getSnapshot().activeConnectionId === "relay:relay.polyhive.sh:443";
     for (let index = 0; index < 6 && !switched; index += 1) {
@@ -498,10 +498,10 @@ describe("HostRuntimeController", () => {
   });
 
   it("does not switch on a transient latency spike", async () => {
-    const host = makeHost({ preferredConnectionId: "direct:lan:6767" });
+    const host = makeHost({ preferredConnectionId: "direct:lan:6768" });
     const clients: FakeDaemonClient[] = [];
     const latencies: Record<string, number | Error> = {
-      "direct:lan:6767": 15,
+      "direct:lan:6768": 15,
       "relay:relay.polyhive.sh:443": 80,
     };
     const controller = new HostRuntimeController({
@@ -510,29 +510,29 @@ describe("HostRuntimeController", () => {
     });
 
     await controller.start({ autoProbe: false });
-    expect(controller.getSnapshot().activeConnectionId).toBe("direct:lan:6767");
+    expect(controller.getSnapshot().activeConnectionId).toBe("direct:lan:6768");
 
-    latencies["direct:lan:6767"] = 100;
+    latencies["direct:lan:6768"] = 100;
     latencies["relay:relay.polyhive.sh:443"] = 20;
     clearProbeBackoff(controller);
     await controller.runProbeCycleNow();
-    expect(controller.getSnapshot().activeConnectionId).toBe("direct:lan:6767");
+    expect(controller.getSnapshot().activeConnectionId).toBe("direct:lan:6768");
 
-    latencies["direct:lan:6767"] = 20;
+    latencies["direct:lan:6768"] = 20;
     latencies["relay:relay.polyhive.sh:443"] = 90;
     clearProbeBackoff(controller);
     await controller.runProbeCycleNow();
-    expect(controller.getSnapshot().activeConnectionId).toBe("direct:lan:6767");
+    expect(controller.getSnapshot().activeConnectionId).toBe("direct:lan:6768");
 
-    latencies["direct:lan:6767"] = 100;
+    latencies["direct:lan:6768"] = 100;
     latencies["relay:relay.polyhive.sh:443"] = 20;
     clearProbeBackoff(controller);
     await controller.runProbeCycleNow();
-    expect(controller.getSnapshot().activeConnectionId).toBe("direct:lan:6767");
+    expect(controller.getSnapshot().activeConnectionId).toBe("direct:lan:6768");
 
     clearProbeBackoff(controller);
     await controller.runProbeCycleNow();
-    expect(controller.getSnapshot().activeConnectionId).toBe("direct:lan:6767");
+    expect(controller.getSnapshot().activeConnectionId).toBe("direct:lan:6768");
 
     let switched = controller.getSnapshot().activeConnectionId === "relay:relay.polyhive.sh:443";
     for (let index = 0; index < 6 && !switched; index += 1) {
@@ -547,7 +547,7 @@ describe("HostRuntimeController", () => {
     const host = makeHost();
     const clients: FakeDaemonClient[] = [];
     const latencies: Record<string, number | Error> = {
-      "direct:lan:6767": 12,
+      "direct:lan:6768": 12,
       "relay:relay.polyhive.sh:443": 65,
     };
     const controller = new HostRuntimeController({
@@ -568,7 +568,7 @@ describe("HostRuntimeController", () => {
     });
 
     const latest = observed[observed.length - 1];
-    expect(latest?.activeConnectionId).toBe("direct:lan:6767");
+    expect(latest?.activeConnectionId).toBe("direct:lan:6768");
     expect(latest?.connectionStatus).toBe("error");
     expect(latest?.lastError).toBe("transport closed");
     unsubscribe();
@@ -578,9 +578,9 @@ describe("HostRuntimeController", () => {
     const host = makeHost({
       connections: [
         {
-          id: "direct:lan:6767",
+          id: "direct:lan:6768",
           type: "directTcp",
-          endpoint: "lan:6767",
+          endpoint: "lan:6768",
         },
       ],
     });
@@ -589,7 +589,7 @@ describe("HostRuntimeController", () => {
       host,
       deps: makeDeps(
         {
-          "direct:lan:6767": 12,
+          "direct:lan:6768": 12,
         },
         clients,
       ),
@@ -613,9 +613,9 @@ describe("HostRuntimeController", () => {
       const host = makeHost({
         connections: [
           {
-            id: "direct:lan:6767",
+            id: "direct:lan:6768",
             type: "directTcp",
-            endpoint: "lan:6767",
+            endpoint: "lan:6768",
           },
         ],
       });
@@ -624,7 +624,7 @@ describe("HostRuntimeController", () => {
         host,
         deps: makeDeps(
           {
-            "direct:lan:6767": 12,
+            "direct:lan:6768": 12,
           },
           clients,
         ),
@@ -651,7 +651,7 @@ describe("HostRuntimeController", () => {
     const host = makeHost();
     const clients: FakeDaemonClient[] = [];
     const latencies: Record<string, number | Error> = {
-      "direct:lan:6767": 12,
+      "direct:lan:6768": 12,
       "relay:relay.polyhive.sh:443": 65,
     };
     const controller = new HostRuntimeController({
@@ -671,7 +671,7 @@ describe("HostRuntimeController", () => {
     const host = makeHost();
     const clients: FakeDaemonClient[] = [];
     const latencies: Record<string, number | Error> = {
-      "direct:lan:6767": 12,
+      "direct:lan:6768": 12,
       "relay:relay.polyhive.sh:443": 65,
     };
     const controller = new HostRuntimeController({
@@ -700,7 +700,7 @@ describe("HostRuntimeController", () => {
     const host = makeHost();
     const clients: FakeDaemonClient[] = [];
     const latencies: Record<string, number | Error> = {
-      "direct:lan:6767": 12,
+      "direct:lan:6768": 12,
       "relay:relay.polyhive.sh:443": 65,
     };
     const controller = new HostRuntimeController({
@@ -722,7 +722,7 @@ describe("HostRuntimeController", () => {
     const host = makeHost();
     const clients: FakeDaemonClient[] = [];
     const latencies: Record<string, number | Error> = {
-      "direct:lan:6767": 12,
+      "direct:lan:6768": 12,
       "relay:relay.polyhive.sh:443": 65,
     };
     const controller = new HostRuntimeController({
@@ -751,9 +751,9 @@ describe("HostRuntimeController", () => {
     const host = makeHost({
       connections: [
         {
-          id: "direct:lan:6767",
+          id: "direct:lan:6768",
           type: "directTcp",
-          endpoint: "lan:6767",
+          endpoint: "lan:6768",
         },
         {
           id: "relay:relay.polyhive.sh:443",
@@ -768,7 +768,7 @@ describe("HostRuntimeController", () => {
     const deps: HostRuntimeControllerDeps = {
       createClient: ({ connection }) => {
         const client = new FakeDaemonClient();
-        if (connection.id === "direct:lan:6767") {
+        if (connection.id === "direct:lan:6768") {
           client.connect = async () => {
             client.connectCalls += 1;
             await firstConnectGate.promise;
@@ -804,12 +804,12 @@ describe("HostRuntimeController", () => {
       controller as unknown as {
         switchToConnection: (input: { connectionId: string }) => Promise<void>;
       }
-    ).switchToConnection({ connectionId: "direct:lan:6767" });
+    ).switchToConnection({ connectionId: "direct:lan:6768" });
     await waitUntil(() => {
       const snapshot = controller.getSnapshot();
       return (
         createdClients.length === 1 &&
-        snapshot.activeConnectionId === "direct:lan:6767" &&
+        snapshot.activeConnectionId === "direct:lan:6768" &&
         snapshot.connectionStatus === "connecting"
       );
     });
@@ -842,9 +842,9 @@ describe("HostRuntimeController", () => {
     const host = makeHost({
       connections: [
         {
-          id: "direct:lan:6767",
+          id: "direct:lan:6768",
           type: "directTcp",
-          endpoint: "lan:6767",
+          endpoint: "lan:6768",
         },
       ],
     });
@@ -886,7 +886,7 @@ describe("HostRuntimeController", () => {
 
     fastProbe.resolve(12);
     await second;
-    const probeAfterSecond = controller.getSnapshot().probeByConnectionId.get("direct:lan:6767");
+    const probeAfterSecond = controller.getSnapshot().probeByConnectionId.get("direct:lan:6768");
     expect(probeAfterSecond).toEqual({
       status: "available",
       latencyMs: 12,
@@ -896,7 +896,7 @@ describe("HostRuntimeController", () => {
     await first;
     const probeAfterFirstSettles = controller
       .getSnapshot()
-      .probeByConnectionId.get("direct:lan:6767");
+      .probeByConnectionId.get("direct:lan:6768");
     expect(probeAfterFirstSettles).toEqual({
       status: "available",
       latencyMs: 12,
@@ -907,9 +907,9 @@ describe("HostRuntimeController", () => {
     const host = makeHost({
       connections: [
         {
-          id: "direct:lan:6767",
+          id: "direct:lan:6768",
           type: "directTcp",
-          endpoint: "lan:6767",
+          endpoint: "lan:6768",
         },
       ],
     });
@@ -949,10 +949,10 @@ describe("HostRuntimeController", () => {
   it("does not notify or replace the snapshot for equal probe maps", () => {
     const controller = new HostRuntimeController({ host: makeHost() });
     const firstProbeMap = makeProbeMap([
-      ["direct:lan:6767", { status: "available", latencyMs: 12 }],
+      ["direct:lan:6768", { status: "available", latencyMs: 12 }],
     ]);
     const equalProbeMap = makeProbeMap([
-      ["direct:lan:6767", { status: "available", latencyMs: 12 }],
+      ["direct:lan:6768", { status: "available", latencyMs: 12 }],
     ]);
 
     updateControllerSnapshot(controller, { probeByConnectionId: firstProbeMap });
@@ -990,10 +990,10 @@ describe("HostRuntimeController", () => {
   it("does not notify or replace the snapshot when every patched field is equal", () => {
     const controller = new HostRuntimeController({ host: makeHost() });
     const firstProbeMap = makeProbeMap([
-      ["direct:lan:6767", { status: "available", latencyMs: 12 }],
+      ["direct:lan:6768", { status: "available", latencyMs: 12 }],
     ]);
     const equalProbeMap = makeProbeMap([
-      ["direct:lan:6767", { status: "available", latencyMs: 12 }],
+      ["direct:lan:6768", { status: "available", latencyMs: 12 }],
     ]);
 
     updateControllerSnapshot(controller, {
@@ -1020,10 +1020,10 @@ describe("HostRuntimeController", () => {
   it("notifies once for a changed field while preserving equal field identity", () => {
     const controller = new HostRuntimeController({ host: makeHost() });
     const firstProbeMap = makeProbeMap([
-      ["direct:lan:6767", { status: "available", latencyMs: 12 }],
+      ["direct:lan:6768", { status: "available", latencyMs: 12 }],
     ]);
     const equalProbeMap = makeProbeMap([
-      ["direct:lan:6767", { status: "available", latencyMs: 12 }],
+      ["direct:lan:6768", { status: "available", latencyMs: 12 }],
     ]);
 
     updateControllerSnapshot(controller, {
@@ -1051,10 +1051,10 @@ describe("HostRuntimeController", () => {
   it("notifies once and replaces the probe map when probe contents change", () => {
     const controller = new HostRuntimeController({ host: makeHost() });
     const firstProbeMap = makeProbeMap([
-      ["direct:lan:6767", { status: "available", latencyMs: 12 }],
+      ["direct:lan:6768", { status: "available", latencyMs: 12 }],
     ]);
     const changedProbeMap = makeProbeMap([
-      ["direct:lan:6767", { status: "available", latencyMs: 12 }],
+      ["direct:lan:6768", { status: "available", latencyMs: 12 }],
       ["relay:relay.polyhive.sh:443", { status: "unavailable", latencyMs: null }],
     ]);
 
@@ -1080,9 +1080,9 @@ describe("HostRuntimeStore", () => {
     const host = makeHost({
       connections: [
         {
-          id: "direct:lan:6767",
+          id: "direct:lan:6768",
           type: "directTcp",
-          endpoint: "lan:6767",
+          endpoint: "lan:6768",
         },
       ],
     });
@@ -1131,9 +1131,9 @@ describe("HostRuntimeStore", () => {
       serverId: "srv_no_session",
       connections: [
         {
-          id: "direct:lan:6767",
+          id: "direct:lan:6768",
           type: "directTcp",
-          endpoint: "lan:6767",
+          endpoint: "lan:6768",
         },
       ],
     });
@@ -1174,9 +1174,9 @@ describe("HostRuntimeStore", () => {
       serverId: "srv_paged",
       connections: [
         {
-          id: "direct:lan:6767",
+          id: "direct:lan:6768",
           type: "directTcp",
-          endpoint: "lan:6767",
+          endpoint: "lan:6768",
         },
       ],
     });
@@ -1271,9 +1271,9 @@ describe("HostRuntimeStore", () => {
       serverId: "srv_resubscribe",
       connections: [
         {
-          id: "direct:lan:6767",
+          id: "direct:lan:6768",
           type: "directTcp",
-          endpoint: "lan:6767",
+          endpoint: "lan:6768",
         },
       ],
     });
@@ -1336,9 +1336,9 @@ describe("HostRuntimeStore", () => {
       serverId: "srv_archived_rehydrate",
       connections: [
         {
-          id: "direct:lan:6767",
+          id: "direct:lan:6768",
           type: "directTcp",
-          endpoint: "lan:6767",
+          endpoint: "lan:6768",
         },
       ],
     });
@@ -1417,9 +1417,9 @@ describe("HostRuntimeStore", () => {
     const host = makeHost({
       connections: [
         {
-          id: "direct:lan:6767",
+          id: "direct:lan:6768",
           type: "directTcp",
-          endpoint: "lan:6767",
+          endpoint: "lan:6768",
         },
       ],
     });
@@ -1439,7 +1439,7 @@ describe("HostRuntimeStore", () => {
     let snapshot = store.getSnapshot(host.serverId);
     const timeoutAt = Date.now() + 100;
     while (
-      snapshot?.probeByConnectionId.get("direct:lan:6767")?.status !== "unavailable" &&
+      snapshot?.probeByConnectionId.get("direct:lan:6768")?.status !== "unavailable" &&
       Date.now() < timeoutAt
     ) {
       await new Promise((resolve) => setTimeout(resolve, 0));
@@ -1448,7 +1448,7 @@ describe("HostRuntimeStore", () => {
 
     expect(snapshot?.connectionStatus).toBe("connecting");
     expect(snapshot?.lastError).toBeNull();
-    expect(snapshot?.probeByConnectionId.get("direct:lan:6767")).toEqual({
+    expect(snapshot?.probeByConnectionId.get("direct:lan:6768")).toEqual({
       status: "unavailable",
       latencyMs: null,
     });
@@ -1471,7 +1471,7 @@ describe("HostRuntimeStore", () => {
     // this.hosts and syncs controllers — matching the real init path.
     await store.upsertDirectConnection({
       serverId: "srv_rename",
-      endpoint: "lan:6767",
+      endpoint: "lan:6768",
       label: "old name",
     });
     expect(store.getHosts().find((h) => h.serverId === "srv_rename")?.label).toBe("old name");

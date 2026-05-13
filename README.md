@@ -81,7 +81,7 @@ polyhive attach abc123                # stream live output
 polyhive send abc123 "also add tests" # follow-up task
 
 # run on a remote daemon
-polyhive --host workstation.local:6767 run "run the full test suite"
+polyhive --host workstation.local:6768 run "run the full test suite"
 ```
 
 See the CLI docs in this repository for more.

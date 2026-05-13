@@ -13,14 +13,14 @@ console.log("=== Local Daemon Utility Helpers ===\n");
 
 {
   console.log("Test 1: resolves numeric listen values to localhost host:port");
-  assert.strictEqual(resolveTcpHostFromListen("6767"), "127.0.0.1:6767");
+  assert.strictEqual(resolveTcpHostFromListen("6768"), "127.0.0.1:6768");
   assert.strictEqual(resolveTcpHostFromListen("  7777  "), "127.0.0.1:7777");
   console.log("✓ resolves numeric listen values\n");
 }
 
 {
   console.log("Test 2: preserves explicit host:port listen values");
-  assert.strictEqual(resolveTcpHostFromListen("localhost:6767"), "localhost:6767");
+  assert.strictEqual(resolveTcpHostFromListen("localhost:6768"), "localhost:6768");
   assert.strictEqual(resolveTcpHostFromListen("0.0.0.0:8080"), "0.0.0.0:8080");
   console.log("✓ preserves explicit host:port values\n");
 }

@@ -30,7 +30,7 @@ class LoggingWebSocket extends OriginalWebSocket {
 }
 
 const POLYHIVE_HOME = process.env.POLYHIVE_HOME ?? `${os.homedir()}/.polyhive`;
-const POLYHIVE_LISTEN = process.env.POLYHIVE_LISTEN ?? "127.0.0.1:6767";
+const POLYHIVE_LISTEN = process.env.POLYHIVE_LISTEN ?? "127.0.0.1:6768";
 const DAEMON_URL = `ws://${POLYHIVE_LISTEN}/ws`;
 const CLIENT_ID = "clsk_checkout_debug";
 

@@ -19,13 +19,13 @@ test.beforeEach(async ({ page }) => {
   const metroPort = process.env.E2E_METRO_PORT;
   if (!daemonPort) {
     throw new Error(
-      "E2E_DAEMON_PORT is not set. Refusing to run e2e against the default daemon (e.g. localhost:6767). " +
+      "E2E_DAEMON_PORT is not set. Refusing to run e2e against the default daemon (e.g. localhost:6768). " +
         "Ensure Playwright `globalSetup` starts the e2e daemon and exports E2E_DAEMON_PORT.",
     );
   }
-  if (daemonPort === "6767") {
+  if (daemonPort === "6768") {
     throw new Error(
-      "E2E_DAEMON_PORT is 6767. Refusing to run e2e against the default local daemon. " +
+      "E2E_DAEMON_PORT is 6768. Refusing to run e2e against the default local daemon. " +
         "Fix Playwright globalSetup to start an isolated test daemon and export its port.",
     );
   }
@@ -36,10 +36,10 @@ test.beforeEach(async ({ page }) => {
   }
 
   // Hard guardrail: never allow tests to hit the developer's default daemon.
-  // This blocks both HTTP and WS attempts to :6767 (before any navigation).
-  await page.route(/:(6767)\b/, (route) => route.abort());
-  await page.routeWebSocket(/:(6767)\b/, async (ws) => {
-    await ws.close({ code: 1008, reason: "Blocked connection to localhost:6767 during e2e." });
+  // This blocks both HTTP and WS attempts to :6768 (before any navigation).
+  await page.route(/:(6768)\b/, (route) => route.abort());
+  await page.routeWebSocket(/:(6768)\b/, async (ws) => {
+    await ws.close({ code: 1008, reason: "Blocked connection to localhost:6768 during e2e." });
   });
 
   const entries: string[] = [];

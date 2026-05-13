@@ -1,7 +1,7 @@
 import { execFile, spawn } from "child_process";
 import { promisify } from "util";
 import { existsSync, mkdirSync, readFileSync, realpathSync, rmSync, statSync } from "fs";
-import { rm, stat } from "fs/promises";
+import { copyFile, rm, stat } from "fs/promises";
 import { join, basename, dirname, resolve, sep } from "path";
 import net from "node:net";
 import { createHash } from "node:crypto";
@@ -20,7 +20,7 @@ import { resolvePolyHiveHome } from "../server/polyhive-home.js";
 import { ensureNodePtySpawnHelperExecutableForCurrentPlatform } from "../terminal/terminal.js";
 import { parseGitRevParsePath, resolveGitRevParsePath } from "./git-rev-parse-path.js";
 
-interface PolyHiveConfig {
+export interface PolyHiveConfig {
   worktree?: {
     setup?: string[];
     teardown?: string[];
@@ -200,20 +200,33 @@ export class UnknownBranchError extends Error {
   }
 }
 
-function readPolyHiveConfig(repoRoot: string): PolyHiveConfig | null {
+export type ReadPolyHiveConfigResult =
+  | { ok: true; config: PolyHiveConfig | null }
+  | { ok: false; configPath: string; error: unknown };
+
+export function readPolyHiveConfig(repoRoot: string): ReadPolyHiveConfigResult {
   const polyhiveConfigPath = join(repoRoot, "polyhive.json");
   if (!existsSync(polyhiveConfigPath)) {
-    return null;
+    return { ok: true, config: null };
   }
   try {
-    return JSON.parse(readFileSync(polyhiveConfigPath, "utf8"));
-  } catch {
-    throw new Error(`Failed to parse polyhive.json`);
+    return { ok: true, config: JSON.parse(readFileSync(polyhiveConfigPath, "utf8")) };
+  } catch (error) {
+    return { ok: false, configPath: polyhiveConfigPath, error };
   }
 }
 
+function readPolyHiveConfigOrThrow(repoRoot: string): PolyHiveConfig | null {
+  const result = readPolyHiveConfig(repoRoot);
+  if (!result.ok) {
+    const cause = result.error instanceof Error ? result.error.message : String(result.error);
+    throw new Error(`Failed to parse ${result.configPath}: ${cause}`);
+  }
+  return result.config;
+}
+
 export function getWorktreeSetupCommands(repoRoot: string): string[] {
-  const config = readPolyHiveConfig(repoRoot);
+  const config = readPolyHiveConfigOrThrow(repoRoot);
   const setupCommands = config?.worktree?.setup;
   if (!setupCommands || setupCommands.length === 0) {
     return [];
@@ -222,7 +235,7 @@ export function getWorktreeSetupCommands(repoRoot: string): string[] {
 }
 
 export function getWorktreeTeardownCommands(repoRoot: string): string[] {
-  const config = readPolyHiveConfig(repoRoot);
+  const config = readPolyHiveConfigOrThrow(repoRoot);
   const teardownCommands = config?.worktree?.teardown;
   if (!teardownCommands || teardownCommands.length === 0) {
     return [];
@@ -231,7 +244,7 @@ export function getWorktreeTeardownCommands(repoRoot: string): string[] {
 }
 
 export function getWorktreeTerminalSpecs(repoRoot: string): WorktreeTerminalConfig[] {
-  const config = readPolyHiveConfig(repoRoot);
+  const config = readPolyHiveConfigOrThrow(repoRoot);
   const terminals = config?.worktree?.terminals;
   if (!Array.isArray(terminals) || terminals.length === 0) {
     return [];
@@ -265,8 +278,7 @@ export function getWorktreeTerminalSpecs(repoRoot: string): WorktreeTerminalConf
   return specs;
 }
 
-export function getScriptConfigs(repoRoot: string): Map<string, ScriptConfig> {
-  const config = readPolyHiveConfig(repoRoot);
+export function getScriptConfigs(config: PolyHiveConfig | null): Map<string, ScriptConfig> {
   const scripts = config?.scripts;
   if (!scripts || typeof scripts !== "object") {
     return new Map();
@@ -1243,6 +1255,22 @@ export const createWorktree = async ({
   }
 
   writePolyHiveWorktreeMetadata(worktreePath, { baseRefName: sourcePlan.metadataBaseRefName });
+
+  // If polyhive.json exists in the main repo but wasn't checked into the worktree
+  // (e.g. uncommitted on first-time setup), seed the worktree with it so setup
+  // commands and scripts pick up the user's intended config.
+  const mainConfigPath = join(cwd, "polyhive.json");
+  const worktreeConfigPath = join(worktreePath, "polyhive.json");
+  try {
+    await stat(worktreeConfigPath);
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code !== "ENOENT") {
+      throw error;
+    }
+    await copyFile(mainConfigPath, worktreeConfigPath).catch((err) => {
+      if ((err as NodeJS.ErrnoException).code !== "ENOENT") throw err;
+    });
+  }
 
   if (runSetup) {
     await runWorktreeSetupCommands({

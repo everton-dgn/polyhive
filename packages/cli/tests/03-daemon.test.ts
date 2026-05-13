@@ -22,7 +22,7 @@ import { runLocalPolyHive } from "./helpers/local-cli.ts";
 
 console.log("=== Daemon Commands ===\n");
 
-// Keep restart off default 6767 to avoid collisions with any existing daemon.
+// Keep restart off default 6768 to avoid collisions with any existing daemon.
 const port = 10000 + Math.floor(Math.random() * 50000);
 const polyhiveHome = await mkdtemp(join(tmpdir(), "polyhive-test-home-"));
 

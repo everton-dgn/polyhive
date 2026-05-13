@@ -8,7 +8,7 @@ const runningService: WorkspaceScriptPayload = {
   type: "service",
   hostname: "web.feature.polyhive.localhost",
   port: 3000,
-  proxyUrl: "http://web.feature.polyhive.localhost:6767",
+  proxyUrl: "http://web.feature.polyhive.localhost:6768",
   lifecycle: "running",
   health: "healthy",
   exitCode: null,
@@ -25,10 +25,10 @@ function resolveLink(activeConnection: ActiveConnection | null) {
 describe("resolveWorkspaceScriptLink", () => {
   it("uses the local proxy URL for loopback TCP connections", () => {
     expect(
-      resolveLink({ type: "directTcp", endpoint: "localhost:6767", display: "localhost:6767" }),
+      resolveLink({ type: "directTcp", endpoint: "localhost:6768", display: "localhost:6768" }),
     ).toEqual({
-      openUrl: "http://web.feature.polyhive.localhost:6767",
-      labelUrl: "http://web.feature.polyhive.localhost:6767",
+      openUrl: "http://web.feature.polyhive.localhost:6768",
+      labelUrl: "http://web.feature.polyhive.localhost:6768",
     });
   });
 
@@ -36,8 +36,8 @@ describe("resolveWorkspaceScriptLink", () => {
     expect(
       resolveLink({ type: "directSocket", endpoint: "/tmp/polyhive.sock", display: "socket" }),
     ).toEqual({
-      openUrl: "http://web.feature.polyhive.localhost:6767",
-      labelUrl: "http://web.feature.polyhive.localhost:6767",
+      openUrl: "http://web.feature.polyhive.localhost:6768",
+      labelUrl: "http://web.feature.polyhive.localhost:6768",
     });
   });
 
@@ -45,8 +45,8 @@ describe("resolveWorkspaceScriptLink", () => {
     expect(
       resolveLink({
         type: "directTcp",
-        endpoint: "mac-mini.tail123.ts.net:6767",
-        display: "mac-mini.tail123.ts.net:6767",
+        endpoint: "mac-mini.tail123.ts.net:6768",
+        display: "mac-mini.tail123.ts.net:6768",
       }),
     ).toEqual({
       openUrl: "http://mac-mini.tail123.ts.net:3000",
@@ -59,7 +59,7 @@ describe("resolveWorkspaceScriptLink", () => {
       resolveLink({ type: "relay", endpoint: "relay.polyhive.sh:443", display: "relay" }),
     ).toEqual({
       openUrl: null,
-      labelUrl: "http://web.feature.polyhive.localhost:6767",
+      labelUrl: "http://web.feature.polyhive.localhost:6768",
     });
   });
 });

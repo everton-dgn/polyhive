@@ -187,6 +187,6 @@ $POLYHIVE_HOME/
 
 ## Deployment models
 
-1. **Local daemon** (default): `polyhive daemon start` on `127.0.0.1:6767`
+1. **Local daemon** (default): `polyhive daemon start` on `127.0.0.1:6768`
 2. **Managed desktop**: Electron app spawns daemon as subprocess
 3. **Remote + relay**: Daemon behind firewall, relay bridges with E2E encryption

@@ -986,7 +986,7 @@ describe("workspace-layout-store actions", () => {
 
   it("convertDraftToAgent removes the draft and focuses the existing canonical agent tab", () => {
     vi.spyOn(globalThis.crypto, "randomUUID").mockReturnValue(
-      "67676767-6767-6767-6767-676767676767",
+      "67686768-6768-6768-6768-676867686768",
     );
     const workspaceKey = createWorkspaceKey();
     const store = useWorkspaceLayoutStore.getState();
@@ -1005,7 +1005,7 @@ describe("workspace-layout-store actions", () => {
     const nextTabId = store.convertDraftToAgent(workspaceKey, draftTabId!, "agent-1");
     const layout = useWorkspaceLayoutStore.getState().layoutByWorkspace[workspaceKey]!;
 
-    expect(splitPaneId).toBe("pane_67676767-6767-6767-6767-676767676767");
+    expect(splitPaneId).toBe("pane_67686768-6768-6768-6768-676867686768");
     expect(nextTabId).toBe("agent_agent-1");
     expect(collectAllTabs(layout.root).map((tab) => tab.tabId)).toEqual(["agent_agent-1"]);
     expect(layout.focusedPaneId).toBe(splitPaneId);

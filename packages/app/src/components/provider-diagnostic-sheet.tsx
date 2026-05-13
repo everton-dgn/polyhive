@@ -144,7 +144,6 @@ export function ProviderDiagnosticSheet({
       visible={visible}
       onClose={onClose}
       snapPoints={["50%", "85%"]}
-      scrollable={false}
       headerActions={
         <Pressable
           onPress={handleRefresh}
@@ -194,7 +193,7 @@ export function ProviderDiagnosticSheet({
         </View>
       </View>
 
-      <View style={sheetStyles.modelsSection}>
+      <View>
         <View style={sheetStyles.modelsHeader}>
           <Text style={sheetStyles.sectionTitle}>Models</Text>
           <View style={sheetStyles.modelsHeaderMeta}>
@@ -326,8 +325,7 @@ const sheetStyles = StyleSheet.create((theme) => ({
     fontSize: theme.fontSize.sm,
   },
   modelsScroll: {
-    flex: 1,
-    minHeight: 0,
+    maxHeight: 360,
   },
   modelsScrollContent: {
     paddingBottom: theme.spacing[2],

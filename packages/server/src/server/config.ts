@@ -13,7 +13,7 @@ import { AgentProviderSchema } from "./agent/provider-manifest.js";
 import { resolveSpeechConfig } from "./speech/speech-config-resolver.js";
 import { mergeHostnames, parseHostnamesEnv, type HostnamesConfig } from "./hostnames.js";
 
-const DEFAULT_PORT = 6767;
+const DEFAULT_PORT = 6768;
 const DEFAULT_RELAY_ENDPOINT = "relay.polyhive.sh:443";
 const DEFAULT_APP_BASE_URL = "https://app.polyhive.sh";
 
@@ -116,7 +116,7 @@ export function loadConfig(
   // - host:port (TCP)
   // - /path/to/socket (Unix socket)
   // - unix:///path/to/socket (Unix socket)
-  // Default is TCP at 127.0.0.1:6767
+  // Default is TCP at 127.0.0.1:6768
   const listen =
     options?.cli?.listen ??
     env.POLYHIVE_LISTEN ??

@@ -41,7 +41,7 @@ console.log("=== CLI IPC Target Helpers ===\n");
     );
     assert.deepStrictEqual(resolveDefaultDaemonHosts({ POLYHIVE_HOME: polyhiveHome }), [
       "unix:///tmp/polyhive-from-pid.sock",
-      "localhost:6767",
+      "localhost:6768",
     ]);
     const previousHome = process.env.POLYHIVE_HOME;
     const previousHost = process.env.POLYHIVE_HOST;
@@ -67,7 +67,7 @@ console.log("=== CLI IPC Target Helpers ===\n");
         POLYHIVE_HOME: polyhiveHome,
         POLYHIVE_LISTEN: "127.0.0.1:7777",
       }),
-      ["127.0.0.1:7777", "localhost:6767"],
+      ["127.0.0.1:7777", "localhost:6768"],
     );
   } finally {
     rmSync(polyhiveHome, { recursive: true, force: true });
@@ -89,7 +89,7 @@ console.log("=== CLI IPC Target Helpers ===\n");
         POLYHIVE_HOME: polyhiveHome,
         POLYHIVE_LISTEN: "127.0.0.1:7777",
       }),
-      ["unix:///tmp/polyhive-priority.sock", "127.0.0.1:7777", "localhost:6767"],
+      ["unix:///tmp/polyhive-priority.sock", "127.0.0.1:7777", "localhost:6768"],
     );
   } finally {
     rmSync(polyhiveHome, { recursive: true, force: true });

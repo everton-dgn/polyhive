@@ -140,7 +140,7 @@ function Security() {
       <section className="space-y-4">
         <h2 className="text-xl font-medium">Direct connections</h2>
         <p className="text-white/60 leading-relaxed">
-          By default, the daemon listens on <code className="font-mono">127.0.0.1:6767</code>{" "}
+          By default, the daemon listens on <code className="font-mono">127.0.0.1:6768</code>{" "}
           (localhost only). This is safe for local CLI usage but not reachable from your phone or
           other devices.
         </p>
@@ -182,7 +182,7 @@ function Security() {
           </li>
           <li>
             Configure the daemon to listen on your Tailscale IP (e.g.,{" "}
-            <code className="font-mono">100.x.y.z:6767</code>)
+            <code className="font-mono">100.x.y.z:6768</code>)
           </li>
           <li>
             Add your Tailscale hostname to <code className="font-mono">hostnames</code> and{" "}

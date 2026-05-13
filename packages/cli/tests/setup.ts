@@ -2,7 +2,7 @@
  * Test setup utilities for PolyHive CLI E2E tests
  *
  * Critical rules from design doc:
- * 1. Port: Random port via 10000 + Math.floor(Math.random() * 50000) - NEVER 6767
+ * 1. Port: Random port via 10000 + Math.floor(Math.random() * 50000) - NEVER 6768
  * 2. Protocol: WebSocket ONLY - daemon has no HTTP endpoints
  * 3. Temp dirs: Create temp directories for POLYHIVE_HOME and agent --cwd
  * 4. Model: Always --provider claude with haiku model for agent tests
@@ -46,7 +46,7 @@ function killPidTree(pid: number, signal: NodeJS.Signals): void {
 }
 
 export interface TestContext {
-  /** Random port for test daemon (never 6767) */
+  /** Random port for test daemon (never 6768) */
   port: number;
   /** Temp directory for POLYHIVE_HOME */
   polyhiveHome: string;
@@ -62,7 +62,7 @@ export interface TestContext {
 
 /**
  * Generate a random port for test daemon
- * NEVER uses 6767 (user's running daemon)
+ * NEVER uses 6768 (user's running daemon)
  */
 export function getRandomPort(): number {
   return 10000 + Math.floor(Math.random() * 50000);

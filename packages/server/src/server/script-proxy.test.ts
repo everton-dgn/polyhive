@@ -52,7 +52,7 @@ describe("ScriptRouteStore", () => {
       scriptName: "editor",
     });
 
-    const route = store.findRoute("route-a.example.localhost:6767");
+    const route = store.findRoute("route-a.example.localhost:6768");
     expect(route).toEqual({ hostname: "route-a.example.localhost", port: 3000 });
   });
 

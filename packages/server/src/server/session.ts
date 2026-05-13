@@ -73,7 +73,10 @@ import { sendPromptToAgent, unarchiveAgentState } from "./agent/mcp-shared.js";
 import { experimental_createMCPClient } from "ai";
 import { StreamableHTTPClientTransport } from "@modelcontextprotocol/sdk/client/streamableHttp.js";
 import type { VoiceCallerContext, VoiceSpeakHandler } from "./voice-types.js";
-import { buildWorkspaceScriptPayloads } from "./script-status-projection.js";
+import {
+  buildWorkspaceScriptPayloads,
+  readPolyHiveConfigForProjection,
+} from "./script-status-projection.js";
 import { deriveProjectSlug } from "./workspace-git-metadata.js";
 import type { ScriptHealthState } from "./script-health-monitor.js";
 import { spawnWorkspaceScript } from "./worktree-bootstrap.js";
@@ -5629,6 +5632,7 @@ export class Session {
           ? buildWorkspaceScriptPayloads({
               workspaceId: workspace.workspaceId,
               workspaceDirectory: workspace.cwd,
+              polyhiveConfig: readPolyHiveConfigForProjection(workspace.cwd, this.sessionLogger),
               routeStore: this.scriptRouteStore,
               runtimeStore: this.scriptRuntimeStore,
               daemonPort: this.getDaemonTcpPort?.() ?? null,
@@ -5774,8 +5778,11 @@ export class Session {
       return exact.workspaceId;
     }
 
+    const userHome = normalizePersistedWorkspaceId(homedir());
     let bestMatch: PersistedWorkspaceRecord | null = null;
     for (const workspace of workspaces) {
+      if (workspace.cwd === userHome) continue;
+      if (workspace.archivedAt) continue;
       const prefix = workspace.cwd.endsWith(sep) ? workspace.cwd : `${workspace.cwd}${sep}`;
       if (!normalizedCwd.startsWith(prefix)) {
         continue;
@@ -6504,6 +6511,7 @@ export class Session {
     return buildWorkspaceScriptPayloads({
       workspaceId,
       workspaceDirectory,
+      polyhiveConfig: readPolyHiveConfigForProjection(workspaceDirectory, this.sessionLogger),
       routeStore: this.scriptRouteStore,
       runtimeStore: this.scriptRuntimeStore,
       daemonPort: this.getDaemonTcpPort?.() ?? null,

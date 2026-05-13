@@ -1,6 +1,6 @@
 # Ad-hoc daemon testing
 
-Spin up an isolated daemon programmatically without touching the main daemon on port 6767.
+Spin up an isolated daemon programmatically without touching the main daemon on port 6768.
 
 ## Quick start
 

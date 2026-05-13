@@ -9,13 +9,20 @@ import {
   isServiceScript,
   isPolyHiveOwnedWorktreeCwd,
   listPolyHiveWorktrees,
+  readPolyHiveConfig,
   resolveWorktreeRuntimeEnv,
   type WorktreeSetupCommandProgressEvent,
   runWorktreeSetupCommands,
   slugify,
   type CreateWorktreeOptions,
+  type PolyHiveConfig,
   type WorktreeConfig,
 } from "./worktree";
+
+function loadConfigForTest(repoRoot: string): PolyHiveConfig | null {
+  const result = readPolyHiveConfig(repoRoot);
+  return result.ok ? result.config : null;
+}
 import { getPolyHiveWorktreeMetadataPath } from "./worktree-metadata.js";
 import { execSync } from "child_process";
 import {
@@ -635,7 +642,7 @@ describe("createWorktree", () => {
       }),
     );
 
-    const scriptConfigs = getScriptConfigs(repoDir);
+    const scriptConfigs = getScriptConfigs(loadConfigForTest(repoDir));
     const typecheck = scriptConfigs.get("typecheck");
 
     expect(typecheck).toEqual({
@@ -659,7 +666,7 @@ describe("createWorktree", () => {
       }),
     );
 
-    const scriptConfigs = getScriptConfigs(repoDir);
+    const scriptConfigs = getScriptConfigs(loadConfigForTest(repoDir));
     const server = scriptConfigs.get("server");
 
     expect(server).toEqual({
@@ -699,7 +706,7 @@ describe("createWorktree", () => {
       }),
     );
 
-    expect(getScriptConfigs(repoDir)).toEqual(
+    expect(getScriptConfigs(loadConfigForTest(repoDir))).toEqual(
       new Map([
         ["valid", { command: "npm run valid" }],
         ["invalidType", { command: "npm run worker" }],

@@ -18,7 +18,7 @@ polyhive run --provider claude/opus-4.6 \
   "implement user authentication"           # spawn an agent
 polyhive ls                                 # list agents
 polyhive attach <agent-id>                  # stream an agent's output
-polyhive --host workstation.local:6767 ls   # talk to a remote daemon
+polyhive --host workstation.local:6768 ls   # talk to a remote daemon
 ```
 
 ## What is PolyHive?

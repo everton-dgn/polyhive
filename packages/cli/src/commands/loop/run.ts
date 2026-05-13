@@ -86,7 +86,27 @@ function parseMaxIterations(value: string | undefined): number | undefined {
   return parsed;
 }
 
-function buildLoopRunInput(prompt: string, options: LoopRunOptions): LoopRunInput {
+function splitProviderModel(input: string): {
+  provider: string | undefined;
+  model: string | undefined;
+} {
+  const trimmed = input.trim();
+  if (!trimmed) {
+    return { provider: undefined, model: undefined };
+  }
+  const slashIndex = trimmed.indexOf("/");
+  if (slashIndex === -1) {
+    return { provider: trimmed, model: undefined };
+  }
+  const provider = trimmed.slice(0, slashIndex).trim();
+  const model = trimmed.slice(slashIndex + 1).trim();
+  return {
+    provider: provider || undefined,
+    model: model || undefined,
+  };
+}
+
+export function buildLoopRunInput(prompt: string, options: LoopRunOptions): LoopRunInput {
   const verifyPrompt = options.verify?.trim();
   if (options.verify !== undefined && !verifyPrompt) {
     throw {
@@ -95,23 +115,60 @@ function buildLoopRunInput(prompt: string, options: LoopRunOptions): LoopRunInpu
     } satisfies CommandError;
   }
 
-  return {
+  const result: LoopRunInput = {
     prompt,
     cwd: process.cwd(),
-    ...(options.provider ? { provider: options.provider } : {}),
-    ...(options.model?.trim() ? { model: options.model.trim() } : {}),
-    ...(options.verifyProvider ? { verifierProvider: options.verifyProvider } : {}),
-    ...(options.verifyModel?.trim() ? { verifierModel: options.verifyModel.trim() } : {}),
-    ...(verifyPrompt ? { verifyPrompt } : {}),
-    ...(options.verifyCheck && options.verifyCheck.length > 0
-      ? { verifyChecks: options.verifyCheck }
-      : {}),
-    ...(options.archive ? { archive: true } : {}),
-    ...(options.name?.trim() ? { name: options.name.trim() } : {}),
-    ...(options.sleep ? { sleepMs: parseDuration(options.sleep) } : {}),
-    ...(options.maxIterations ? { maxIterations: parseMaxIterations(options.maxIterations) } : {}),
-    ...(options.maxTime ? { maxTimeMs: parseDuration(options.maxTime) } : {}),
   };
+
+  if (options.provider !== undefined) {
+    const { provider, model } = splitProviderModel(options.provider);
+    if (!provider) {
+      throw {
+        code: "INVALID_PROVIDER",
+        message: "--provider must be <provider> or <provider>/<model>",
+      } satisfies CommandError;
+    }
+    result.provider = provider;
+    if (options.model?.trim()) {
+      result.model = options.model.trim();
+    } else if (model) {
+      result.model = model;
+    }
+  } else if (options.model?.trim()) {
+    result.model = options.model.trim();
+  }
+
+  if (options.verifyProvider !== undefined) {
+    const { provider, model } = splitProviderModel(options.verifyProvider);
+    if (!provider) {
+      throw {
+        code: "INVALID_VERIFY_PROVIDER",
+        message: "--verify-provider must be <provider> or <provider>/<model>",
+      } satisfies CommandError;
+    }
+    result.verifierProvider = provider;
+    if (options.verifyModel?.trim()) {
+      result.verifierModel = options.verifyModel.trim();
+    } else if (model) {
+      result.verifierModel = model;
+    }
+  } else if (options.verifyModel?.trim()) {
+    result.verifierModel = options.verifyModel.trim();
+  }
+
+  if (verifyPrompt) result.verifyPrompt = verifyPrompt;
+  if (options.verifyCheck && options.verifyCheck.length > 0) {
+    result.verifyChecks = options.verifyCheck;
+  }
+  if (options.archive) result.archive = true;
+  if (options.name?.trim()) result.name = options.name.trim();
+  if (options.sleep) result.sleepMs = parseDuration(options.sleep);
+  if (options.maxIterations) {
+    result.maxIterations = parseMaxIterations(options.maxIterations);
+  }
+  if (options.maxTime) result.maxTimeMs = parseDuration(options.maxTime);
+
+  return result;
 }
 
 export type LoopRunResult = SingleResult<LoopRunRow>;

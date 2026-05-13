@@ -102,8 +102,21 @@ export class OpenAIRealtimeTranscriptionSession
 
     this.closing = false;
     this.ready = new Promise<void>((resolve, reject) => {
-      const url = "wss://api.openai.com/v1/realtime?intent=transcription";
-      const ws = new WebSocket(url, {
+      const rawRealtimeUrl =
+        process.env.OPENAI_REALTIME_URL ?? "wss://api.openai.com/v1/realtime?intent=transcription";
+      let realtimeUrl: URL;
+      try {
+        realtimeUrl = new URL(rawRealtimeUrl);
+      } catch {
+        reject(new Error(`Invalid OPENAI_REALTIME_URL: ${rawRealtimeUrl}`));
+        return;
+      }
+      const isLocalhost = ["localhost", "127.0.0.1", "::1"].includes(realtimeUrl.hostname);
+      if (realtimeUrl.protocol !== "wss:" && !(isLocalhost && realtimeUrl.protocol === "ws:")) {
+        reject(new Error("OPENAI_REALTIME_URL must use wss:// (ws:// allowed only for localhost)"));
+        return;
+      }
+      const ws = new WebSocket(realtimeUrl.toString(), {
         headers: {
           Authorization: `Bearer ${this.apiKey}`,
         },

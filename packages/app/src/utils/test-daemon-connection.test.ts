@@ -82,16 +82,16 @@ describe("test-daemon-connection connectToDaemon", () => {
     const mod = await import("./test-daemon-connection");
 
     const first = await mod.connectToDaemon({
-      id: "direct:lan:6767",
+      id: "direct:lan:6768",
       type: "directTcp",
-      endpoint: "lan:6767",
+      endpoint: "lan:6768",
     });
     await first.client.close();
 
     const second = await mod.connectToDaemon({
-      id: "direct:lan:6767",
+      id: "direct:lan:6768",
       type: "directTcp",
-      endpoint: "lan:6767",
+      endpoint: "lan:6768",
     });
     await second.client.close();
 

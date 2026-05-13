@@ -10,7 +10,7 @@ export interface ConnectOptions {
   timeout?: number;
 }
 
-const DEFAULT_HOST = "localhost:6767";
+const DEFAULT_HOST = "localhost:6768";
 const DEFAULT_TIMEOUT = 15000;
 const PID_FILENAME = "polyhive.pid";
 
@@ -113,7 +113,7 @@ function resolveConfiguredTcpDaemonHost(
   if (!isTcpDaemonHost(configuredHost)) {
     return null;
   }
-  return configuredHost === "127.0.0.1:6767" ? null : configuredHost;
+  return configuredHost === "127.0.0.1:6768" ? null : configuredHost;
 }
 
 export function resolveDefaultDaemonHosts(env: NodeJS.ProcessEnv = process.env): string[] {

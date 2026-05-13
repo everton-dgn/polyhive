@@ -123,10 +123,10 @@ describe("polyhive daemon bootstrap", () => {
   });
 
   test("parses whitespace-padded numeric port strings", () => {
-    expect(parseListenString(" 6767 ")).toEqual({
+    expect(parseListenString(" 6768 ")).toEqual({
       type: "tcp",
       host: "127.0.0.1",
-      port: 6767,
+      port: 6768,
     });
   });
 

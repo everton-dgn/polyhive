@@ -69,7 +69,9 @@ const CodeLine = React.memo(function CodeLine({
   return (
     <View style={codeLineStyles.line}>
       <View style={[codeLineStyles.gutter, { width: gutterWidth }]}>
-        <Text style={[codeLineStyles.gutterText, { color: baseColor }]}>{String(lineNumber)}</Text>
+        <Text numberOfLines={1} style={[codeLineStyles.gutterText, { color: baseColor }]}>
+          {String(lineNumber)}
+        </Text>
       </View>
       <Text selectable style={codeLineStyles.lineText}>
         {tokens.map((token, index) => (
@@ -140,8 +142,8 @@ function FilePreviewBody({
 
   const gutterWidth = useMemo(() => {
     if (!highlightedLines) return 0;
-    return lineNumberGutterWidth(highlightedLines.length);
-  }, [highlightedLines]);
+    return lineNumberGutterWidth(highlightedLines.length, theme.fontSize.sm);
+  }, [highlightedLines, theme.fontSize.sm]);
 
   if (isLoading && !preview) {
     return (

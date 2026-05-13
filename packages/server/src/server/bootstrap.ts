@@ -1,7 +1,7 @@
 import express from "express";
 import { createServer as createHTTPServer } from "http";
-import { createReadStream, unlinkSync, existsSync } from "fs";
-import { stat } from "fs/promises";
+import { constants, existsSync, unlinkSync } from "fs";
+import { open } from "fs/promises";
 import { randomUUID } from "node:crypto";
 import { hostname as getHostname } from "node:os";
 import path from "node:path";
@@ -119,6 +119,9 @@ import { WorkspaceScriptRuntimeStore } from "./workspace-script-runtime-store.js
 import { isHostnameAllowed, type HostnamesConfig } from "./hostnames.js";
 
 type AgentMcpTransportMap = Map<string, StreamableHTTPServerTransport>;
+
+const DOWNLOAD_OPEN_FLAGS =
+  process.platform === "win32" ? constants.O_RDONLY : constants.O_RDONLY | constants.O_NOFOLLOW;
 
 function formatHostForHttpUrl(host: string): string {
   return host.includes(":") && !host.startsWith("[") ? `[${host}]` : host;
@@ -342,8 +345,10 @@ export async function createPolyHiveDaemon(
         return;
       }
 
+      let fileHandle: Awaited<ReturnType<typeof open>> | null = null;
       try {
-        const fileStats = await stat(entry.absolutePath);
+        fileHandle = await open(entry.absolutePath, DOWNLOAD_OPEN_FLAGS);
+        const fileStats = await fileHandle.stat();
         if (!fileStats.isFile()) {
           res.status(404).json({ error: "File not found" });
           return;
@@ -352,9 +357,10 @@ export async function createPolyHiveDaemon(
         const safeFileName = entry.fileName.replace(/["\r\n]/g, "_");
         res.setHeader("Content-Type", entry.mimeType);
         res.setHeader("Content-Disposition", `attachment; filename="${safeFileName}"`);
-        res.setHeader("Content-Length", entry.size.toString());
+        res.setHeader("Content-Length", fileStats.size.toString());
 
-        const stream = createReadStream(entry.absolutePath);
+        const stream = fileHandle.createReadStream();
+        fileHandle = null;
         stream.on("error", (err) => {
           logger.error({ err }, "Failed to stream download");
           if (!res.headersSent) {
@@ -369,6 +375,8 @@ export async function createPolyHiveDaemon(
         if (!res.headersSent) {
           res.status(404).json({ error: "File not found" });
         }
+      } finally {
+        await fileHandle?.close().catch(() => undefined);
       }
     });
 

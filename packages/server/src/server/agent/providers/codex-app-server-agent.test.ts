@@ -281,6 +281,37 @@ describe("Codex app-server provider", () => {
     );
   });
 
+  test("does not replace a persisted Codex thread when app-server resume fails", async () => {
+    const session = createSession({ thinkingOptionId: "medium" });
+    session.currentThreadId = "archived-thread-id";
+    const requests: Array<{ method: string; params: unknown }> = [];
+    session.client = {
+      request: vi.fn(async (method: string, params: unknown) => {
+        requests.push({ method, params });
+        if (method === "thread/loaded/list") {
+          return { data: [] };
+        }
+        if (method === "thread/resume") {
+          throw new Error("no rollout found for thread id archived-thread-id");
+        }
+        if (method === "thread/start") {
+          return { thread: { id: "replacement-empty-thread-id" } };
+        }
+        return {};
+      }),
+    };
+
+    await expect((session as any).ensureThreadLoaded()).rejects.toThrow(
+      "no rollout found for thread id archived-thread-id",
+    );
+
+    expect(session.currentThreadId).toBe("archived-thread-id");
+    expect(requests).toEqual([
+      { method: "thread/loaded/list", params: {} },
+      { method: "thread/resume", params: { threadId: "archived-thread-id" } },
+    ]);
+  });
+
   test("loadSkills requests Codex skills for the session cwd via cwds", async () => {
     const session = createSession({ cwd: "/tmp/codex-real-skills" });
     const request = vi.fn().mockResolvedValue({ data: [] });

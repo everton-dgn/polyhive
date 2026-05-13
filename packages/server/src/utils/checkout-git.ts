@@ -1450,6 +1450,58 @@ function combineCheckoutShortstats(
   return { additions, deletions };
 }
 
+const UNTRACKED_SHORTSTAT_MAX_FILES = 500;
+
+function addUntrackedAdditions(
+  shortstat: CheckoutShortstat | null,
+  untrackedAdditions: number,
+): CheckoutShortstat | null {
+  if (shortstat) {
+    return {
+      additions: shortstat.additions + untrackedAdditions,
+      deletions: shortstat.deletions,
+    };
+  }
+  if (untrackedAdditions > 0) {
+    return { additions: untrackedAdditions, deletions: 0 };
+  }
+  return null;
+}
+
+async function countUntrackedAdditions(cwd: string): Promise<number> {
+  try {
+    const { stdout } = await runGitCommand(["ls-files", "--others", "--exclude-standard"], {
+      cwd,
+      env: READ_ONLY_GIT_ENV,
+    });
+    const files = stdout
+      .split("\n")
+      .map((line) => line.trim())
+      .filter(Boolean);
+
+    let additions = 0;
+    for (const file of files.slice(0, UNTRACKED_SHORTSTAT_MAX_FILES)) {
+      const absolutePath = resolve(cwd, file);
+      try {
+        const metadata = await statFile(absolutePath);
+        if (!metadata.isFile()) continue;
+        if (metadata.size > PER_FILE_DIFF_MAX_BYTES) continue;
+        if (await isLikelyBinaryFile(absolutePath)) continue;
+        const content = await readFile(absolutePath, "utf-8");
+        if (content.length === 0) continue;
+        const normalized = content.replace(/\r\n/g, "\n");
+        const lineCount = normalized.split("\n").length;
+        additions += normalized.endsWith("\n") ? lineCount - 1 : lineCount;
+      } catch {
+        // Skip unreadable files.
+      }
+    }
+    return additions;
+  } catch {
+    return 0;
+  }
+}
+
 async function getCheckoutShortstatUncached(
   cwd: string,
   context?: CheckoutContext,
@@ -1505,24 +1557,27 @@ async function getCheckoutShortstatUncached(
 
     // Incoming uses a two-ref diff, so add the working tree diff separately.
     const showIncoming = headOnly === 0 && comparisonOnly > 0;
-    const { stdout } = await runGitCommand(
-      ["diff", "--shortstat", mergeBase, ...(showIncoming ? [comparisonRef] : [])],
-      {
+    const [{ stdout }, untrackedAdditions] = await Promise.all([
+      runGitCommand(["diff", "--shortstat", mergeBase, ...(showIncoming ? [comparisonRef] : [])], {
         cwd,
         env: READ_ONLY_GIT_ENV,
-      },
-    );
+      }),
+      countUntrackedAdditions(cwd),
+    ]);
     const committedShortstat = parseCheckoutShortstat(stdout);
 
     if (!showIncoming) {
-      return committedShortstat;
+      return addUntrackedAdditions(committedShortstat, untrackedAdditions);
     }
 
     const { stdout: worktreeOut } = await runGitCommand(["diff", "--shortstat", "HEAD"], {
       cwd,
       env: READ_ONLY_GIT_ENV,
     });
-    return combineCheckoutShortstats(committedShortstat, parseCheckoutShortstat(worktreeOut));
+    return addUntrackedAdditions(
+      combineCheckoutShortstats(committedShortstat, parseCheckoutShortstat(worktreeOut)),
+      untrackedAdditions,
+    );
   } catch {
     return null;
   }

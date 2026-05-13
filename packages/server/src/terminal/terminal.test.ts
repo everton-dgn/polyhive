@@ -11,6 +11,7 @@ import {
 } from "./terminal.js";
 import {
   chmodSync,
+  cpSync,
   existsSync,
   mkdtempSync,
   mkdirSync,
@@ -19,7 +20,7 @@ import {
   writeFileSync,
 } from "node:fs";
 import { join } from "node:path";
-import { tmpdir } from "node:os";
+import { tmpdir, userInfo } from "node:os";
 
 const hasZsh = existsSync("/bin/zsh");
 
@@ -100,6 +101,13 @@ async function waitForTitle(
   }
 
   throw new Error("Timeout waiting for terminal title predicate to match");
+}
+
+function removeZshShellIntegrationRuntimeDir(): void {
+  rmSync(join(tmpdir(), `${userInfo().username || "unknown"}-polyhive-zsh`), {
+    recursive: true,
+    force: true,
+  });
 }
 
 describe("Terminal", () => {
@@ -196,7 +204,28 @@ describe("Terminal", () => {
 
       expect(resolvedEnv.TERM).toBe("xterm-256color");
       expect(resolvedEnv.POLYHIVE_ZSH_ZDOTDIR).toBe("/tmp/polyhive-zdotdir");
-      expect(resolvedEnv.ZDOTDIR).toBe(resolveZshShellIntegrationDir());
+      expect(existsSync(join(resolvedEnv.ZDOTDIR, "polyhive-integration.zsh"))).toBe(true);
+    });
+
+    it("reuses zsh shell integration copied from read-only source files", () => {
+      const integrationSourceDir = mkdtempSync(join(tmpdir(), "polyhive-zsh-readonly-source-"));
+      const tmpHome = mkdtempSync(join(tmpdir(), "polyhive-zsh-readonly-home-"));
+      temporaryDirs.push(integrationSourceDir, tmpHome);
+      cpSync(resolveZshShellIntegrationDir(), integrationSourceDir, { recursive: true });
+      chmodSync(join(integrationSourceDir, ".zshenv"), 0o444);
+      chmodSync(join(integrationSourceDir, "polyhive-integration.zsh"), 0o444);
+      removeZshShellIntegrationRuntimeDir();
+
+      const buildEnvironment = () =>
+        buildTerminalEnvironment({
+          shell: "/bin/zsh",
+          env: { HOME: tmpHome },
+          zshShellIntegrationDir: integrationSourceDir,
+        });
+
+      buildEnvironment();
+
+      expect(buildEnvironment).not.toThrow();
     });
 
     it("uses custom name when provided", async () => {

@@ -120,9 +120,15 @@ export function buildLoopRunInput(prompt: string, options: LoopRunOptions): Loop
     cwd: process.cwd(),
   };
 
-  if (options.provider) {
+  if (options.provider !== undefined) {
     const { provider, model } = splitProviderModel(options.provider);
-    if (provider) result.provider = provider;
+    if (!provider) {
+      throw {
+        code: "INVALID_PROVIDER",
+        message: "--provider must be <provider> or <provider>/<model>",
+      } satisfies CommandError;
+    }
+    result.provider = provider;
     if (options.model?.trim()) {
       result.model = options.model.trim();
     } else if (model) {
@@ -132,9 +138,15 @@ export function buildLoopRunInput(prompt: string, options: LoopRunOptions): Loop
     result.model = options.model.trim();
   }
 
-  if (options.verifyProvider) {
+  if (options.verifyProvider !== undefined) {
     const { provider, model } = splitProviderModel(options.verifyProvider);
-    if (provider) result.verifierProvider = provider;
+    if (!provider) {
+      throw {
+        code: "INVALID_VERIFY_PROVIDER",
+        message: "--verify-provider must be <provider> or <provider>/<model>",
+      } satisfies CommandError;
+    }
+    result.verifierProvider = provider;
     if (options.verifyModel?.trim()) {
       result.verifierModel = options.verifyModel.trim();
     } else if (model) {

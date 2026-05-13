@@ -33,10 +33,11 @@ export function parseGitHubRepoFromRemote(remoteUrl: string | null | undefined):
   if (cleaned.endsWith(".git")) {
     cleaned = cleaned.slice(0, -".git".length);
   }
-  if (!cleaned.includes("/")) {
+  const parts = cleaned.split("/");
+  if (parts.length !== 2 || parts.some((part) => part.length === 0)) {
     return null;
   }
-  return cleaned;
+  return `${parts[0]}/${parts[1]}`;
 }
 
 export function buildGitHubBranchTreeUrl(input: {

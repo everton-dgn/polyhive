@@ -2620,11 +2620,18 @@ class OpenCodeAgentSession implements AgentSession {
     }
 
     try {
-      await this.client.permission.reply({
+      const response = await this.client.permission.reply({
         requestID: request.id,
         directory: this.config.cwd,
         reply: "once",
       });
+      if (response.error) {
+        this.logger.warn(
+          { err: response.error, requestId: request.id },
+          "Failed to auto-approve OpenCode tool permission",
+        );
+        return false;
+      }
       return true;
     } catch (error) {
       this.logger.warn(

@@ -5778,7 +5778,7 @@ export class Session {
       return exact.workspaceId;
     }
 
-    const userHome = homedir();
+    const userHome = normalizePersistedWorkspaceId(homedir());
     let bestMatch: PersistedWorkspaceRecord | null = null;
     for (const workspace of workspaces) {
       if (workspace.cwd === userHome) continue;

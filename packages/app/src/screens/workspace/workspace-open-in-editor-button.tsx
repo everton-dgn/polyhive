@@ -180,8 +180,14 @@ export function WorkspaceOpenInEditorButton({
 
   const handleOpenTarget = useCallback(
     (target: OpenTarget) => {
-      void updatePreferredEditor(target.id).catch(() => undefined);
-      openMutation.mutate(target);
+      if (openMutation.isPending) {
+        return;
+      }
+      openMutation.mutate(target, {
+        onSuccess: () => {
+          void updatePreferredEditor(target.id).catch(() => undefined);
+        },
+      });
     },
     [openMutation, updatePreferredEditor],
   );

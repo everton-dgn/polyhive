@@ -74,10 +74,11 @@ function pushTruncatedIfNonEmpty(
   }
 }
 
-function formatErrorDiagnostic(error: Error): string {
+function formatErrorDiagnostic(error: { message?: unknown } & object): string {
   const sections: string[] = [];
-  if (error.message && error.message.trim().length > 0) {
-    sections.push(error.message.trim());
+  const message = typeof error.message === "string" ? error.message.trim() : "";
+  if (message.length > 0) {
+    sections.push(message);
   }
   pushIfNonEmpty(sections, "exit code", readStringProperty(error, "code"));
   pushIfNonEmpty(sections, "signal", readStringProperty(error, "signal"));
@@ -120,6 +121,17 @@ export function toDiagnosticErrorMessage(error: unknown): string {
   }
   if (error === null || error === undefined) {
     return "Unknown error";
+  }
+  if (
+    typeof error === "object" &&
+    ("message" in error ||
+      "code" in error ||
+      "signal" in error ||
+      "stdout" in error ||
+      "stderr" in error ||
+      "cause" in error)
+  ) {
+    return formatErrorDiagnostic(error);
   }
   return formatNonErrorDiagnostic(error);
 }

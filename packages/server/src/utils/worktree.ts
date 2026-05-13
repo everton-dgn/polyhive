@@ -1263,7 +1263,10 @@ export const createWorktree = async ({
   const worktreeConfigPath = join(worktreePath, "polyhive.json");
   try {
     await stat(worktreeConfigPath);
-  } catch {
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code !== "ENOENT") {
+      throw error;
+    }
     await copyFile(mainConfigPath, worktreeConfigPath).catch((err) => {
       if ((err as NodeJS.ErrnoException).code !== "ENOENT") throw err;
     });

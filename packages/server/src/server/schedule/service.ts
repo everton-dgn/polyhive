@@ -3,7 +3,11 @@ import { join } from "node:path";
 import type { Logger } from "pino";
 import { AgentManager } from "../agent/agent-manager.js";
 import type { AgentStorage } from "../agent/agent-storage.js";
-import type { AgentPromptInput, AgentSessionConfig } from "../agent/agent-sdk-types.js";
+import type {
+  AgentPromptInput,
+  AgentRunResult,
+  AgentSessionConfig,
+} from "../agent/agent-sdk-types.js";
 import { curateAgentActivity } from "../agent/activity-curator.js";
 import { ensureAgentLoaded } from "../agent/agent-loading.js";
 import { ScheduleStore } from "./store.js";
@@ -421,13 +425,28 @@ export class ScheduleService {
       systemPrompt: schedule.target.config.systemPrompt,
       mcpServers: schedule.target.config.mcpServers as AgentSessionConfig["mcpServers"],
     };
+    const runId = randomUUID();
     const labels = {
       "polyhive.schedule-id": schedule.id,
-      "polyhive.schedule-run": randomUUID(),
+      "polyhive.schedule-run": runId,
     };
     const agent = await this.agentManager.createAgent(config, undefined, { labels });
-    this.agentManager.recordUserMessage(agent.id, schedule.prompt, { emitState: false });
-    const result = await this.agentManager.runAgent(agent.id, buildAgentPrompt(schedule.prompt));
+    let result: AgentRunResult;
+    try {
+      this.agentManager.recordUserMessage(agent.id, schedule.prompt, { emitState: false });
+      result = await this.agentManager.runAgent(agent.id, buildAgentPrompt(schedule.prompt));
+    } catch (error) {
+      try {
+        await this.agentManager.archiveAgent(agent.id);
+      } catch (archiveError) {
+        this.logger.warn(
+          { err: archiveError, agentId: agent.id, scheduleId: schedule.id, runId },
+          "Failed to archive scheduled agent after failed run",
+        );
+      }
+      throw error;
+    }
+    await this.agentManager.archiveAgent(agent.id);
     const timelineText = curateAgentActivity(result.timeline);
     return {
       agentId: agent.id,

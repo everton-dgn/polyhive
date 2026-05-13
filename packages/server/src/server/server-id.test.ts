@@ -1,13 +1,5 @@
 import { describe, it, expect, beforeEach, afterEach } from "vitest";
-import {
-  chmodSync,
-  existsSync,
-  mkdtempSync,
-  readFileSync,
-  rmSync,
-  statSync,
-  writeFileSync,
-} from "node:fs";
+import { existsSync, mkdtempSync, readFileSync, rmSync, statSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import { getOrCreateServerId } from "./server-id.js";
@@ -70,7 +62,6 @@ describe("getOrCreateServerId", () => {
     it("repairs existing server-id permissions when loading", () => {
       const idPath = path.join(home, "server-id");
       writeFileSync(idPath, "srv_existing\n", { mode: PERMISSIVE_FILE_MODE });
-      chmodSync(idPath, PERMISSIVE_FILE_MODE);
 
       expect(getOrCreateServerId(home)).toBe("srv_existing");
       expect(modeOf(idPath)).toBe(PRIVATE_FILE_MODE);
@@ -80,7 +71,6 @@ describe("getOrCreateServerId", () => {
       const idPath = path.join(home, "server-id");
       process.env.POLYHIVE_SERVER_ID = "test-daemon-id";
       writeFileSync(idPath, "srv_existing\n", { mode: PERMISSIVE_FILE_MODE });
-      chmodSync(idPath, PERMISSIVE_FILE_MODE);
 
       expect(getOrCreateServerId(home)).toBe("test-daemon-id");
       expect(modeOf(idPath)).toBe(PRIVATE_FILE_MODE);

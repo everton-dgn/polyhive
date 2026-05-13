@@ -104,7 +104,13 @@ async function waitForTitle(
 }
 
 function removeZshShellIntegrationRuntimeDir(): void {
-  rmSync(join(tmpdir(), `${userInfo().username || "unknown"}-polyhive-zsh`), {
+  let username = "unknown";
+  try {
+    username = userInfo().username || username;
+  } catch {
+    // keep fallback when passwd lookup fails (CI/container without /etc/passwd entry)
+  }
+  rmSync(join(tmpdir(), `${username}-polyhive-zsh`), {
     recursive: true,
     force: true,
   });

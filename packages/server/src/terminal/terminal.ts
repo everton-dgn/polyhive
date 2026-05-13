@@ -1,7 +1,7 @@
 import * as pty from "node-pty";
 import xterm, { type Terminal as TerminalType } from "@xterm/headless";
 import { randomUUID } from "crypto";
-import { chmodSync, existsSync, mkdirSync, readFileSync, statSync } from "node:fs";
+import { chmodSync, existsSync, lstatSync, mkdirSync, readFileSync, statSync } from "node:fs";
 import { tmpdir, userInfo } from "node:os";
 import { basename, dirname, join } from "node:path";
 import { createRequire } from "node:module";
@@ -194,9 +194,36 @@ function resolveZshShellIntegrationRuntimeDir(): string {
   return join(tmpdir(), `${username}-polyhive-zsh`);
 }
 
+function assertPrivateRuntimeDir(runtimeDir: string): void {
+  let stats: ReturnType<typeof lstatSync>;
+  try {
+    stats = lstatSync(runtimeDir);
+  } catch (err) {
+    if ((err as NodeJS.ErrnoException).code === "ENOENT") {
+      return;
+    }
+    throw err;
+  }
+  if (stats.isSymbolicLink()) {
+    throw new Error(`Refusing to use zsh integration runtime dir: ${runtimeDir} is a symlink`);
+  }
+  if (!stats.isDirectory()) {
+    throw new Error(
+      `Refusing to use zsh integration runtime dir: ${runtimeDir} is not a directory`,
+    );
+  }
+  const currentUid = typeof process.getuid === "function" ? process.getuid() : undefined;
+  if (currentUid !== undefined && stats.uid !== currentUid) {
+    throw new Error(
+      `Refusing to use zsh integration runtime dir: ${runtimeDir} not owned by current user (uid ${stats.uid})`,
+    );
+  }
+}
+
 function prepareZshShellIntegrationRuntimeDir(sourceDir = resolveZshShellIntegrationDir()): string {
   const readableSourceDir = resolveExternalProcessPath(sourceDir);
   const runtimeDir = resolveZshShellIntegrationRuntimeDir();
+  assertPrivateRuntimeDir(runtimeDir);
   mkdirSync(runtimeDir, { recursive: true, mode: 0o700 });
   chmodSync(runtimeDir, 0o700);
   writePrivateFileAtomicSync(

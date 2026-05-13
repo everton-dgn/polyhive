@@ -307,7 +307,7 @@ const SHORTCUT_BINDINGS: readonly ShortcutBinding[] = [
     id: "workspace-tab-navigate-index-alt-digit-desktop",
     action: "workspace.tab.navigate.index",
     combo: "Alt+Digit",
-    when: { mac: false, desktop: true, commandCenter: false },
+    when: { mac: false, desktop: true, commandCenter: false, terminal: false },
     payload: { type: "index" },
     help: {
       id: "workspace-tab-jump-index",

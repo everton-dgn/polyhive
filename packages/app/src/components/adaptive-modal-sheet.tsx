@@ -9,7 +9,6 @@ import { getOverlayRoot, OVERLAY_Z } from "../lib/overlay-root";
 import {
   BottomSheetBackdrop,
   BottomSheetScrollView,
-  BottomSheetTextInput,
   type BottomSheetBackgroundProps,
 } from "@gorhom/bottom-sheet";
 import { X } from "lucide-react";
@@ -317,17 +316,10 @@ export function AdaptiveModalSheet({
 }
 
 /**
- * TextInput that automatically uses BottomSheetTextInput on mobile
- * for proper keyboard dodging in AdaptiveModalSheet.
+ * TextInput variant for AdaptiveModalSheet.
  */
 export const AdaptiveTextInput = forwardRef<TextInput, TextInputProps>(
   function AdaptiveTextInput(props, ref) {
-    const isMobile = useIsCompactFormFactor();
-
-    if (isMobile) {
-      return <BottomSheetTextInput ref={ref as any} {...props} />;
-    }
-
     return <TextInput ref={ref} {...props} />;
   },
 );

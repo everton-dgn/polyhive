@@ -7,9 +7,7 @@ import {
   ActivityIndicator,
   type GestureResponderEvent,
 } from "react-native";
-import { BottomSheetTextInput } from "@gorhom/bottom-sheet";
 import { StyleSheet, useUnistyles } from "react-native-unistyles";
-import { useIsCompactFormFactor } from "@/constants/layout";
 import { ArrowLeft, ChevronDown, ChevronRight, Search, Star } from "lucide-react";
 import type { AgentModelDefinition, AgentProvider } from "@server/server/agent/agent-sdk-types";
 import type { AgentProviderDefinition } from "@server/server/agent/provider-manifest";
@@ -343,8 +341,6 @@ function ProviderSearchInput({
 }) {
   const { theme } = useUnistyles();
   const inputRef = useRef<TextInput>(null);
-  const isMobile = useIsCompactFormFactor();
-  const InputComponent = isMobile ? BottomSheetTextInput : TextInput;
 
   useEffect(() => {
     if (autoFocus && inputRef.current) {
@@ -358,7 +354,7 @@ function ProviderSearchInput({
   return (
     <View style={styles.providerSearchContainer}>
       <Search size={theme.iconSize.md} color={theme.colors.foregroundMuted} />
-      <InputComponent
+      <TextInput
         ref={inputRef as any}
         // @ts-expect-error - outlineStyle is web-only
         style={[styles.providerSearchInput, { outlineStyle: "none" }]}

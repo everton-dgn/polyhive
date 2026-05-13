@@ -1,6 +1,6 @@
 {
   "name": "@evertondgn/polyhive-cli",
-  "version": "0.1.62",
+  "version": "0.1.65",
   "description": "PolyHive CLI - control your AI coding agents from the command line",
   "license": "AGPL-3.0-or-later",
   "repository": {
@@ -34,13 +34,13 @@
   },
   "dependencies": {
     "@clack/prompts": "1.1.0",
-    "@evertondgn/polyhive-relay": "0.1.62",
-    "@evertondgn/polyhive-server": "0.1.62",
+    "@evertondgn/polyhive-relay": "0.1.65",
+    "@evertondgn/polyhive-server": "0.1.65",
     "chalk": "5.6.2",
     "commander": "12.1.0",
     "mime-types": "2.1.35",
     "ws": "8.19.0",
-    "yaml": "2.8.2"
+    "yaml": "2.8.4"
   },
   "devDependencies": {
     "@types/mime-types": "3.0.1",

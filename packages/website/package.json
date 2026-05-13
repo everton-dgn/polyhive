@@ -1,6 +1,6 @@
 {
   "name": "polyhive-website",
-  "version": "0.1.62",
+  "version": "0.1.65",
   "private": true,
   "type": "module",
   "scripts": {
@@ -28,7 +28,7 @@
     "@vitejs/plugin-react": "4.7.0",
     "tailwindcss": "4.2.1",
     "typescript": "5.9.3",
-    "vite": "7.3.1",
+    "vite": "7.3.3",
     "vite-tsconfig-paths": "5.1.4"
   }
 }

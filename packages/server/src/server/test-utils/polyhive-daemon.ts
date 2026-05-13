@@ -17,6 +17,7 @@ type TestPolyHiveDaemonOptions = {
   corsAllowedOrigins?: string[];
   listen?: string;
   logger?: Parameters<typeof createPolyHiveDaemon>[1];
+  mcpDebug?: boolean;
   relayEnabled?: boolean;
   relayEndpoint?: string;
   agentClients?: Partial<Record<AgentProvider, AgentClient>>;
@@ -89,7 +90,7 @@ export async function createTestPolyHiveDaemon(
       hostnames: true,
       mcpEnabled: true,
       staticDir,
-      mcpDebug: false,
+      mcpDebug: options.mcpDebug ?? false,
       agentClients: options.agentClients ?? createTestAgentClients(),
       agentStoragePath: path.join(polyhiveHome, "agents"),
       relayEnabled: options.relayEnabled ?? false,

@@ -15,7 +15,6 @@ import { useIsCompactFormFactor } from "@/constants/layout";
 import {
   BottomSheetScrollView,
   BottomSheetBackdrop,
-  BottomSheetTextInput,
   BottomSheetBackgroundProps,
 } from "@gorhom/bottom-sheet";
 import Animated, { FadeIn, FadeOut } from "react-native-reanimated";
@@ -129,11 +128,9 @@ export function SearchInput({
   onChangeText,
   onSubmitEditing,
   autoFocus = false,
-  useBottomSheetInput = false,
 }: SearchInputProps): ReactElement {
   const { theme } = useUnistyles();
   const inputRef = useRef<TextInput>(null);
-  const InputComponent = useBottomSheetInput ? BottomSheetTextInput : TextInput;
 
   useEffect(() => {
     if (autoFocus && inputRef.current) {
@@ -147,7 +144,7 @@ export function SearchInput({
   return (
     <View style={styles.searchInputContainer}>
       <Search size={16} color={theme.colors.foregroundMuted} />
-      <InputComponent
+      <TextInput
         ref={inputRef as any}
         style={[styles.searchInput, { outlineStyle: "none" } as any]}
         placeholder={placeholder}

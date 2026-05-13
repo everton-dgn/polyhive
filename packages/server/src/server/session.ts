@@ -2933,6 +2933,17 @@ export class Session {
     const { handle, overrides, requestId } = msg;
     if (!handle) {
       this.sessionLogger.warn("Resume request missing persistence handle");
+      if (requestId) {
+        this.emit({
+          type: "rpc_error",
+          payload: {
+            requestId,
+            requestType: msg.type,
+            error: "Unable to resume agent: missing persistence handle",
+            code: "agent_resume_failed",
+          },
+        });
+      }
       this.emit({
         type: "activity_log",
         payload: {
@@ -2969,14 +2980,26 @@ export class Session {
         });
       }
     } catch (error: any) {
+      const message = error instanceof Error ? error.message : String(error);
       this.sessionLogger.error({ err: error }, "Failed to resume agent");
+      if (requestId) {
+        this.emit({
+          type: "rpc_error",
+          payload: {
+            requestId,
+            requestType: msg.type,
+            error: message,
+            code: "agent_resume_failed",
+          },
+        });
+      }
       this.emit({
         type: "activity_log",
         payload: {
           id: uuidv4(),
           timestamp: new Date(),
           type: "error",
-          content: `Failed to resume agent: ${error.message}`,
+          content: `Failed to resume agent: ${message}`,
         },
       });
     }
@@ -3030,14 +3053,26 @@ export class Session {
         });
       }
     } catch (error: any) {
+      const message = error instanceof Error ? error.message : String(error);
       this.sessionLogger.error({ err: error, agentId }, `Failed to refresh agent ${agentId}`);
+      if (requestId) {
+        this.emit({
+          type: "rpc_error",
+          payload: {
+            requestId,
+            requestType: msg.type,
+            error: message,
+            code: "agent_refresh_failed",
+          },
+        });
+      }
       this.emit({
         type: "activity_log",
         payload: {
           id: uuidv4(),
           timestamp: new Date(),
           type: "error",
-          content: `Failed to refresh agent: ${error.message}`,
+          content: `Failed to refresh agent: ${message}`,
         },
       });
     }

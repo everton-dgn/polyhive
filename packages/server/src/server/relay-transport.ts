@@ -186,7 +186,7 @@ export function startRelayTransport({
         const now = Date.now();
         const staleForMs = now - controlLastSeenAt;
         // If the control socket is half-open or silently dropped, ws may never emit "close".
-        // Use app-level ping/pong to detect staleness and force a reconnect.
+        // Use WebSocket protocol ping/pong to detect staleness without waking the relay DO.
         if (staleForMs > CONTROL_STALE_TIMEOUT_MS) {
           relayLogger.warn(
             { url, staleForMs, connectionId, staleTimeoutMs: CONTROL_STALE_TIMEOUT_MS },
@@ -201,7 +201,7 @@ export function startRelayTransport({
         }
 
         try {
-          socket.send(JSON.stringify({ type: "ping", ts: now }));
+          socket.ping();
         } catch (error) {
           relayLogger.warn({ err: error, connectionId }, "relay_control_ping_send_failed");
           try {
@@ -212,7 +212,7 @@ export function startRelayTransport({
         }
       }, CONTROL_PING_INTERVAL_MS);
       try {
-        socket.send(JSON.stringify({ type: "ping", ts: Date.now() }));
+        socket.ping();
       } catch (error) {
         relayLogger.warn({ err: error, connectionId }, "relay_control_ping_send_failed");
         try {
@@ -246,6 +246,12 @@ export function startRelayTransport({
       if (controlWs !== socket) return;
       relayLogger.warn({ err, connectionId }, "relay_error");
       // close event will schedule reconnect
+    });
+
+    socket.on("pong", () => {
+      if (controlWs !== socket) return;
+      controlLastSeenAt = Date.now();
+      relayLogger.debug({ connectionId }, "relay_control_pong_received");
     });
 
     socket.on("message", (data) => {
@@ -378,10 +384,19 @@ async function attachEncryptedSocket(
   metadata?: ExternalSocketMetadata,
 ): Promise<void> {
   try {
-    const relayTransport = createRelayTransportAdapter(socket, logger);
+    const relayTransport = createRelayTransportAdapter(socket);
     const emitter = new EventEmitter();
+    const pendingMessages: Array<string | ArrayBuffer> = [];
+    let attached = false;
+    const emitMessage = (data: string | ArrayBuffer) => {
+      if (attached) {
+        emitter.emit("message", data);
+        return;
+      }
+      pendingMessages.push(data);
+    };
     const channel = await createDaemonChannel(relayTransport, daemonKeyPair, {
-      onmessage: (data) => emitter.emit("message", data),
+      onmessage: emitMessage,
       onclose: (code, reason) => emitter.emit("close", code, reason),
       onerror: (error) => {
         logger.warn({ err: error }, "relay_e2ee_error");
@@ -390,6 +405,11 @@ async function attachEncryptedSocket(
     });
     const encryptedSocket = createEncryptedSocket(channel, emitter);
     await attachSocket(encryptedSocket, metadata);
+    attached = true;
+    for (const message of pendingMessages) {
+      emitter.emit("message", message);
+    }
+    pendingMessages.length = 0;
   } catch (error) {
     logger.warn({ err: error }, "relay_e2ee_handshake_failed");
     try {
@@ -400,18 +420,9 @@ async function attachEncryptedSocket(
   }
 }
 
-function createRelayTransportAdapter(socket: WebSocket, logger: pino.Logger): RelayTransport {
+function createRelayTransportAdapter(socket: WebSocket): RelayTransport {
   const relayTransport: RelayTransport = {
-    send: (data) => {
-      try {
-        socket.send(data);
-      } catch (err) {
-        // Socket likely transitioned to closed between checks; let onclose/onerror
-        // drive cleanup. Without this guard the synchronous throw would propagate
-        // up as an uncaughtException and take down the daemon.
-        logger.warn({ err }, "relay_socket_send_failed");
-      }
-    },
+    send: (data) => socket.send(data),
     close: (code?: number, reason?: string) => socket.close(code, reason),
     onmessage: null,
     onclose: null,

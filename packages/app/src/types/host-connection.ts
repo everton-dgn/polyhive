@@ -85,14 +85,13 @@ function hostLifecycleEquals(left: HostLifecycle, right: HostLifecycle): boolean
 }
 
 function dedupeHostConnections(connections: HostConnection[]): HostConnection[] {
-  const next: HostConnection[] = [];
+  // Replace-by-id so updated credentials (useTls/password) overwrite the
+  // previous entry instead of coexisting with the stale one.
+  const byKey = new Map<string, HostConnection>();
   for (const connection of connections) {
-    if (next.some((existing) => hostConnectionEquals(existing, connection))) {
-      continue;
-    }
-    next.push(connection);
+    byKey.set(`${connection.type}:${connection.id}`, connection);
   }
-  return next;
+  return Array.from(byKey.values());
 }
 
 export function upsertHostConnectionInProfiles(input: {

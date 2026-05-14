@@ -761,6 +761,14 @@ export class DaemonClient {
     const headers: Record<string, string> = {};
     const password = normalizePassword(this.config.password);
     if (password) {
+      // RFC 6455 (via RFC 2616) restricts Sec-WebSocket-Protocol tokens to a
+      // narrow ASCII set; reject early instead of letting `new WebSocket(...)`
+      // throw an opaque SyntaxError before any auth logic runs.
+      if (/[\s()<>@,;:\\"/[\]?={}]/.test(password)) {
+        throw new Error(
+          "Daemon password contains characters unsupported by WebSocket subprotocol auth",
+        );
+      }
       headers.Authorization = `Bearer ${password}`;
     } else if (this.config.authHeader) {
       headers.Authorization = this.config.authHeader;

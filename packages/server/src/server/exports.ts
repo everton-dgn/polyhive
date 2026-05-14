@@ -12,8 +12,8 @@ export {
   loadPersistedConfig,
   savePersistedConfig,
   type PersistedConfig,
-} from "./persisted-config.js";
-export { hashDaemonPassword, isBearerTokenValid } from "./auth.js";
+} from "@server/server/persisted-config.js";
+export { hashDaemonPassword, isBearerTokenValid } from "@server/server/auth.js";
 export { generateLocalPairingOffer, type LocalPairingOffer } from "./pairing-offer.js";
 export {
   DaemonClient,
@@ -27,12 +27,12 @@ export {
   normalizeHostPort,
   parseConnectionUri,
   shouldUseTlsForDefaultHostedRelay,
-} from "../shared/daemon-endpoints.js";
+} from "@server/shared/daemon-endpoints.js";
 export {
   DirectTcpHostConnectionSchema,
   type DirectTcpHostConnection,
   type NormalizedDirectTcpHostConnection,
-} from "../shared/host-connection-schema.js";
+} from "@server/shared/host-connection-schema.js";
 export {
   ensureLocalSpeechModels,
   listLocalSpeechModels,

@@ -21,6 +21,23 @@ describe("PersistedConfigSchema daemon auth config", () => {
     expect(parsed.daemon?.auth?.password).toBe(hash);
   });
 });
+
+describe("PersistedConfigSchema daemon relay config", () => {
+  test("accepts optional relay TLS setting", () => {
+    const parsed = PersistedConfigSchema.parse({
+      daemon: {
+        relay: {
+          enabled: true,
+          endpoint: "relay.example.com:443",
+          publicEndpoint: "public.example.com:443",
+          useTls: true,
+        },
+      },
+    });
+
+    expect(parsed.daemon?.relay?.useTls).toBe(true);
+  });
+});
 import { PRIVATE_FILE_MODE } from "./private-files.js";
 
 const MODE_MASK = 0o777;

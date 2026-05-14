@@ -99,6 +99,7 @@ import { DaemonConfigStore } from "./daemon-config-store.js";
 import { WorkspaceGitServiceImpl } from "./workspace-git-service.js";
 import { createTerminalManager, type TerminalManager } from "../terminal/terminal-manager.js";
 import { createConnectionOfferV2, encodeOfferToFragmentUrl } from "./connection-offer.js";
+import { DEFAULT_RELAY_ENDPOINT } from "../shared/daemon-endpoints.js";
 import { loadOrCreateDaemonKeyPair } from "./daemon-keypair.js";
 import { startRelayTransport, type RelayTransportController } from "./relay-transport.js";
 import { getOrCreateServerId } from "./server-id.js";
@@ -209,6 +210,7 @@ export type PolyHiveDaemonConfig = {
   relayEnabled?: boolean;
   relayEndpoint?: string;
   relayPublicEndpoint?: string;
+  relayUseTls?: boolean;
   appBaseUrl?: string;
   auth?: DaemonAuthConfig;
   openai?: PolyHiveOpenAIConfig;
@@ -707,8 +709,9 @@ export async function createPolyHiveDaemon(
               agentManager.setMcpBaseUrl(value ? mcpBaseUrl : null);
             });
             const relayEnabled = config.relayEnabled ?? true;
-            const relayEndpoint = config.relayEndpoint ?? "relay.polyhive.sh:443";
+            const relayEndpoint = config.relayEndpoint ?? DEFAULT_RELAY_ENDPOINT;
             const relayPublicEndpoint = config.relayPublicEndpoint ?? relayEndpoint;
+            const relayUseTls = config.relayUseTls ?? relayEndpoint === DEFAULT_RELAY_ENDPOINT;
             const appBaseUrl = config.appBaseUrl ?? "https://app.polyhive.sh";
 
             if (boundListenTarget.type === "tcp") {
@@ -793,7 +796,7 @@ export async function createPolyHiveDaemon(
               const offer = await createConnectionOfferV2({
                 serverId,
                 daemonPublicKeyB64: daemonKeyPair.publicKeyB64,
-                relay: { endpoint: relayPublicEndpoint },
+                relay: { endpoint: relayPublicEndpoint, useTls: relayUseTls },
               });
 
               encodeOfferToFragmentUrl({ offer, appBaseUrl });
@@ -808,6 +811,7 @@ export async function createPolyHiveDaemon(
                   return wsServer.attachExternalSocket(ws, metadata);
                 },
                 relayEndpoint,
+                relayUseTls,
                 serverId,
                 daemonKeyPair: daemonKeyPair.keyPair,
               });

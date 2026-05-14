@@ -1,6 +1,7 @@
 import type { Logger } from "pino";
 
 import { createConnectionOfferV2, encodeOfferToFragmentUrl } from "./connection-offer.js";
+import { DEFAULT_RELAY_ENDPOINT } from "../shared/daemon-endpoints.js";
 import { loadOrCreateDaemonKeyPair } from "./daemon-keypair.js";
 import { renderPairingQr } from "./pairing-qr.js";
 import { getOrCreateServerId } from "./server-id.js";
@@ -16,6 +17,7 @@ export async function generateLocalPairingOffer(args: {
   relayEnabled?: boolean;
   relayEndpoint?: string;
   relayPublicEndpoint?: string;
+  relayUseTls?: boolean;
   appBaseUrl?: string;
   includeQr?: boolean;
   logger?: Logger;
@@ -29,15 +31,16 @@ export async function generateLocalPairingOffer(args: {
     };
   }
 
-  const relayEndpoint = args.relayEndpoint ?? "relay.polyhive.sh:443";
+  const relayEndpoint = args.relayEndpoint ?? DEFAULT_RELAY_ENDPOINT;
   const relayPublicEndpoint = args.relayPublicEndpoint ?? relayEndpoint;
+  const relayUseTls = args.relayUseTls ?? relayEndpoint === DEFAULT_RELAY_ENDPOINT;
   const appBaseUrl = args.appBaseUrl ?? "https://app.polyhive.sh";
   const serverId = getOrCreateServerId(args.polyhiveHome, { logger: args.logger });
   const daemonKeyPair = await loadOrCreateDaemonKeyPair(args.polyhiveHome, args.logger);
   const offer = await createConnectionOfferV2({
     serverId,
     daemonPublicKeyB64: daemonKeyPair.publicKeyB64,
-    relay: { endpoint: relayPublicEndpoint },
+    relay: { endpoint: relayPublicEndpoint, useTls: relayUseTls },
   });
   const url = encodeOfferToFragmentUrl({ offer, appBaseUrl });
 

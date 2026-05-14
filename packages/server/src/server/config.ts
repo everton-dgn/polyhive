@@ -37,6 +37,7 @@ function parseBooleanEnv(value: string | undefined): boolean | undefined {
 export type CliConfigOverrides = Partial<{
   listen: string;
   relayEnabled: boolean;
+  relayUseTls: boolean;
   mcpEnabled: boolean;
   mcpInjectIntoAgents: boolean;
   hostnames: HostnamesConfig;
@@ -165,6 +166,12 @@ export function loadConfig(
   const relayPublicEndpoint =
     env.POLYHIVE_RELAY_PUBLIC_ENDPOINT ?? persisted.daemon?.relay?.publicEndpoint ?? relayEndpoint;
 
+  const relayUseTls =
+    options?.cli?.relayUseTls ??
+    parseBooleanEnv(env.POLYHIVE_RELAY_USE_TLS) ??
+    persisted.daemon?.relay?.useTls ??
+    relayEndpoint === DEFAULT_RELAY_ENDPOINT;
+
   const appBaseUrl = env.POLYHIVE_APP_BASE_URL ?? persisted.app?.baseUrl ?? DEFAULT_APP_BASE_URL;
 
   const { openai, speech } = resolveSpeechConfig({
@@ -202,6 +209,7 @@ export function loadConfig(
     relayEnabled,
     relayEndpoint,
     relayPublicEndpoint,
+    relayUseTls,
     appBaseUrl,
     auth: resolveAuthConfig(env, persisted),
     openai,

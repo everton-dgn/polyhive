@@ -39,6 +39,9 @@ async function main() {
   if (process.argv.includes("--no-relay")) {
     config.relayEnabled = false;
   }
+  if (process.argv.includes("--relay-use-tls")) {
+    config.relayUseTls = true;
+  }
   if (process.argv.includes("--no-mcp")) {
     config.mcpEnabled = false;
   }

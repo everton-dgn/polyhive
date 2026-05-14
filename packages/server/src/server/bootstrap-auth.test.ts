@@ -103,8 +103,7 @@ describe("daemon bearer auth", () => {
     }
   });
 
-  // TODO: enable once Bloco 3 lands the WebSocket bearer auth handshake in websocket-server.ts.
-  test.skip("closes WebSocket connections with readable auth failures when password is configured", async () => {
+  test("closes WebSocket connections with readable auth failures when password is configured", async () => {
     const daemonHandle = await createTestPolyHiveDaemon({
       auth: { password: CORRECT_PASSWORD_HASH },
     });

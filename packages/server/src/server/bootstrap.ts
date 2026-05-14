@@ -746,6 +746,7 @@ export async function createPolyHiveDaemon(
               daemonConfigStore,
               mcpBaseUrl,
               { allowedOrigins, hostnames: configuredHostnames },
+              config.auth,
               speechService,
               terminalManager,
               {

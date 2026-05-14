@@ -87,7 +87,7 @@ export function resolveDaemonPassword(host: string): string | undefined {
     const fromUri = parseConnectionUri(trimmed).password;
     if (fromUri) return fromUri;
   }
-  const fromEnv = process.env.POLYHIVE_PASSWORD;
+  const fromEnv = process.env.POLYHIVE_PASSWORD?.trim();
   return fromEnv && fromEnv.length > 0 ? fromEnv : undefined;
 }
 

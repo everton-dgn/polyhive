@@ -74,7 +74,7 @@ function hostConnectionEquals(left: HostConnection, right: HostConnection): bool
   if (left.type === "relay" && right.type === "relay") {
     return (
       left.relayEndpoint === right.relayEndpoint &&
-      left.useTls === right.useTls &&
+      (left.useTls ?? false) === (right.useTls ?? false) &&
       left.daemonPublicKeyB64 === right.daemonPublicKeyB64
     );
   }

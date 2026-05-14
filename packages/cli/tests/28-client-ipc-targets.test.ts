@@ -153,6 +153,13 @@ console.log("=== CLI IPC Target Helpers ===\n");
       undefined,
       "Empty env var should be treated as unset",
     );
+
+    process.env.POLYHIVE_PASSWORD = "   ";
+    assert.strictEqual(
+      resolveDaemonPassword("localhost:6767"),
+      undefined,
+      "Whitespace-only env var should be treated as unset",
+    );
   } finally {
     if (previousEnv === undefined) {
       delete process.env.POLYHIVE_PASSWORD;

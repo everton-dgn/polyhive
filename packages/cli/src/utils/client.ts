@@ -1,5 +1,12 @@
 import { existsSync, readFileSync } from "node:fs";
-import { loadConfig, resolvePolyHiveHome, DaemonClient } from "@evertondgn/polyhive-server";
+import {
+  buildDaemonWebSocketUrl,
+  DaemonClient,
+  loadConfig,
+  normalizeHostPort,
+  parseConnectionUri,
+  resolvePolyHiveHome,
+} from "@evertondgn/polyhive-server";
 import path from "node:path";
 import WebSocket from "ws";
 import { getOrCreateCliClientId } from "./client-id.js";
@@ -38,6 +45,27 @@ export function normalizeDaemonHost(raw: string): string | null {
     return null;
   }
 
+  if (trimmed.startsWith("tcp://")) {
+    try {
+      const parsed = parseConnectionUri(trimmed);
+      const endpoint = normalizeHostPort(
+        parsed.isIpv6 ? `[${parsed.host}]:${parsed.port}` : `${parsed.host}:${parsed.port}`,
+      );
+      const query = new URLSearchParams();
+      if (parsed.useTls) {
+        query.set("ssl", "true");
+      }
+      if (parsed.password) {
+        query.set("password", parsed.password);
+      }
+      const queryString = query.toString();
+      const suffix = queryString ? `?${queryString}` : "";
+      return `tcp://${endpoint}${suffix}`;
+    } catch {
+      return null;
+    }
+  }
+
   if (trimmed.startsWith("unix://")) {
     return trimmed;
   }
@@ -51,6 +79,11 @@ export function normalizeDaemonHost(raw: string): string | null {
   }
 
   return trimmed.includes(":") ? trimmed : null;
+}
+
+export function resolveDaemonPassword(host: string): string | undefined {
+  const trimmed = host.trim();
+  return trimmed.startsWith("tcp://") ? parseConnectionUri(trimmed).password : undefined;
 }
 
 export function resolveDefaultDaemonHost(env: NodeJS.ProcessEnv = process.env): string {
@@ -154,6 +187,17 @@ export function resolveDaemonTarget(host: string): DaemonTarget {
     };
   }
 
+  if (trimmed.startsWith("tcp://")) {
+    const parsed = parseConnectionUri(trimmed);
+    const endpoint = normalizeHostPort(
+      parsed.isIpv6 ? `[${parsed.host}]:${parsed.port}` : `${parsed.host}:${parsed.port}`,
+    );
+    return {
+      type: "tcp",
+      url: buildDaemonWebSocketUrl(endpoint, { useTls: parsed.useTls }),
+    };
+  }
+
   return {
     type: "tcp",
     url: `ws://${trimmed}/ws`,
@@ -164,8 +208,11 @@ export function resolveDaemonTarget(host: string): DaemonTarget {
  * Create a WebSocket factory that works in Node.js
  */
 function createNodeWebSocketFactory() {
-  return (url: string, options?: { headers?: Record<string, string>; socketPath?: string }) => {
-    return new WebSocket(url, {
+  return (
+    url: string,
+    options?: { headers?: Record<string, string>; protocols?: string[]; socketPath?: string },
+  ) => {
+    return new WebSocket(url, options?.protocols, {
       headers: options?.headers,
       ...(options?.socketPath ? { socketPath: options.socketPath } : {}),
     }) as unknown as {
@@ -193,15 +240,21 @@ export async function connectToDaemon(options?: ConnectOptions): Promise<DaemonC
 
   for (const host of hosts) {
     const target = resolveDaemonTarget(host);
+    const password = resolveDaemonPassword(host);
     const client = new DaemonClient({
       url: target.url,
       clientId,
       clientType: "cli",
       ...(appVersion ? { appVersion } : {}),
+      ...(password ? { password } : {}),
       connectTimeoutMs: timeout,
-      webSocketFactory: (url: string, config?: { headers?: Record<string, string> }) =>
+      webSocketFactory: (
+        url: string,
+        config?: { headers?: Record<string, string>; protocols?: string[] },
+      ) =>
         nodeWebSocketFactory(url, {
           headers: config?.headers,
+          protocols: config?.protocols,
           ...(target.type === "ipc" ? { socketPath: target.socketPath } : {}),
         }),
       reconnect: { enabled: false },

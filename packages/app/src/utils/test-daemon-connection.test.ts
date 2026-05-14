@@ -115,4 +115,37 @@ describe("test-daemon-connection connectToDaemon", () => {
       "polyhive+local://socket?path=%2Ftmp%2Fpolyhive.sock",
     );
   });
+
+  it("uses relay TLS from the stored connection", async () => {
+    const mod = await import("./test-daemon-connection");
+
+    const tlsResult = await mod.connectToDaemon(
+      {
+        id: "relay:wss:[::1]:443",
+        type: "relay",
+        relayEndpoint: "[::1]:443",
+        useTls: true,
+        daemonPublicKeyB64: "pubkey",
+      },
+      { serverId: "srv_probe_test" },
+    );
+    await tlsResult.client.close();
+
+    const plainResult = await mod.connectToDaemon(
+      {
+        id: "relay:relay.polyhive.sh:443",
+        type: "relay",
+        relayEndpoint: "relay.polyhive.sh:443",
+        useTls: false,
+        daemonPublicKeyB64: "pubkey",
+      },
+      { serverId: "srv_probe_test" },
+    );
+    await plainResult.client.close();
+
+    expect(daemonClientMock.createdConfigs[0]?.url).toMatch(/^wss:\/\/\[::1\]\/ws\?/);
+    expect(daemonClientMock.createdConfigs[1]?.url).toMatch(
+      /^ws:\/\/relay\.polyhive\.sh:443\/ws\?/,
+    );
+  });
 });

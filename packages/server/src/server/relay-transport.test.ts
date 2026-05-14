@@ -143,6 +143,7 @@ describe("relay-transport control lifecycle", () => {
       logger: logger as any,
       attachSocket: async () => {},
       relayEndpoint: "relay.polyhive.sh:443",
+      relayUseTls: true,
       serverId: "srv_test",
     });
     controllers.push(controller);
@@ -165,6 +166,7 @@ describe("relay-transport control lifecycle", () => {
       logger: logger as any,
       attachSocket: async () => {},
       relayEndpoint: "relay.polyhive.sh:443",
+      relayUseTls: true,
       serverId: "srv_test",
     });
     controllers.push(controller);
@@ -187,6 +189,7 @@ describe("relay-transport control lifecycle", () => {
       logger: logger as any,
       attachSocket: async () => {},
       relayEndpoint: "relay.polyhive.sh:443",
+      relayUseTls: true,
       serverId: "srv_test",
     });
     controllers.push(controller);
@@ -208,6 +211,7 @@ describe("relay-transport control lifecycle", () => {
       logger: logger as any,
       attachSocket,
       relayEndpoint: "relay.polyhive.sh:443",
+      relayUseTls: true,
       serverId: "srv_test",
     });
     controllers.push(controller);
@@ -228,5 +232,25 @@ describe("relay-transport control lifecycle", () => {
       transport: "relay",
       externalSessionKey: "session:clt_test",
     });
+  });
+
+  test("uses relayUseTls for control and data socket URLs", () => {
+    const logger = createMockLogger();
+    const controller = startRelayTransport({
+      logger: logger as any,
+      attachSocket: async () => {},
+      relayEndpoint: "[::1]:443",
+      relayUseTls: true,
+      serverId: "srv_test",
+    });
+    controllers.push(controller);
+
+    const control = MockWebSocket.instances[0];
+    control.open();
+    control.message(JSON.stringify({ type: "pong", ts: Date.now() }));
+    control.message(JSON.stringify({ type: "connected", connectionId: "clt_test" }));
+
+    expect(MockWebSocket.instances[0]?.url).toMatch(/^wss:\/\/\[::1\]\/ws\?/);
+    expect(MockWebSocket.instances[1]?.url).toMatch(/^wss:\/\/\[::1\]\/ws\?/);
   });
 });

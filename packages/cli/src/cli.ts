@@ -108,6 +108,7 @@ export function createCli(): Command {
     )
     .option("--port <port>", "Port for restarted daemon listen target")
     .option("--no-relay", "Disable relay on restarted daemon")
+    .option("--relay-use-tls", "Use wss:// for the relay connection and pairing offers")
     .option("--no-mcp", "Disable Agent MCP on restarted daemon")
     .option(
       "--hostnames <hosts>",

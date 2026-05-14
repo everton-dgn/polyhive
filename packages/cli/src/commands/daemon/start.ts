@@ -21,6 +21,7 @@ export function startCommand(): Command {
     .option("--home <path>", "PolyHive home directory (default: ~/.polyhive)")
     .option("--foreground", "Run in foreground (don't daemonize)")
     .option("--no-relay", "Disable relay connection")
+    .option("--relay-use-tls", "Use wss:// for the relay connection and pairing offers")
     .option("--no-mcp", "Disable the Agent MCP HTTP endpoint")
     .option("--no-inject-mcp", "Disable auto-injecting the PolyHive MCP into created agents")
     .option(

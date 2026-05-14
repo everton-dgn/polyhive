@@ -464,7 +464,7 @@ function createDefaultDeps(): HostRuntimeControllerDeps {
         ...base,
         url: buildRelayWebSocketUrl({
           endpoint: connection.relayEndpoint,
-          useTls: shouldUseTlsForDefaultHostedRelay(connection.relayEndpoint),
+          useTls: connection.useTls ?? shouldUseTlsForDefaultHostedRelay(connection.relayEndpoint),
           serverId: host.serverId,
         }),
         e2ee: {
@@ -1300,30 +1300,37 @@ export class HostRuntimeStore {
   async upsertRelayConnection(input: {
     serverId: string;
     relayEndpoint: string;
+    useTls?: boolean;
     daemonPublicKeyB64: string;
     label?: string;
   }): Promise<HostProfile> {
     const relayEndpoint = normalizeHostPort(input.relayEndpoint);
+    const useTls = input.useTls ?? false;
     const daemonPublicKeyB64 = input.daemonPublicKeyB64.trim();
     if (!daemonPublicKeyB64) {
       throw new Error("daemonPublicKeyB64 is required");
     }
+    const explicitUseTls = input.useTls !== undefined;
     return this.upsertHostConnection({
       serverId: input.serverId,
       label: input.label,
       connection: {
-        id: `relay:${relayEndpoint}`,
+        id: useTls ? `relay:wss:${relayEndpoint}` : `relay:${relayEndpoint}`,
         type: "relay",
         relayEndpoint,
+        ...(explicitUseTls ? { useTls } : {}),
         daemonPublicKeyB64,
       },
     });
   }
 
   async upsertConnectionFromOffer(offer: ConnectionOffer, label?: string): Promise<HostProfile> {
+    // COMPAT(oldRelayOfferTls): added in v0.1.68, remove after 2026-11-14.
+    const useTls = offer.relay.useTls ?? shouldUseTlsForDefaultHostedRelay(offer.relay.endpoint);
     return this.upsertRelayConnection({
       serverId: offer.serverId,
       relayEndpoint: offer.relay.endpoint,
+      useTls,
       daemonPublicKeyB64: offer.daemonPublicKeyB64,
       label,
     });
@@ -1989,6 +1996,7 @@ export interface HostMutations {
   upsertRelayConnection: (input: {
     serverId: string;
     relayEndpoint: string;
+    useTls?: boolean;
     daemonPublicKeyB64: string;
     label?: string;
   }) => Promise<HostProfile>;

@@ -7,7 +7,11 @@
  */
 
 import assert from "node:assert";
-import { resolveTcpHostFromListen } from "../src/commands/daemon/local-daemon.js";
+import {
+  buildChildEnv,
+  buildRunnerArgs,
+  resolveTcpHostFromListen,
+} from "../src/commands/daemon/local-daemon.js";
 
 console.log("=== Local Daemon Utility Helpers ===\n");
 
@@ -40,6 +44,20 @@ console.log("=== Local Daemon Utility Helpers ===\n");
   assert.strictEqual(resolveTcpHostFromListen("   "), null);
   assert.strictEqual(resolveTcpHostFromListen("localhost"), null);
   console.log("✓ rejects empty and non-host listen values\n");
+}
+
+{
+  console.log("Test 5: relay TLS flag maps to runner args");
+  assert.deepStrictEqual(buildRunnerArgs({ relayUseTls: true }), ["--relay-use-tls"]);
+  assert.deepStrictEqual(buildRunnerArgs({}), []);
+  assert.deepStrictEqual(buildRunnerArgs({ relayUseTls: false }), []);
+  console.log("✓ relay TLS flag maps to runner args\n");
+}
+
+{
+  console.log("Test 6: relay TLS flag maps to child env");
+  assert.strictEqual(buildChildEnv({ relayUseTls: true }).POLYHIVE_RELAY_USE_TLS, "true");
+  console.log("✓ relay TLS flag maps to child env\n");
 }
 
 console.log("=== All local daemon utility tests passed ===");

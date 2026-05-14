@@ -198,9 +198,14 @@ export function buildRelayWebSocketUrl(params: {
   return url.toString();
 }
 
+/**
+ * COMPAT: fallback for relay offers/connections stored before explicit `useTls`
+ * (pre-v0.1.68). Active code paths thread `useTls` explicitly; this only fills
+ * the gap for legacy data, treating any port 443 relay endpoint as TLS.
+ */
 export function shouldUseTlsForDefaultHostedRelay(endpoint: string): boolean {
   try {
-    return normalizeHostPort(endpoint) === DEFAULT_RELAY_ENDPOINT;
+    return shouldUseSecureWebSocket(parseHostPort(endpoint).port);
   } catch {
     return false;
   }

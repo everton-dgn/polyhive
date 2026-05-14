@@ -83,7 +83,12 @@ export function normalizeDaemonHost(raw: string): string | null {
 
 export function resolveDaemonPassword(host: string): string | undefined {
   const trimmed = host.trim();
-  return trimmed.startsWith("tcp://") ? parseConnectionUri(trimmed).password : undefined;
+  if (trimmed.startsWith("tcp://")) {
+    const fromUri = parseConnectionUri(trimmed).password;
+    if (fromUri) return fromUri;
+  }
+  const fromEnv = process.env.POLYHIVE_PASSWORD?.trim();
+  return fromEnv && fromEnv.length > 0 ? fromEnv : undefined;
 }
 
 export function resolveDefaultDaemonHost(env: NodeJS.ProcessEnv = process.env): string {

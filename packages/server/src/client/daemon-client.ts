@@ -183,12 +183,20 @@ export type DaemonEvent =
 
 export type DaemonEventHandler = (event: DaemonEvent) => void;
 
+function normalizePassword(value: string | undefined): string | null {
+  if (typeof value !== "string") {
+    return null;
+  }
+  return value.length > 0 ? value : null;
+}
+
 export type DaemonClientConfig = {
   url: string;
   clientId: string;
   clientType?: "mobile" | "browser" | "cli" | "mcp";
   appVersion?: string;
   runtimeGeneration?: number | null;
+  password?: string;
   authHeader?: string;
   suppressSendErrors?: boolean;
   transportFactory?: DaemonTransportFactory;
@@ -751,9 +759,13 @@ export class DaemonClient {
     }
 
     const headers: Record<string, string> = {};
-    if (this.config.authHeader) {
-      headers["Authorization"] = this.config.authHeader;
+    const password = normalizePassword(this.config.password);
+    if (password) {
+      headers.Authorization = `Bearer ${password}`;
+    } else if (this.config.authHeader) {
+      headers.Authorization = this.config.authHeader;
     }
+    const protocols = password ? [`polyhive.bearer.${password}`] : undefined;
 
     try {
       // Reconnect can overlap with browser close/error delivery ordering.
@@ -778,7 +790,11 @@ export class DaemonClient {
         });
       }
       const transportUrl = this.resolveTransportUrlForAttempt();
-      const transport = transportFactory({ url: transportUrl, headers });
+      const transport = transportFactory({
+        url: transportUrl,
+        headers,
+        ...(protocols ? { protocols } : {}),
+      });
       this.transport = transport;
       this.lastServerInfoMessage = null;
 

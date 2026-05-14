@@ -2,6 +2,7 @@ import path from "node:path";
 import { z } from "zod";
 
 import type { PolyHiveDaemonConfig } from "./bootstrap.js";
+import { hashDaemonPassword } from "./auth.js";
 import { loadPersistedConfig } from "./persisted-config.js";
 import type { AgentProvider } from "./agent/agent-sdk-types.js";
 import type {
@@ -102,6 +103,19 @@ function extractAgentProviderSettings(
     : undefined;
 }
 
+function resolveAuthConfig(
+  env: NodeJS.ProcessEnv,
+  persisted: ReturnType<typeof loadPersistedConfig>,
+): PolyHiveDaemonConfig["auth"] {
+  const envPassword = env.POLYHIVE_PASSWORD?.trim();
+  if (envPassword) {
+    return { password: hashDaemonPassword(envPassword) };
+  }
+  return persisted.daemon?.auth?.password
+    ? { password: persisted.daemon.auth.password }
+    : undefined;
+}
+
 export function loadConfig(
   polyhiveHome: string,
   options?: {
@@ -189,6 +203,7 @@ export function loadConfig(
     relayEndpoint,
     relayPublicEndpoint,
     appBaseUrl,
+    auth: resolveAuthConfig(env, persisted),
     openai,
     speech,
     voiceLlmProvider,

@@ -8,7 +8,12 @@ export { loadConfig, type CliConfigOverrides } from "./config.js";
 export { resolvePolyHiveHome } from "./polyhive-home.js";
 export { getOrCreateServerId } from "./server-id.js";
 export { createRootLogger, type LogLevel, type LogFormat } from "./logger.js";
-export { loadPersistedConfig, type PersistedConfig } from "./persisted-config.js";
+export {
+  loadPersistedConfig,
+  savePersistedConfig,
+  type PersistedConfig,
+} from "./persisted-config.js";
+export { hashDaemonPassword, isBearerTokenValid } from "./auth.js";
 export { generateLocalPairingOffer, type LocalPairingOffer } from "./pairing-offer.js";
 export {
   DaemonClient,
@@ -16,6 +21,18 @@ export {
   type ConnectionState,
   type DaemonEvent,
 } from "../client/daemon-client.js";
+export {
+  buildDaemonWebSocketUrl,
+  deriveLabelFromEndpoint,
+  normalizeHostPort,
+  parseConnectionUri,
+  shouldUseTlsForDefaultHostedRelay,
+} from "../shared/daemon-endpoints.js";
+export {
+  DirectTcpHostConnectionSchema,
+  type DirectTcpHostConnection,
+  type NormalizedDirectTcpHostConnection,
+} from "../shared/host-connection-schema.js";
 export {
   ensureLocalSpeechModels,
   listLocalSpeechModels,

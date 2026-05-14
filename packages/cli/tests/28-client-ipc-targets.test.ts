@@ -7,6 +7,7 @@ import path from "node:path";
 import {
   getDaemonHost,
   normalizeDaemonHost,
+  resolveDaemonPassword,
   resolveDaemonTarget,
   resolveDefaultDaemonHosts,
 } from "../src/utils/client.js";
@@ -95,6 +96,36 @@ console.log("=== CLI IPC Target Helpers ===\n");
     rmSync(polyhiveHome, { recursive: true, force: true });
   }
   console.log("✓ local IPC still takes priority over configured TCP hosts\n");
+}
+
+{
+  console.log("Test 7: tcp URI host targets honor ssl=true");
+  const target = resolveDaemonTarget("tcp://example.com:6767?ssl=true&password=query-secret");
+  assert.deepStrictEqual(target, {
+    type: "tcp",
+    url: "wss://example.com:6767/ws",
+  });
+  console.log("✓ tcp URI host targets honor ssl=true\n");
+}
+
+{
+  console.log("Test 8: tcp URI hosts normalize into canonical direct TCP targets");
+  assert.strictEqual(
+    normalizeDaemonHost("tcp://Example.com:6767?ssl=true&password=query-secret"),
+    "tcp://Example.com:6767?ssl=true&password=query-secret",
+  );
+  console.log("✓ tcp URI hosts normalize into canonical direct TCP targets\n");
+}
+
+{
+  console.log("Test 9: daemon password resolution uses only the TCP URI query");
+  assert.strictEqual(
+    resolveDaemonPassword("tcp://example.com:6767?ssl=true&password=query-secret"),
+    "query-secret",
+  );
+  assert.strictEqual(resolveDaemonPassword("tcp://missing.example:6767"), undefined);
+  assert.strictEqual(resolveDaemonPassword("example.com:6767"), undefined);
+  console.log("✓ daemon password resolution uses only the TCP URI query\n");
 }
 
 console.log("=== All CLI IPC target tests passed ===");

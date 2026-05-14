@@ -10,6 +10,7 @@ import {
   type PolyHiveSpeechConfig,
 } from "../bootstrap.js";
 import type { AgentClient, AgentProvider } from "../agent/agent-sdk-types.js";
+import type { DaemonAuthConfig } from "../auth.js";
 import { createTestAgentClients } from "./fake-agent-client.js";
 
 type TestPolyHiveDaemonOptions = {
@@ -24,6 +25,7 @@ type TestPolyHiveDaemonOptions = {
   polyhiveHomeRoot?: string;
   staticDir?: string;
   cleanup?: boolean;
+  auth?: DaemonAuthConfig;
   openai?: PolyHiveOpenAIConfig;
   speech?: PolyHiveSpeechConfig;
   voiceLlmProvider?: PolyHiveDaemonConfig["voiceLlmProvider"];
@@ -96,6 +98,7 @@ export async function createTestPolyHiveDaemon(
       relayEnabled: options.relayEnabled ?? false,
       relayEndpoint: options.relayEndpoint ?? "relay.polyhive.sh:443",
       appBaseUrl: "https://app.polyhive.sh",
+      auth: options.auth,
       openai: options.openai,
       speech: options.speech,
       voiceLlmProvider: options.voiceLlmProvider ?? null,

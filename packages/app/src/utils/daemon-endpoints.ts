@@ -5,7 +5,11 @@ import {
   deriveLabelFromEndpoint,
   extractHostPortFromWebSocketUrl,
   normalizeHostPort,
+  parseConnectionUri,
   parseHostPort,
+  serializeConnectionUri,
+  serializeConnectionUriForStorage,
+  shouldUseTlsForDefaultHostedRelay,
   type HostPortParts,
 } from "@server/shared/daemon-endpoints";
 
@@ -16,7 +20,11 @@ export {
   deriveLabelFromEndpoint,
   extractHostPortFromWebSocketUrl,
   normalizeHostPort,
+  parseConnectionUri,
   parseHostPort,
+  serializeConnectionUri,
+  serializeConnectionUriForStorage,
+  shouldUseTlsForDefaultHostedRelay,
 };
 
 function decodeBase64UrlToUtf8(input: string): string {
@@ -30,6 +38,10 @@ export function decodeOfferFragmentPayload(encoded: string): unknown {
   return JSON.parse(json) as unknown;
 }
 
-export function buildRelayWebSocketUrl(params: { endpoint: string; serverId: string }): string {
+export function buildRelayWebSocketUrl(params: {
+  endpoint: string;
+  serverId: string;
+  useTls: boolean;
+}): string {
   return buildSharedRelayWebSocketUrl({ ...params, role: "client" });
 }

@@ -117,6 +117,7 @@ import { ScriptHealthMonitor } from "./script-health-monitor.js";
 import { createScriptStatusEmitter } from "./script-status-projection.js";
 import { WorkspaceScriptRuntimeStore } from "./workspace-script-runtime-store.js";
 import { isHostnameAllowed, type HostnamesConfig } from "./hostnames.js";
+import { createRequireBearerMiddleware, type DaemonAuthConfig } from "./auth.js";
 
 type AgentMcpTransportMap = Map<string, StreamableHTTPServerTransport>;
 
@@ -209,6 +210,7 @@ export type PolyHiveDaemonConfig = {
   relayEndpoint?: string;
   relayPublicEndpoint?: string;
   appBaseUrl?: string;
+  auth?: DaemonAuthConfig;
   openai?: PolyHiveOpenAIConfig;
   speech?: PolyHiveSpeechConfig;
   voiceLlmProvider?: AgentProvider | null;
@@ -305,12 +307,6 @@ export async function createPolyHiveDaemon(
       });
     }
 
-    // Script proxy — intercepts requests for registered *.localhost hostnames
-    // and forwards them to the corresponding local script port. Placed after
-    // the host allowlist (*.localhost is already allowed) but before CORS and
-    // the rest of the routes so proxied requests skip unnecessary middleware.
-    app.use(createScriptProxyMiddleware({ routeStore: scriptRouteStore, logger }));
-
     // CORS - allow same-origin + configured origins
     const allowedOrigins = new Set([
       ...config.corsAllowedOrigins,
@@ -340,6 +336,17 @@ export async function createPolyHiveDaemon(
       }
       next();
     });
+
+    app.use(
+      createRequireBearerMiddleware(config.auth, (context) => {
+        logger.warn(context, "Rejected HTTP request with invalid daemon password");
+      }),
+    );
+
+    // Script proxy — intercepts requests for registered *.localhost hostnames
+    // and forwards them to the corresponding local script port. Placed after
+    // host/CORS/auth checks but before the rest of the routes.
+    app.use(createScriptProxyMiddleware({ routeStore: scriptRouteStore, logger }));
 
     // Serve static files from public directory
     app.use("/public", express.static(staticDir));
@@ -709,15 +716,23 @@ export async function createPolyHiveDaemon(
                 {
                   host: boundListenTarget.host,
                   port: boundListenTarget.port,
+                  authRequired: !!config.auth?.password,
                   elapsed: elapsed(),
                 },
                 `Server listening on http://${boundListenTarget.host}:${boundListenTarget.port}`,
               );
             } else {
               logger.info(
-                { path: boundListenTarget.path, elapsed: elapsed() },
+                {
+                  path: boundListenTarget.path,
+                  authRequired: !!config.auth?.password,
+                  elapsed: elapsed(),
+                },
                 `Server listening on ${boundListenTarget.path}`,
               );
+            }
+            if (config.auth?.password) {
+              logger.info("Daemon password authentication enabled");
             }
 
             wsServer = new VoiceAssistantWebSocketServer(
@@ -731,6 +746,7 @@ export async function createPolyHiveDaemon(
               daemonConfigStore,
               mcpBaseUrl,
               { allowedOrigins, hostnames: configuredHostnames },
+              config.auth,
               speechService,
               terminalManager,
               {

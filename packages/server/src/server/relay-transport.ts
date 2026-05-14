@@ -405,11 +405,11 @@ async function attachEncryptedSocket(
     });
     const encryptedSocket = createEncryptedSocket(channel, emitter);
     await attachSocket(encryptedSocket, metadata);
-    attached = true;
     for (const message of pendingMessages) {
       emitter.emit("message", message);
     }
     pendingMessages.length = 0;
+    attached = true;
   } catch (error) {
     logger.warn({ err: error }, "relay_e2ee_handshake_failed");
     try {

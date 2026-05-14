@@ -12,6 +12,7 @@ const wsMock = vi.hoisted(() => {
     readonly options: unknown;
     readyState = MockWebSocket.CONNECTING;
     sent: string[] = [];
+    pings = 0;
     terminateCalls = 0;
     private listeners = new Map<string, Array<(...args: any[]) => void>>();
 
@@ -58,6 +59,13 @@ const wsMock = vi.hoisted(() => {
       this.sent.push(data);
     }
 
+    ping() {
+      if (this.readyState !== MockWebSocket.OPEN) {
+        throw new Error(`WebSocket not open (readyState=${this.readyState})`);
+      }
+      this.pings += 1;
+    }
+
     open() {
       this.readyState = MockWebSocket.OPEN;
       this.emit("open");
@@ -65,6 +73,10 @@ const wsMock = vi.hoisted(() => {
 
     message(data: unknown) {
       this.emit("message", data);
+    }
+
+    pong() {
+      this.emit("pong");
     }
 
     error(err: unknown) {
@@ -140,7 +152,7 @@ describe("relay-transport control lifecycle", () => {
 
     control.open();
     expect(hasLogMessage(logger.info, "relay_control_connected")).toBe(false);
-    expect(control.sent.length).toBeGreaterThan(0);
+    expect(control.pings).toBeGreaterThan(0);
 
     control.message(JSON.stringify({ type: "pong", ts: Date.now() }));
     expect(hasLogMessage(logger.info, "relay_control_connected")).toBe(true);

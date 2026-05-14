@@ -385,11 +385,13 @@ export class RelayDurableObject {
 
     const { role, connectionId } = attachment;
     if (!connectionId) {
-      // Control channel: support simple app-level keepalive.
+      // COMPAT(relay-json-ping): old daemons send JSON {type:"ping"} on the control socket.
+      // New daemons use WebSocket protocol pings so hibernated relay objects stay asleep.
       if (typeof message === "string") {
         try {
           const parsed = JSON.parse(message) as unknown as { type?: unknown };
           if (parsed?.type === "ping") {
+            console.log("[Relay DO] legacy_json_ping_received");
             try {
               ws.send(JSON.stringify({ type: "pong", ts: Date.now() }));
             } catch {

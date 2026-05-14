@@ -1,7 +1,7 @@
 {
   "name": "polyhive-app",
   "main": "index.ts",
-  "version": "0.1.65",
+  "version": "0.1.66",
   "private": true,
   "scripts": {
     "build:workspace-deps": "npm run build --workspace=@evertondgn/polyhive-highlight",
@@ -19,8 +19,8 @@
     "@dnd-kit/sortable": "10.0.0",
     "@dnd-kit/utilities": "3.2.2",
     "@floating-ui/react-dom": "2.1.8",
-    "@evertondgn/polyhive-highlight": "0.1.65",
-    "@evertondgn/polyhive-server": "0.1.65",
+    "@evertondgn/polyhive-highlight": "0.1.66",
+    "@evertondgn/polyhive-server": "0.1.66",
     "@gorhom/bottom-sheet": "5.2.8",
     "@gorhom/portal": "1.0.14",
     "@react-native-async-storage/async-storage": "2.2.0",

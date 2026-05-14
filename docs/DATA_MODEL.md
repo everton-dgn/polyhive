@@ -132,7 +132,7 @@ Single file, validated with `PersistedConfigSchema`.
     hostnames: true | string[],
     mcp: { enabled: boolean },
     cors: { allowedOrigins: string[] },
-    relay: { enabled: boolean, endpoint: string, publicEndpoint: string }
+    relay: { enabled: boolean, endpoint: string, publicEndpoint: string, useTls: boolean }
   },
   app: {
     baseUrl: string

@@ -194,6 +194,15 @@ function Configuration() {
             <code className="font-mono">POLYHIVE_HOSTNAMES</code>
           </li>
           <li>
+            <code className="font-mono">POLYHIVE_PASSWORD</code> — on the daemon, the password to
+            require (hashed at startup); on the CLI, the password used to connect when the host URI
+            omits one
+          </li>
+          <li>
+            <code className="font-mono">POLYHIVE_RELAY_USE_TLS</code> — use{" "}
+            <code className="font-mono">wss://</code> for the relay connection and pairing offers
+          </li>
+          <li>
             <code className="font-mono">POLYHIVE_LOG_CONSOLE_LEVEL</code> — override{" "}
             <code className="font-mono">log.console.level</code>
           </li>

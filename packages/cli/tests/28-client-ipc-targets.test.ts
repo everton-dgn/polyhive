@@ -118,14 +118,49 @@ console.log("=== CLI IPC Target Helpers ===\n");
 }
 
 {
-  console.log("Test 9: daemon password resolution uses only the TCP URI query");
-  assert.strictEqual(
-    resolveDaemonPassword("tcp://example.com:6767?ssl=true&password=query-secret"),
-    "query-secret",
-  );
-  assert.strictEqual(resolveDaemonPassword("tcp://missing.example:6767"), undefined);
-  assert.strictEqual(resolveDaemonPassword("example.com:6767"), undefined);
-  console.log("✓ daemon password resolution uses only the TCP URI query\n");
+  console.log("Test 9: daemon password resolution prefers TCP URI query, falls back to env");
+  const previousEnv = process.env.POLYHIVE_PASSWORD;
+  try {
+    delete process.env.POLYHIVE_PASSWORD;
+    assert.strictEqual(
+      resolveDaemonPassword("tcp://example.com:6767?ssl=true&password=query-secret"),
+      "query-secret",
+    );
+    assert.strictEqual(resolveDaemonPassword("tcp://missing.example:6767"), undefined);
+    assert.strictEqual(resolveDaemonPassword("example.com:6767"), undefined);
+
+    process.env.POLYHIVE_PASSWORD = "env-secret";
+    assert.strictEqual(
+      resolveDaemonPassword("tcp://example.com:6767?ssl=true&password=query-secret"),
+      "query-secret",
+      "URI password should take precedence over env var",
+    );
+    assert.strictEqual(
+      resolveDaemonPassword("tcp://missing.example:6767"),
+      "env-secret",
+      "TCP host without query password should fall back to env var",
+    );
+    assert.strictEqual(
+      resolveDaemonPassword("example.com:6767"),
+      "env-secret",
+      "Bare host should pick up env var password",
+    );
+    assert.strictEqual(resolveDaemonPassword("localhost:6767"), "env-secret");
+
+    process.env.POLYHIVE_PASSWORD = "";
+    assert.strictEqual(
+      resolveDaemonPassword("localhost:6767"),
+      undefined,
+      "Empty env var should be treated as unset",
+    );
+  } finally {
+    if (previousEnv === undefined) {
+      delete process.env.POLYHIVE_PASSWORD;
+    } else {
+      process.env.POLYHIVE_PASSWORD = previousEnv;
+    }
+  }
+  console.log("✓ daemon password resolution prefers TCP URI query, falls back to env\n");
 }
 
 console.log("=== All CLI IPC target tests passed ===");

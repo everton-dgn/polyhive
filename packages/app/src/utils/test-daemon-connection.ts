@@ -96,7 +96,7 @@ export async function buildClientConfig(
     ...base,
     url: buildRelayWebSocketUrl({
       endpoint: connection.relayEndpoint,
-      useTls: shouldUseTlsForDefaultHostedRelay(connection.relayEndpoint),
+      useTls: connection.useTls ?? shouldUseTlsForDefaultHostedRelay(connection.relayEndpoint),
       serverId,
     }),
     e2ee: { enabled: true, daemonPublicKeyB64: connection.daemonPublicKeyB64 },

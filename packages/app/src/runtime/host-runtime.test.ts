@@ -198,8 +198,18 @@ function makeOffer(input?: Partial<ConnectionOffer>): ConnectionOffer {
     daemonPublicKeyB64: input?.daemonPublicKeyB64 ?? "pk_test_offer",
     relay: {
       endpoint: input?.relay?.endpoint ?? "relay.polyhive.sh:443",
+      useTls: input?.relay?.useTls ?? false,
     },
   };
+}
+
+function encodeOfferUrl(payload: unknown): string {
+  const encoded = Buffer.from(JSON.stringify(payload), "utf8")
+    .toString("base64")
+    .replace(/\+/g, "-")
+    .replace(/\//g, "_")
+    .replace(/=+$/g, "");
+  return `https://app.polyhive.sh/#offer=${encoded}`;
 }
 
 function makeDeps(
@@ -1531,6 +1541,78 @@ describe("HostRuntimeStore", () => {
 
     const pairedHost = store.getHosts().find((host) => host.serverId === "srv_offer");
     expect(pairedHost?.label).toBe("mbp");
+
+    store.syncHosts([]);
+  });
+
+  it("stores relay TLS from a pairing offer", async () => {
+    const store = new HostRuntimeStore({
+      deps: {
+        createClient: () => new FakeDaemonClient() as unknown as DaemonClient,
+        connectToDaemon: async ({ host }) => ({
+          client: makeConnectedProbeClient(5) as unknown as DaemonClient,
+          serverId: host.serverId,
+          hostname: host.label ?? null,
+        }),
+        getClientId: async () => "cid_test_runtime",
+      },
+    });
+
+    await store.upsertConnectionFromOffer(
+      makeOffer({
+        relay: {
+          endpoint: "relay.example.com:443",
+          useTls: true,
+        },
+      }),
+      "tls relay",
+    );
+
+    const pairedHost = store.getHosts().find((host) => host.serverId === "srv_offer");
+    expect(pairedHost?.connections).toEqual([
+      {
+        id: "relay:wss:relay.example.com:443",
+        type: "relay",
+        relayEndpoint: "relay.example.com:443",
+        useTls: true,
+        daemonPublicKeyB64: "pk_test_offer",
+      },
+    ]);
+
+    store.syncHosts([]);
+  });
+
+  it("uses TLS for old pairing URLs that omit relay TLS on port 443", async () => {
+    const store = new HostRuntimeStore({
+      deps: {
+        createClient: () => new FakeDaemonClient() as unknown as DaemonClient,
+        connectToDaemon: async ({ host }) => ({
+          client: makeConnectedProbeClient(5) as unknown as DaemonClient,
+          serverId: host.serverId,
+          hostname: host.label ?? null,
+        }),
+        getClientId: async () => "cid_test_runtime",
+      },
+    });
+    const oldPairingUrl = encodeOfferUrl({
+      v: 2,
+      serverId: "srv_offer",
+      daemonPublicKeyB64: "pk_test_offer",
+      relay: { endpoint: "relay.polyhive.sh:443" },
+    });
+
+    await store.upsertConnectionFromOfferUrl(oldPairingUrl, "old relay");
+
+    const pairedHost = store.getHosts().find((host) => host.serverId === "srv_offer");
+    expect(pairedHost?.connections).toEqual([
+      {
+        id: "relay:wss:relay.polyhive.sh:443",
+        type: "relay",
+        relayEndpoint: "relay.polyhive.sh:443",
+        useTls: true,
+        daemonPublicKeyB64: "pk_test_offer",
+      },
+    ]);
 
     store.syncHosts([]);
   });

@@ -1,11 +1,15 @@
 import { existsSync, readFileSync } from "node:fs";
 import {
   buildDaemonWebSocketUrl,
+  buildRelayWebSocketUrl,
   DaemonClient,
   loadConfig,
   normalizeHostPort,
+  parseConnectionOfferFromUrl,
   parseConnectionUri,
   resolvePolyHiveHome,
+  type ConnectionOffer,
+  type WebSocketLike,
 } from "@evertondgn/polyhive-server";
 import path from "node:path";
 import WebSocket from "ws";
@@ -216,19 +220,69 @@ function createNodeWebSocketFactory() {
   return (
     url: string,
     options?: { headers?: Record<string, string>; protocols?: string[]; socketPath?: string },
-  ) => {
+  ): WebSocketLike => {
     return new WebSocket(url, options?.protocols, {
       headers: options?.headers,
       ...(options?.socketPath ? { socketPath: options.socketPath } : {}),
-    }) as unknown as {
-      readyState: number;
-      send: (data: string | Uint8Array | ArrayBuffer) => void;
-      close: (code?: number, reason?: string) => void;
-      binaryType?: string;
-      on: (event: string, listener: (...args: unknown[]) => void) => void;
-      off: (event: string, listener: (...args: unknown[]) => void) => void;
-    };
+    }) as unknown as WebSocketLike;
   };
+}
+
+async function connectViaRelayOffer(
+  offer: ConnectionOffer,
+  clientId: string,
+  timeout: number,
+  nodeWebSocketFactory: ReturnType<typeof createNodeWebSocketFactory>,
+): Promise<DaemonClient> {
+  const url = buildRelayWebSocketUrl({
+    endpoint: offer.relay.endpoint,
+    serverId: offer.serverId,
+    role: "client",
+    useTls: offer.relay.useTls,
+  });
+
+  const appVersion = getCliVersionOrNull();
+  const client = new DaemonClient({
+    url,
+    clientId,
+    clientType: "cli",
+    ...(appVersion ? { appVersion } : {}),
+    connectTimeoutMs: timeout,
+    webSocketFactory: (
+      target: string,
+      config?: { headers?: Record<string, string>; protocols?: string[] },
+    ) =>
+      nodeWebSocketFactory(target, {
+        headers: config?.headers,
+        protocols: config?.protocols,
+      }),
+    e2ee: { enabled: true, daemonPublicKeyB64: offer.daemonPublicKeyB64 },
+    reconnect: { enabled: false },
+  } as unknown as ConstructorParameters<typeof DaemonClient>[0]);
+
+  try {
+    await client.connect();
+    return client;
+  } catch (error) {
+    await client.close().catch(() => {});
+    const message = error instanceof Error ? error.message : String(error);
+    const lastError = client.lastError ? ` (${client.lastError})` : "";
+    const wrapped = new Error(`Failed to connect via relay offer: ${message}${lastError}`);
+    (wrapped as Error & { cause?: unknown }).cause = error;
+    throw wrapped;
+  }
+}
+
+function parseHostOfferOrNull(host: string | undefined): ConnectionOffer | null {
+  if (!host) return null;
+  try {
+    return parseConnectionOfferFromUrl(host);
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    const wrapped = new Error(`Invalid pairing offer URL: ${message}`);
+    (wrapped as Error & { cause?: unknown }).cause = error;
+    throw wrapped;
+  }
 }
 
 /**
@@ -239,8 +293,15 @@ export async function connectToDaemon(options?: ConnectOptions): Promise<DaemonC
   const timeout = options?.timeout ?? DEFAULT_TIMEOUT;
   const clientId = await getOrCreateCliClientId();
   const appVersion = getCliVersionOrNull();
-  const hosts = resolveDaemonHostCandidates(options);
   const nodeWebSocketFactory = createNodeWebSocketFactory();
+
+  const explicitHost = options?.host ?? process.env.POLYHIVE_HOST;
+  const offer = parseHostOfferOrNull(explicitHost);
+  if (offer) {
+    return connectViaRelayOffer(offer, clientId, timeout, nodeWebSocketFactory);
+  }
+
+  const hosts = resolveDaemonHostCandidates(options);
   let lastError: unknown = null;
 
   for (const host of hosts) {

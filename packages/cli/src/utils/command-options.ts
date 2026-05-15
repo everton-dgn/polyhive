@@ -2,7 +2,7 @@ import type { Command } from "commander";
 
 const JSON_OPTION_DESCRIPTION = "Output in JSON format";
 const DAEMON_HOST_OPTION_DESCRIPTION =
-  "Daemon host target: host:port or tcp://host:port?ssl=true&password=secret (default: local socket/pipe, then localhost:6768)";
+  "Daemon host target: host:port, tcp://host:port?ssl=true&password=secret, or https://app.polyhive.sh/#offer=<base64url> for relay (default: local socket/pipe, then localhost:6768; honors POLYHIVE_HOST env)";
 
 export function collectMultiple(value: string, previous: string[]): string[] {
   return previous.concat([value]);

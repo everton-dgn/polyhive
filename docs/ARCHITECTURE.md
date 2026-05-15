@@ -191,3 +191,4 @@ $POLYHIVE_HOME/
 1. **Local daemon** (default): `polyhive daemon start` on `127.0.0.1:6768`
 2. **Managed desktop**: Electron app spawns daemon as subprocess
 3. **Remote + relay**: Daemon behind firewall, relay bridges with E2E encryption
+4. **CLI via relay**: pass `--host https://app.polyhive.sh/#offer=...` (or set `POLYHIVE_HOST`) to drive a remote daemon over the relay with the same E2EE that the mobile and desktop apps use

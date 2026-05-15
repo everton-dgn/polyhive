@@ -216,6 +216,7 @@ export async function startTestDaemon(options?: {
   polyhiveHome?: string;
   workDir?: string;
   timeout?: number;
+  env?: NodeJS.ProcessEnv;
 }): Promise<TestDaemonContext> {
   const port = options?.port ?? (await getAvailablePort());
   const { polyhiveHome, workDir } =
@@ -230,11 +231,17 @@ export async function startTestDaemon(options?: {
   const cliDir = join(import.meta.dirname, "..", "..");
   const cliSrcPath = join(cliDir, "src", "index.ts");
 
-  // Start daemon process using tsx to run TypeScript directly
+  // Start daemon process using tsx to run TypeScript directly.
+  //
+  // Env merge order: `options.env` is applied BEFORE the helper invariants
+  // (POLYHIVE_HOME / POLYHIVE_LISTEN / CI). This lets tests inject extras like
+  // POLYHIVE_RELAY_* without being able to accidentally override the calculated
+  // port or the isolated home that this helper owns.
   const daemonProcess = spawn("npx", ["tsx", cliSrcPath, "daemon", "start", "--foreground"], {
     env: {
       ...process.env,
       ...TEST_DAEMON_ENV_DEFAULTS,
+      ...options?.env,
       POLYHIVE_HOME: polyhiveHome,
       POLYHIVE_LISTEN: `${TEST_DAEMON_HOST}:${port}`,
       // Force no TTY to prevent QR code output
@@ -394,7 +401,10 @@ export async function runPolyHiveCli(
  *
  * This is the main entry point for E2E tests.
  */
-export async function createE2ETestContext(options?: { timeout?: number }): Promise<
+export async function createE2ETestContext(options?: {
+  timeout?: number;
+  env?: NodeJS.ProcessEnv;
+}): Promise<
   TestDaemonContext & {
     /** Run a polyhive CLI command against this daemon */
     polyhive: (
@@ -407,7 +417,7 @@ export async function createE2ETestContext(options?: { timeout?: number }): Prom
     }>;
   }
 > {
-  const ctx = await startTestDaemon({ timeout: options?.timeout });
+  const ctx = await startTestDaemon({ timeout: options?.timeout, env: options?.env });
 
   const polyhive = (
     args: string[],

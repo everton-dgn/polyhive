@@ -16,13 +16,24 @@ export {
 export { hashDaemonPassword, isBearerTokenValid } from "./auth.js";
 export { generateLocalPairingOffer, type LocalPairingOffer } from "./pairing-offer.js";
 export {
+  ConnectionOfferSchema,
+  decodeOfferFragmentPayload,
+  parseConnectionOfferFromUrl,
+  type ConnectionOffer,
+} from "../shared/connection-offer.js";
+export {
   DaemonClient,
   type DaemonClientConfig,
   type ConnectionState,
   type DaemonEvent,
 } from "../client/daemon-client.js";
+export type {
+  WebSocketFactory,
+  WebSocketLike,
+} from "../client/daemon-client-transport-types.js";
 export {
   buildDaemonWebSocketUrl,
+  buildRelayWebSocketUrl,
   deriveLabelFromEndpoint,
   normalizeHostPort,
   parseConnectionUri,

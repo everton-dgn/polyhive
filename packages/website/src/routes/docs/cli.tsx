@@ -188,6 +188,37 @@ polyhive daemon stop              # Stop the daemon`}</pre>
         </p>
       </section>
 
+      {/* Connecting to a remote daemon */}
+      <section className="space-y-4">
+        <h2 id="connecting-to-a-remote-daemon" className="text-xl font-medium">
+          Connecting to a remote daemon
+        </h2>
+        <p className="text-white/60 leading-relaxed">
+          <code className="font-mono">--host</code> accepts either a local target (
+          <code className="font-mono">host:port</code>, a Unix socket, or a Windows pipe) or a
+          pairing offer URL — the same{" "}
+          <code className="font-mono">https://app.polyhive.sh/#offer=...</code> link the mobile app
+          uses for QR pairing. With an offer URL the CLI connects through the PolyHive relay with
+          end-to-end encryption, so you can drive a daemon on another machine without exposing it to
+          the network.
+        </p>
+        <p className="text-white/60 leading-relaxed">
+          Get an offer URL from the daemon you want to control:
+        </p>
+        <Code>
+          <pre className="text-white/80">{`polyhive daemon pair --json   # prints { url, qr, ... }`}</pre>
+        </Code>
+        <p className="text-white/60 leading-relaxed">Use it from anywhere:</p>
+        <Code>
+          <pre className="text-white/80">{`polyhive ls --host 'https://app.polyhive.sh/#offer=eyJ2IjoyLC...'
+polyhive run --host "$OFFER_URL" "fix the failing tests"`}</pre>
+        </Code>
+        <p className="text-white/60 leading-relaxed">
+          You can also set it once via <code className="font-mono">POLYHIVE_HOST</code> instead of
+          passing <code className="font-mono">--host</code> on every command.
+        </p>
+      </section>
+
       {/* Multi-agent workflows */}
       <section className="space-y-4">
         <h2 className="text-xl font-medium">Multi-agent workflows</h2>
@@ -238,8 +269,13 @@ polyhive ls -q                    # IDs only (quiet)`}</pre>
         <h2 className="text-xl font-medium">Global options</h2>
         <ul className="text-white/60 space-y-2 list-disc list-inside">
           <li>
-            <code className="font-mono">--host &lt;host:port&gt;</code> — connect to a different
-            daemon
+            <code className="font-mono">--host &lt;target&gt;</code> — connect to a different daemon
+            (<code className="font-mono">host:port</code>, Unix socket, or{" "}
+            <code className="font-mono">https://app.polyhive.sh/#offer=...</code> for relay). See{" "}
+            <a href="#connecting-to-a-remote-daemon" className="underline">
+              Connecting to a remote daemon
+            </a>
+            .
           </li>
           <li>
             <code className="font-mono">--json</code> — JSON output

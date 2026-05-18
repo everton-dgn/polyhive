@@ -1,6 +1,6 @@
 {
   "name": "@evertondgn/polyhive-relay",
-  "version": "0.1.68",
+  "version": "0.1.69",
   "description": "PolyHive relay for bridging daemon and client connections",
   "license": "AGPL-3.0-or-later",
   "repository": {

@@ -15,6 +15,10 @@ import { WebSocket } from "ws";
 import { getAvailablePort } from "../helpers/network.ts";
 import { createE2ETestContext } from "../helpers/test-daemon.ts";
 
+// Heuristic inherited from paseo PR #639: wrangler dev (used to spin up the local
+// relay) is unstable under Node 25+, so default-skip on those versions and opt-in
+// via FORCE_RELAY_E2E=1 to debug. The same gate is mirrored in the other relay
+// e2e suites (packages/relay/src/e2e.test.ts, packages/server/.../relay-transport.e2e.test.ts).
 const nodeMajor = Number((process.versions.node ?? "0").split(".")[0] ?? "0");
 const shouldRunRelayE2e = process.env.FORCE_RELAY_E2E === "1" || nodeMajor < 25;
 const wranglerCliPath = createRequire(import.meta.url).resolve("wrangler/bin/wrangler.js");
@@ -227,6 +231,7 @@ async function waitForDaemonRelayRegistered(offerUrl: string, timeoutMs = 30_000
     expect(relay.exitCode, `relay ls failed: ${relay.stderr}\nstdout: ${relay.stdout}`).toBe(0);
     const relayAgents = JSON.parse(relay.stdout.trim() || "[]");
     expect(Array.isArray(relayAgents)).toBe(true);
-    expect(relayAgents.length).toBe(directAgents.length);
+    const sortById = (a: { id: string }, b: { id: string }) => a.id.localeCompare(b.id);
+    expect([...relayAgents].sort(sortById)).toEqual([...directAgents].sort(sortById));
   }, 60_000);
 });

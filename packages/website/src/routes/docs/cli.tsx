@@ -190,7 +190,9 @@ polyhive daemon stop              # Stop the daemon`}</pre>
 
       {/* Connecting to a remote daemon */}
       <section className="space-y-4">
-        <h2 className="text-xl font-medium">Connecting to a remote daemon</h2>
+        <h2 id="connecting-to-a-remote-daemon" className="text-xl font-medium">
+          Connecting to a remote daemon
+        </h2>
         <p className="text-white/60 leading-relaxed">
           <code className="font-mono">--host</code> accepts either a local target (
           <code className="font-mono">host:port</code>, a Unix socket, or a Windows pipe) or a
